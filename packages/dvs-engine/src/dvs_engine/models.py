@@ -86,27 +86,44 @@ def default_superflex_weights() -> dict[str, float]:
 
 @dataclass(frozen=True, slots=True)
 class FormulaParams:
-    """Tunable DVS coefficients; defaults preserve Phase 1 behavior after P0/P1 fixes."""
+    """Tunable DVS coefficients."""
 
+    formula_version: int = 2
     replacement_index_offset: int = 1
     flex_weights: Mapping[str, float] = field(default_factory=default_flex_weights)
     superflex_weights: Mapping[str, float] = field(default_factory=default_superflex_weights)
+    # v1-only composition weights (ignored when formula_version >= 2)
     urgency_weight: float = 1.5
     need_direct_boost: float = 0.22
     need_flex_boost: float = 0.08
     need_bench_penalty_base: float = 0.08
     need_floor: float = 0.55
+    # v2 roster utility
+    wait_loss_weight: float = 1.0
+    bench_discount_default: float = 0.25
+    bench_discount_by_depth: tuple[float, ...] = (0.35, 0.25, 0.15)
+    # shared survival / demand
     survival_default_no_adp: float = 0.5
     survival_spread_min: float = 4.0
     survival_spread_adp_factor: float = 0.16
     survival_clamp_low: float = 0.01
     survival_clamp_high: float = 0.99
     opponent_demand_weight: float = 0.15
+    # preferences and guardrail labels
     my_guy_bonus: float = 6.0
-    avoid_penalty: float = -1000.0
+    exclude_avoid_tag: bool = True
+    # v1 labels
     cant_pass_vorp_min: float = 20.0
     cant_pass_survival_max: float = 0.30
     safe_to_wait_survival_min: float = 0.65
+    # v2 labels
+    value_min: float = 5.0
+    urgent_wait_loss: float = 8.0
+    safe_wait_loss: float = 3.0
+
+    def __post_init__(self) -> None:
+        if self.formula_version not in (1, 2):
+            raise ValueError("formula_version must be 1 or 2")
 
 
 @dataclass(frozen=True, slots=True)
@@ -185,6 +202,8 @@ class RecommendationBreakdown:
     opponent_demand_factor: float
     guardrail_adjustment: float
     user_adjustment: float
+    marginal_value: float = 0.0
+    wait_loss: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)

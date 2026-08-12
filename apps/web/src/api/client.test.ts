@@ -41,6 +41,8 @@ describe('DVS API contract adapter', () => {
       tier_label: 'BEST PICK',
       breakdown: {
         vorp: 30,
+        marginal_value: 28,
+        wait_loss: 6,
         tier_urgency: 4,
         survival_probability: 0.3,
         need_multiplier: 1.1,
@@ -52,6 +54,8 @@ describe('DVS API contract adapter', () => {
 
     expect(result.playerId).toBe(player.id)
     expect(result.breakdown.survivalProbability).toBe(0.3)
+    expect(result.breakdown.marginalValue).toBe(28)
+    expect(result.breakdown.waitLoss).toBe(6)
     expect(result.explanation).toContain('above replacement')
   })
 })

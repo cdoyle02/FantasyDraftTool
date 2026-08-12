@@ -8,6 +8,7 @@ from dataclasses import replace
 from typing import Iterable, Mapping, Sequence
 
 from .draft import validate_state
+from .lineup import marginal_value
 from .models import (
     DraftState,
     FormulaParams,
@@ -247,6 +248,39 @@ def guardrail_adjustment(
     return adjustment
 
 
+def expected_fallback_value(
+    player: Player,
+    available: Sequence[Player],
+    marginals: Mapping[str, float],
+    survival_by_id: Mapping[str, float],
+) -> float:
+    """Expected best same-position marginal value available at the next turn."""
+    ranked = [
+        candidate
+        for candidate in available
+        if candidate.position == player.position and candidate.id != player.id
+    ]
+    ranked.sort(key=lambda candidate: marginals.get(candidate.id, 0.0), reverse=True)
+    fallback = 0.0
+    survival_product = 1.0
+    for candidate in ranked:
+        survival = survival_by_id.get(candidate.id, 0.5)
+        fallback += marginals.get(candidate.id, 0.0) * survival * survival_product
+        survival_product *= 1.0 - survival
+    return fallback
+
+
+def wait_loss(
+    player: Player,
+    available: Sequence[Player],
+    marginals: Mapping[str, float],
+    survival_by_id: Mapping[str, float],
+) -> float:
+    marginal = marginals.get(player.id, 0.0)
+    fallback = expected_fallback_value(player, available, marginals, survival_by_id)
+    return max(0.0, marginal - fallback)
+
+
 def recommend(
     players: Sequence[Player],
     state: DraftState,
@@ -259,6 +293,19 @@ def recommend(
         raise ValueError("draft state and league settings team counts differ")
     if limit < 1:
         raise ValueError("limit must be positive")
+    params = settings.formula_params
+    if params.formula_version >= 2:
+        return _recommend_v2(players, state, settings, adjustments, limit)
+    return _recommend_v1(players, state, settings, adjustments, limit)
+
+
+def _recommend_v1(
+    players: Sequence[Player],
+    state: DraftState,
+    settings: LeagueSettings,
+    adjustments: Mapping[str, UserAdjustment] | None,
+    limit: int,
+) -> list[RecommendationResult]:
     params = settings.formula_params
     adjustments = adjustments or {}
     drafted_ids = {pick.player_id for pick in state.pick_history}
@@ -288,10 +335,10 @@ def recommend(
         tag_bonus = (
             params.my_guy_bonus
             if adjustment and adjustment.tag == "myGuy"
-            else params.avoid_penalty
-            if adjustment and adjustment.tag == "avoid"
             else 0.0
         )
+        if adjustment and adjustment.tag == "avoid":
+            continue
         value_vorp = max(0.0, player_vorp)
         score = (
             (value_vorp * need * demand)
@@ -340,6 +387,131 @@ def recommend(
             label = RecommendationLabel.BEST_PICK
         labeled.append(replace(result, tier_label=label))
     return labeled
+
+
+def _recommend_v2(
+    players: Sequence[Player],
+    state: DraftState,
+    settings: LeagueSettings,
+    adjustments: Mapping[str, UserAdjustment] | None,
+    limit: int,
+) -> list[RecommendationResult]:
+    params = settings.formula_params
+    adjustments = adjustments or {}
+    drafted_ids = {pick.player_id for pick in state.pick_history}
+    adjusted_all = [effective_player(player, adjustments.get(player.id)) for player in players]
+    available = [player for player in adjusted_all if player.id not in drafted_ids]
+    if params.exclude_avoid_tag:
+        available = [
+            player
+            for player in available
+            if adjustments.get(player.id) is None or adjustments[player.id].tag != "avoid"
+        ]
+    player_map = {player.id: player for player in adjusted_all}
+    levels = replacement_levels(adjusted_all, settings)
+    roster = [
+        player_map[player_id]
+        for player_id in state.rosters.get(settings.user_team_id, ())
+        if player_id in player_map
+    ]
+    current_round = (state.current_pick - 1) // settings.team_count + 1
+    until_next = picks_until_team_turn(state, settings.user_team_id)
+    marginals = {
+        player.id: marginal_value(player, roster, settings, levels, params) for player in available
+    }
+    survival_by_id = {
+        player.id: survival_probability(player, state.current_pick, until_next, params)
+        for player in available
+    }
+    scored: list[RecommendationResult] = []
+    for player in available:
+        player_vorp = vorp(player, levels)
+        survival = survival_by_id[player.id]
+        marginal = marginals[player.id]
+        loss = wait_loss(player, available, marginals, survival_by_id)
+        cliff = tier_cliff_urgency(player, available, survival)
+        demand = 1.0
+        guardrail = guardrail_adjustment(player, marginal, roster, settings, current_round)
+        adjustment = adjustments.get(player.id)
+        opinion = adjustment.points_delta if adjustment else 0.0
+        tag_bonus = params.my_guy_bonus if adjustment and adjustment.tag == "myGuy" else 0.0
+        score = marginal + (params.wait_loss_weight * loss) + guardrail + tag_bonus
+        reasons = _reasons_v2(player_vorp, marginal, loss, cliff, survival, guardrail, adjustment)
+        scored.append(
+            RecommendationResult(
+                player.id,
+                player.name,
+                player.position,
+                round(score, 4),
+                RecommendationLabel.BEST_PICK,
+                RecommendationBreakdown(
+                    round(player_vorp, 4),
+                    round(cliff, 4),
+                    round(survival, 4),
+                    1.0,
+                    round(demand, 4),
+                    round(guardrail, 4),
+                    round(opinion, 4),
+                    round(marginal, 4),
+                    round(loss, 4),
+                ),
+                reasons,
+            )
+        )
+    scored.sort(
+        key=lambda result: (
+            -result.dvs_score,
+            player_map[result.player_id].adp or float("inf"),
+            result.player_id,
+        )
+    )
+    labeled: list[RecommendationResult] = []
+    for index, result in enumerate(scored[:limit]):
+        breakdown = result.breakdown
+        if (
+            breakdown.marginal_value >= params.value_min
+            and breakdown.wait_loss >= params.urgent_wait_loss
+        ):
+            label = RecommendationLabel.CANT_PASS
+        elif (
+            index > 0
+            and breakdown.survival_probability >= params.safe_to_wait_survival_min
+            and breakdown.wait_loss <= params.safe_wait_loss
+        ):
+            label = RecommendationLabel.SAFE_TO_WAIT
+        else:
+            label = RecommendationLabel.BEST_PICK
+        labeled.append(replace(result, tier_label=label))
+    return labeled
+
+
+def _reasons_v2(
+    player_vorp: float,
+    marginal: float,
+    loss: float,
+    cliff: float,
+    survival: float,
+    guardrail: float,
+    adjustment: UserAdjustment | None,
+) -> tuple[str, ...]:
+    reasons: list[str] = []
+    if marginal > 0:
+        reasons.append(f"{marginal:.1f} marginal roster points")
+    if player_vorp > 0:
+        reasons.append(f"{player_vorp:.1f} points above replacement")
+    if loss >= 3:
+        reasons.append("meaningful expected loss if you wait")
+    elif cliff > 2:
+        reasons.append("meaningful tier cliff")
+    if survival < 0.35:
+        reasons.append("unlikely to survive to your next pick")
+    elif survival > 0.65:
+        reasons.append("likely available at your next pick")
+    if guardrail < 0:
+        reasons.append("deprioritized by roster guardrails")
+    if adjustment and adjustment.tag:
+        reasons.append(f"user tag: {adjustment.tag}")
+    return tuple(reasons)
 
 
 def _reasons(

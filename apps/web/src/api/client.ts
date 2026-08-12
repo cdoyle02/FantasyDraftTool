@@ -26,6 +26,8 @@ interface EngineRecommendation {
   tier_label: Recommendation['tierLabel']
   breakdown: {
     vorp: number
+    marginal_value: number
+    wait_loss: number
     tier_urgency: number
     survival_probability: number
     need_multiplier: number
@@ -72,6 +74,8 @@ export function normalizeRecommendations(results: EngineRecommendation[]): Recom
     tierLabel: result.tier_label,
     breakdown: {
       vorp: result.breakdown.vorp,
+      marginalValue: result.breakdown.marginal_value ?? 0,
+      waitLoss: result.breakdown.wait_loss ?? 0,
       tierUrgency: result.breakdown.tier_urgency,
       survivalProbability: result.breakdown.survival_probability,
       needMultiplier: result.breakdown.need_multiplier,

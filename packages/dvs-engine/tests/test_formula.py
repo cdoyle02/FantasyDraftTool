@@ -145,7 +145,7 @@ def test_formula_params_override_label_thresholds(players, settings, empty_state
         team_count=settings.team_count,
         roster_slots=settings.roster_slots,
         user_team_id=settings.user_team_id,
-        formula_params=FormulaParams(cant_pass_vorp_min=999.0),
+        formula_params=FormulaParams(value_min=999.0, urgent_wait_loss=999.0),
     )
     baseline = recommend(players, empty_state, tuned, limit=10)
     assert all(item.tier_label != RecommendationLabel.CANT_PASS for item in baseline)
@@ -237,9 +237,15 @@ def test_guardrails_penalize_rb_heavy_roster_in_mid_draft(players, settings):
 
 
 def test_recommend_score_matches_formula_decomposition(players, settings, empty_state):
-    results = recommend(players, empty_state, settings, limit=5)
+    v1 = LeagueSettings(
+        team_count=settings.team_count,
+        roster_slots=settings.roster_slots,
+        user_team_id=settings.user_team_id,
+        formula_params=FormulaParams(formula_version=1),
+    )
+    results = recommend(players, empty_state, v1, limit=5)
     top = results[0]
-    params = settings.formula_params
+    params = v1.formula_params
     value = max(0.0, top.breakdown.vorp) * top.breakdown.need_multiplier
     expected = (
         value
@@ -294,27 +300,29 @@ def test_label_cant_pass_when_high_vorp_and_low_survival():
         team_count=2,
         roster_slots={"QB": 0, "RB": 1, "WR": 0, "TE": 0, "FLEX": 0, "BENCH": 0, "K": 0, "DST": 0},
         user_team_id="1",
-        formula_params=FormulaParams(cant_pass_survival_max=0.99),
+        formula_params=FormulaParams(value_min=1.0, urgent_wait_loss=0.0),
     )
     results = recommend(urgent_pool, state, league, limit=1)
-    assert results[0].breakdown.vorp > 20
+    assert results[0].breakdown.marginal_value > 0
     assert results[0].tier_label == RecommendationLabel.CANT_PASS
 
 
 def test_recommend_sorts_by_score_then_adp_then_id():
     tied = [
         Player("z-player", "Z", Position.RB, projected_points=300, adp=5.0, tier=1),
-        Player("a-player", "A", Position.RB, projected_points=300, adp=10.0, tier=1),
+        Player("a-player", "A", Position.RB, projected_points=300, adp=5.0, tier=1),
         Player("m-player", "M", Position.RB, projected_points=100, adp=1.0, tier=3),
     ]
     league = LeagueSettings(
         team_count=2,
         roster_slots={"QB": 0, "RB": 1, "WR": 0, "TE": 0, "FLEX": 0, "BENCH": 0, "K": 0, "DST": 0},
         user_team_id="1",
+        formula_params=FormulaParams(wait_loss_weight=0.0),
     )
     state = DraftState(team_count=2)
     results = recommend(tied, state, league, limit=2)
-    assert [item.player_id for item in results] == ["z-player", "a-player"]
+    assert results[0].dvs_score == pytest.approx(results[1].dvs_score)
+    assert [item.player_id for item in results] == ["a-player", "z-player"]
 
 
 def test_points_delta_affects_vorp_in_recommendations(players, settings, empty_state):

@@ -12,7 +12,9 @@ from .formula import (
     survival_probability,
     tier_cliff_urgency,
     vorp,
+    wait_loss,
 )
+from .lineup import marginal_value, roster_utility
 from .models import (
     DraftState,
     FormulaParams,
@@ -32,7 +34,7 @@ from .models import (
     team_on_clock,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "CsvImportError",
@@ -55,12 +57,14 @@ __all__ = [
     "correct_last_pick",
     "guardrail_adjustment",
     "import_players_csv",
+    "marginal_value",
     "player_from_dict",
     "recommend",
     "recommendation_json",
     "replacement_counts",
     "replacement_levels",
     "roster_need_multiplier",
+    "roster_utility",
     "settings_from_dict",
     "state_from_dict",
     "survival_probability",
@@ -69,4 +73,5 @@ __all__ = [
     "undo_last_pick",
     "validate_state",
     "vorp",
+    "wait_loss",
 ]

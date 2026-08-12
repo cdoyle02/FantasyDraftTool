@@ -41,6 +41,8 @@ export interface DraftPick {
 
 export interface ScoreBreakdown {
   vorp: number
+  marginalValue: number
+  waitLoss: number
   tierUrgency: number
   survivalProbability: number
   needMultiplier: number
