@@ -1,0 +1,53 @@
+{
+  "name": "@fantasy-draft-tool/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src tests vite.config.ts playwright.config.ts",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "dexie": "4.0.10",
+    "papaparse": "5.5.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zustand": "5.0.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.51.1",
+    "@testing-library/jest-dom": "6.6.3",
+    "@testing-library/react": "16.2.0",
+    "@testing-library/user-event": "14.6.1",
+    "@types/node": "22.13.10",
+    "@types/papaparse": "5.3.16",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "@vitejs/plugin-react": "4.3.4",
+    "autoprefixer": "10.4.21",
+    "eslint": "^10.8.1",
+    "globals": "^17.11.0",
+    "jsdom": "24.1.3",
+    "openapi-typescript": "^7.13.0",
+    "postcss": "8.5.3",
+    "prettier": "^3.9.6",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.3",
+    "typescript-eslint": "^8.67.0",
+    "vite": "5.4.14",
+    "vite-plugin-pwa": "0.20.5",
+    "vitest": "2.1.9",
+    "workbox-build": "7.1.1",
+    "workbox-window": "7.1.0"
+  }
+}

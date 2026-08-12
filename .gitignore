@@ -18,6 +18,16 @@ dist/
 *.manifest
 *.spec
 
+# Node / frontend
+node_modules/
+.pnpm-store/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+apps/web/public/pyodide/
+apps/web/public/engine/*.whl
+
 # Unit test / coverage
 .pytest_cache/
 .coverage
@@ -42,6 +52,7 @@ htmlcov/
 # IDE / editor
 .idea/
 .vscode/
+.cursor/
 *.swp
 *.swo
 *~

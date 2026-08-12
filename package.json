@@ -1,0 +1,20 @@
+{
+  "name": "fantasy-draft-tool",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "pnpm --filter @fantasy-draft-tool/web dev",
+    "build": "pnpm build:engine && pnpm --filter @fantasy-draft-tool/web build",
+    "build:engine": "uv build --wheel --out-dir apps/web/public/engine packages/dvs-engine",
+    "generate:api": "uv run --project apps/api python apps/api/scripts/export_openapi.py && pnpm --filter @fantasy-draft-tool/web exec openapi-typescript ../../apps/api/openapi.json -o src/api/schema.generated.ts",
+    "lint": "pnpm --filter @fantasy-draft-tool/web lint",
+    "test": "pnpm --filter @fantasy-draft-tool/web test",
+    "test:e2e": "pnpm --filter @fantasy-draft-tool/web test:e2e",
+    "api:dev": "uv run --project apps/api uvicorn draft_api.main:app --reload",
+    "test:python": "uv run pytest"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

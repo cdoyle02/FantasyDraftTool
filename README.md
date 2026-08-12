@@ -1,31 +1,62 @@
-# FantasyDraftTool
+# Fantasy Draft Tool
 
-A Python tool for fantasy draft preparation and decision-making.
+A platform-independent, local-first fantasy football draft assistant. It
+combines replacement value, positional tier cliffs, roster construction, and
+configurable guardrails into explainable live recommendations.
 
-## Getting Started
+The application is a React/TypeScript progressive web app backed by FastAPI.
+The same pure-Python scoring package runs on the server and, through Pyodide, in
+the browser when a draft loses internet access.
 
-1. Create a virtual environment:
+## Repository
 
-   ```bash
-   python -m venv .venv
-   ```
+- `apps/web` — live-draft PWA, browser persistence, and offline engine adapter
+- `apps/api` — stateless FastAPI service
+- `packages/dvs-engine` — deterministic Draft Value Score domain package
+- `docs` — architecture, deployment, and draft-day readiness
 
-2. Activate it:
+## Prerequisites
 
-   ```bash
-   # Windows
-   .venv\Scripts\activate
+- Node.js 20 or newer and pnpm 9
+- Python 3.13 or newer and uv
 
-   # macOS / Linux
-   source .venv/bin/activate
-   ```
+## Development
 
-3. Install dependencies (once a requirements file is added):
+```bash
+pnpm install
+uv sync --all-packages --all-groups
+```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+Start the API and web app in separate terminals:
 
-## License
+```bash
+pnpm api:dev
+pnpm dev
+```
 
-TBD
+Open `http://localhost:5173`. The API defaults to `http://localhost:8000`;
+put `VITE_API_BASE_URL` in `apps/web/.env.local` to override the web client and
+set the API variables from `.env.example` in the API process environment.
+
+## Checks
+
+```bash
+uv run ruff check .
+uv run mypy packages/dvs-engine/src apps/api/src
+uv run pytest
+pnpm lint
+pnpm test
+pnpm build
+pnpm test:e2e
+```
+
+The offline path needs a built DVS wheel and cached Pyodide distribution. See
+[`docs/offline-readiness.md`](docs/offline-readiness.md) before relying on it in
+a live draft.
+
+## Product scope
+
+Phase 1 targets full-PPR snake redraft leagues with configurable roster settings,
+FantasyPros-style CSV imports, fast manual pick entry, persistent player
+adjustments, and explainable recommendations. Opponent demand modeling, Sleeper
+sync, simulations, and accounts are later phases.
