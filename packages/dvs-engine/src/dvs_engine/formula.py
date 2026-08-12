@@ -10,6 +10,7 @@ from typing import Iterable, Mapping, Sequence
 from .draft import validate_state
 from .models import (
     DraftState,
+    FormulaParams,
     LeagueSettings,
     Player,
     Position,
@@ -35,7 +36,30 @@ def effective_player(player: Player, adjustment: UserAdjustment | None) -> Playe
     )
 
 
+def _allocate_weighted_slots(
+    total: int, weights: Mapping[Position, float]
+) -> dict[Position, int]:
+    """Split integer slots by weight using largest-remainder allocation."""
+    if total <= 0:
+        return {position: 0 for position in weights}
+    weight_sum = sum(weights.values())
+    if weight_sum <= 0:
+        return {position: 0 for position in weights}
+    scaled = {position: total * weight / weight_sum for position, weight in weights.items()}
+    allocated = {position: int(math.floor(value)) for position, value in scaled.items()}
+    remainder = total - sum(allocated.values())
+    if remainder > 0:
+        fractional = sorted(
+            ((position, scaled[position] - allocated[position]) for position in weights),
+            key=lambda item: (-item[1], item[0].value),
+        )
+        for index in range(remainder):
+            allocated[fractional[index][0]] += 1
+    return allocated
+
+
 def replacement_counts(settings: LeagueSettings) -> dict[Position, int]:
+    params = settings.formula_params
     slots = settings.roster_slots
     counts = {
         position: settings.team_count * int(slots.get(position.value, 0))
@@ -49,24 +73,29 @@ def replacement_counts(settings: LeagueSettings) -> dict[Position, int]:
         )
     }
     flex = settings.team_count * int(slots.get("FLEX", 0))
-    flex_weights = {Position.RB: 0.45, Position.WR: 0.45, Position.TE: 0.10}
-    for position, weight in flex_weights.items():
-        counts[position] += round(flex * weight)
+    flex_weights = {
+        Position.RB: float(params.flex_weights.get("RB", 0.45)),
+        Position.WR: float(params.flex_weights.get("WR", 0.45)),
+        Position.TE: float(params.flex_weights.get("TE", 0.10)),
+    }
+    for position, added in _allocate_weighted_slots(flex, flex_weights).items():
+        counts[position] += added
     superflex = settings.team_count * int(slots.get("SUPERFLEX", slots.get("SF", 0)))
     superflex_weights = {
-        Position.QB: 0.65,
-        Position.RB: 0.15,
-        Position.WR: 0.15,
-        Position.TE: 0.05,
+        Position.QB: float(params.superflex_weights.get("QB", 0.65)),
+        Position.RB: float(params.superflex_weights.get("RB", 0.15)),
+        Position.WR: float(params.superflex_weights.get("WR", 0.15)),
+        Position.TE: float(params.superflex_weights.get("TE", 0.05)),
     }
-    for position, weight in superflex_weights.items():
-        counts[position] += round(superflex * weight)
+    for position, added in _allocate_weighted_slots(superflex, superflex_weights).items():
+        counts[position] += added
     return {position: max(1, count) for position, count in counts.items()}
 
 
 def replacement_levels(
     players: Iterable[Player], settings: LeagueSettings
 ) -> dict[Position, float]:
+    params = settings.formula_params
     counts = replacement_counts(settings)
     grouped: dict[Position, list[float]] = {position: [] for position in counts}
     for player in players:
@@ -75,7 +104,8 @@ def replacement_levels(
     levels: dict[Position, float] = {}
     for position, points in grouped.items():
         ordered = sorted(points, reverse=True)
-        index = min(counts[position], len(ordered)) - 1
+        replacement_rank = counts[position] + params.replacement_index_offset
+        index = min(replacement_rank, len(ordered)) - 1
         levels[position] = ordered[index] if ordered else 0.0
     return levels
 
@@ -114,12 +144,28 @@ def picks_until_team_turn(state: DraftState, team_id: str) -> int:
     return state.team_count
 
 
-def survival_probability(player: Player, current_pick: int, picks_until_next: int) -> float:
+def _availability_at_pick(adp: float, pick: int, spread: float) -> float:
+    return 1.0 / (1.0 + math.exp((pick - adp) / spread))
+
+
+def survival_probability(
+    player: Player,
+    current_pick: int,
+    picks_until_next: int,
+    params: FormulaParams | None = None,
+) -> float:
+    """Conditional probability the player is still available at the user's next pick."""
+    formula = params or FormulaParams()
     if player.adp is None:
-        return 0.5
+        return formula.survival_default_no_adp
     target_pick = current_pick + max(1, picks_until_next)
-    spread = max(4.0, player.adp * 0.16)
-    return _clamp(1.0 / (1.0 + math.exp((target_pick - player.adp) / spread)), 0.01, 0.99)
+    spread = max(formula.survival_spread_min, player.adp * formula.survival_spread_adp_factor)
+    available_now = _availability_at_pick(player.adp, current_pick, spread)
+    available_next = _availability_at_pick(player.adp, target_pick, spread)
+    if available_now <= 0:
+        return formula.survival_clamp_low
+    conditional = available_next / available_now
+    return _clamp(conditional, formula.survival_clamp_low, formula.survival_clamp_high)
 
 
 def roster_need_multiplier(
@@ -128,6 +174,7 @@ def roster_need_multiplier(
     settings: LeagueSettings,
     current_round: int,
 ) -> float:
+    params = settings.formula_params
     counts = Counter(player.position for player in roster)
     direct_slots = int(settings.roster_slots.get(position.value, 0))
     flex_slots = int(settings.roster_slots.get("FLEX", 0)) if position in FLEX_POSITIONS else 0
@@ -139,11 +186,15 @@ def roster_need_multiplier(
     filled = counts[position]
     progress = current_round / max(1, settings.rounds)
     if filled < direct_slots:
-        return 1.0 + 0.22 * progress
+        return 1.0 + params.need_direct_boost * progress
     if filled < starter_capacity:
-        return 1.0 + 0.08 * progress
+        return 1.0 + params.need_flex_boost * progress
     bench_count = max(0, filled - starter_capacity)
-    return max(0.55, 1.0 - (0.08 + 0.22 * progress) * (bench_count + 1))
+    return max(
+        params.need_floor,
+        1.0 - (params.need_bench_penalty_base + params.need_direct_boost * progress)
+        * (bench_count + 1),
+    )
 
 
 def opponent_demand_factor(
@@ -165,7 +216,7 @@ def opponent_demand_factor(
         )
         if count < int(settings.roster_slots.get(position.value, 0)):
             needing += 1
-    return 1.0 if not opponents else 1.0 + 0.15 * needing / opponents
+    return 1.0 if not opponents else 1.0 + settings.formula_params.opponent_demand_weight * needing / opponents
 
 
 def guardrail_adjustment(
@@ -203,14 +254,12 @@ def recommend(
     adjustments: Mapping[str, UserAdjustment] | None = None,
     limit: int = 20,
 ) -> list[RecommendationResult]:
-    from .draft import validate_state
-
     validate_state(state)
     if state.team_count != settings.team_count:
         raise ValueError("draft state and league settings team counts differ")
-    validate_state(state)
     if limit < 1:
         raise ValueError("limit must be positive")
+    params = settings.formula_params
     adjustments = adjustments or {}
     drafted_ids = {pick.player_id for pick in state.pick_history}
     adjusted_all = [effective_player(player, adjustments.get(player.id)) for player in players]
@@ -227,7 +276,7 @@ def recommend(
     scored: list[RecommendationResult] = []
     for player in available:
         player_vorp = vorp(player, levels)
-        survival = survival_probability(player, state.current_pick, until_next)
+        survival = survival_probability(player, state.current_pick, until_next, params)
         urgency = tier_cliff_urgency(player, available, survival)
         need = roster_need_multiplier(player.position, roster, settings, current_round)
         # Phase 1.5 will activate the opponent demand model. Keep v1 neutral so
@@ -237,13 +286,19 @@ def recommend(
         adjustment = adjustments.get(player.id)
         opinion = adjustment.points_delta if adjustment else 0.0
         tag_bonus = (
-            6.0
+            params.my_guy_bonus
             if adjustment and adjustment.tag == "myGuy"
-            else -1000.0
+            else params.avoid_penalty
             if adjustment and adjustment.tag == "avoid"
             else 0.0
         )
-        score = (player_vorp * need * demand) + (urgency * 1.5) + guardrail + tag_bonus
+        value_vorp = max(0.0, player_vorp)
+        score = (
+            (value_vorp * need * demand)
+            + (urgency * params.urgency_weight)
+            + guardrail
+            + tag_bonus
+        )
         reasons = _reasons(player_vorp, urgency, survival, need, guardrail, adjustment)
         scored.append(
             RecommendationResult(
@@ -274,9 +329,12 @@ def recommend(
     labeled: list[RecommendationResult] = []
     for index, result in enumerate(scored[:limit]):
         breakdown = result.breakdown
-        if breakdown.vorp > 20 and breakdown.survival_probability < 0.30:
+        if (
+            breakdown.vorp > params.cant_pass_vorp_min
+            and breakdown.survival_probability < params.cant_pass_survival_max
+        ):
             label = RecommendationLabel.CANT_PASS
-        elif index > 0 and breakdown.survival_probability >= 0.65:
+        elif index > 0 and breakdown.survival_probability >= params.safe_to_wait_survival_min:
             label = RecommendationLabel.SAFE_TO_WAIT
         else:
             label = RecommendationLabel.BEST_PICK

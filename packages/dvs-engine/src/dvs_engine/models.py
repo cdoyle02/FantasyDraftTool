@@ -76,6 +76,39 @@ def default_roster_slots() -> dict[str, int]:
     }
 
 
+def default_flex_weights() -> dict[str, float]:
+    return {"RB": 0.45, "WR": 0.45, "TE": 0.10}
+
+
+def default_superflex_weights() -> dict[str, float]:
+    return {"QB": 0.65, "RB": 0.15, "WR": 0.15, "TE": 0.05}
+
+
+@dataclass(frozen=True, slots=True)
+class FormulaParams:
+    """Tunable DVS coefficients; defaults preserve Phase 1 behavior after P0/P1 fixes."""
+
+    replacement_index_offset: int = 1
+    flex_weights: Mapping[str, float] = field(default_factory=default_flex_weights)
+    superflex_weights: Mapping[str, float] = field(default_factory=default_superflex_weights)
+    urgency_weight: float = 1.5
+    need_direct_boost: float = 0.22
+    need_flex_boost: float = 0.08
+    need_bench_penalty_base: float = 0.08
+    need_floor: float = 0.55
+    survival_default_no_adp: float = 0.5
+    survival_spread_min: float = 4.0
+    survival_spread_adp_factor: float = 0.16
+    survival_clamp_low: float = 0.01
+    survival_clamp_high: float = 0.99
+    opponent_demand_weight: float = 0.15
+    my_guy_bonus: float = 6.0
+    avoid_penalty: float = -1000.0
+    cant_pass_vorp_min: float = 20.0
+    cant_pass_survival_max: float = 0.30
+    safe_to_wait_survival_min: float = 0.65
+
+
 @dataclass(frozen=True, slots=True)
 class LeagueSettings:
     team_count: int = 12
@@ -86,6 +119,7 @@ class LeagueSettings:
     user_team_id: str = "1"
     qb_te_vorp_threshold: float = 45.0
     guardrail_weight: float = 12.0
+    formula_params: FormulaParams = field(default_factory=FormulaParams)
 
     def __post_init__(self) -> None:
         if not 2 <= self.team_count <= 32:
