@@ -16,6 +16,7 @@ package = false
 
 [tool.uv.workspace]
 members = ["apps/api", "packages/dvs-engine"]
+exclude = ["tools/*"]
 
 [tool.ruff]
 line-length = 100
