@@ -1,5 +1,4 @@
 import pytest
-
 from dvs_engine import (
     DraftState,
     FormulaParams,
@@ -38,7 +37,6 @@ def test_marginal_value_reflects_open_starter_slot(settings):
 
 
 def test_wait_loss_equals_marginal_when_no_same_position_alternatives():
-    levels = {Position.RB: 150.0}
     rb = Player("rb-1", "RB1", Position.RB, projected_points=250, adp=1.0)
     marginals = {"rb-1": 100.0}
     survival = {"rb-1": 0.5}
@@ -46,7 +44,6 @@ def test_wait_loss_equals_marginal_when_no_same_position_alternatives():
 
 
 def test_wait_loss_falls_when_a_likely_fallback_exists(settings):
-    levels = {Position.RB: 150.0}
     elite = Player("rb-1", "RB1", Position.RB, projected_points=250, adp=1.0)
     backup = Player("rb-2", "RB2", Position.RB, projected_points=220, adp=200.0)
     params = FormulaParams()

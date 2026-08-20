@@ -1,5 +1,4 @@
 import pytest
-
 from dvs_engine import DraftState, LeagueSettings, Player, Position
 
 

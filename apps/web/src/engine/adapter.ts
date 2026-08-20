@@ -2,7 +2,7 @@ import { draftApi, type RecommendationRequest } from '../api/client'
 import type { Recommendation } from '../types'
 import { developmentFallbackScore } from './fallback'
 
-export type EngineMode = 'online-api' | 'offline-python' | 'development-fallback'
+export type EngineMode = 'online-api' | 'offline-python' | 'development-fallback' | 'unavailable'
 
 let worker: Worker | undefined
 
@@ -61,21 +61,33 @@ export async function getRecommendations(request: RecommendationRequest): Promis
   mode: EngineMode
   warning?: string
 }> {
+  let apiError: unknown
   if (navigator.onLine) {
     try {
       const response = await draftApi.recommendations(request)
       return { recommendations: response.recommendations, mode: 'online-api' }
-    } catch {
-      // API is optional for the local-first client.
+    } catch (error) {
+      apiError = error
     }
   }
   try {
     return { recommendations: await pythonRecommendations(request), mode: 'offline-python' }
   } catch (error) {
+    const offlineMessage = error instanceof Error ? error.message : 'Python engine unavailable'
+    if (import.meta.env.PROD) {
+      const apiMessage = apiError instanceof Error
+        ? apiError.message
+        : navigator.onLine ? 'API unavailable' : 'Device is offline'
+      return {
+        recommendations: [],
+        mode: 'unavailable',
+        warning: `DVS scoring is unavailable. Check your connection or reload to retry the offline engine. Manual draft entry remains available. API: ${apiMessage}. Offline: ${offlineMessage}.`
+      }
+    }
     return {
       recommendations: developmentFallbackScore(request.players, request.picks, request.settings, request.adjustments),
       mode: 'development-fallback',
-      warning: `Non-production TypeScript scorer active: ${error instanceof Error ? error.message : 'Python engine unavailable'}`
+      warning: `Non-production TypeScript scorer active: ${offlineMessage}`
     }
   }
 }

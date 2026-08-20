@@ -1,5 +1,4 @@
 import pytest
-
 from dvs_engine import CsvImportError, Position, import_players_csv
 
 
