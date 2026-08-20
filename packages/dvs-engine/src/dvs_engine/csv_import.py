@@ -5,8 +5,8 @@ from __future__ import annotations
 import csv
 import io
 import re
-from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import Mapping
 
 from .models import Player, Position
 
@@ -94,7 +94,7 @@ def import_players_csv(
 
 
 def _resolve_mapping(
-    fieldnames: Sequence[str], custom: Mapping[str, str]
+    fieldnames: list[str], custom: Mapping[str, str]
 ) -> dict[str, str]:
     by_normalized = {_normalize_header(header): header for header in fieldnames}
     result: dict[str, str] = {}

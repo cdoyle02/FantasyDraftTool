@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Mapping, Sequence
+from typing import Mapping, Sequence
 
 from .models import FormulaParams, LeagueSettings, Player, Position
 

@@ -1,6 +1,7 @@
 import json
 
 import pytest
+
 from dvs_engine import LeagueSettings, Player, Position, recommendation_json
 
 

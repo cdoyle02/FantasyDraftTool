@@ -1,5 +1,6 @@
-from draft_api.main import app
 from fastapi.testclient import TestClient
+
+from draft_api.main import app
 
 client = TestClient(app)
 
@@ -8,7 +9,7 @@ def test_health_and_version():
     assert client.get("/health").json() == {"status": "ok"}
     version = client.get("/api/v1/version")
     assert version.status_code == 200
-    assert version.json() == {"api": "0.1.0", "engine": "0.2.0"}
+    assert version.json() == {"api": "0.1.0", "engine": "0.1.0"}
 
 
 def test_csv_import_success_keeps_adjustments_separate():

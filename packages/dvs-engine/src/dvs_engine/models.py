@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
-from typing import Any
+from typing import Any, Mapping, Sequence
 
 
 class Position(StrEnum):

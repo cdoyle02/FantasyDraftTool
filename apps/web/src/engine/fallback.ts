@@ -38,16 +38,7 @@ export function developmentFallbackScore(
       playerId: player.id,
       dvsScore: Number(dvsScore.toFixed(1)),
       tierLabel: survivalProbability < 0.3 && dvsScore > 80 ? "CAN'T PASS" : survivalProbability > 0.7 ? 'SAFE TO WAIT' : 'BEST PICK',
-      breakdown: {
-        vorp,
-        marginalValue: 0,
-        waitLoss: 0,
-        tierUrgency,
-        survivalProbability,
-        needMultiplier,
-        opponentDemandFactor,
-        guardrailAdjustment
-      },
+      breakdown: { vorp, tierUrgency, survivalProbability, needMultiplier, opponentDemandFactor, guardrailAdjustment },
       explanation: survivalProbability < 0.4
         ? `Strong value with only a ${Math.round(survivalProbability * 100)}% chance to reach your next pick.`
         : `${Math.round(survivalProbability * 100)}% chance to survive; balance value against positional need.`

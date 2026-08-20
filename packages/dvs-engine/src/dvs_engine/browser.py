@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
-from typing import Any
+from typing import Any, Mapping
 
 from .formula import recommend
 from .models import (
