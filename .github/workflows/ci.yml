@@ -54,5 +54,5 @@ jobs:
           python-version: "3.13"
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:engine
-      - run: pnpm --filter @fantasy-draft/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @fantasy-draft-tool/web exec playwright install --with-deps chromium
       - run: pnpm test:e2e

@@ -2,7 +2,7 @@ import { draftApi, type RecommendationRequest } from '../api/client'
 import type { Recommendation } from '../types'
 import { developmentFallbackScore } from './fallback'
 
-export type EngineMode = 'online-api' | 'offline-python' | 'development-fallback'
+export type EngineMode = 'online-api' | 'offline-python' | 'development-fallback' | 'unavailable'
 
 let worker: Worker | undefined
 
@@ -72,10 +72,18 @@ export async function getRecommendations(request: RecommendationRequest): Promis
   try {
     return { recommendations: await pythonRecommendations(request), mode: 'offline-python' }
   } catch (error) {
+    const offlineError = error instanceof Error ? error.message : 'Python engine unavailable'
+    if (import.meta.env.PROD) {
+      return {
+        recommendations: [],
+        mode: 'unavailable',
+        warning: `Recommendations unavailable. Check your connection or prepare the offline engine; manual draft entry remains available. Offline engine: ${offlineError}`
+      }
+    }
     return {
       recommendations: developmentFallbackScore(request.players, request.picks, request.settings, request.adjustments),
       mode: 'development-fallback',
-      warning: `Non-production TypeScript scorer active: ${error instanceof Error ? error.message : 'Python engine unavailable'}`
+      warning: `Non-production TypeScript scorer active: ${offlineError}`
     }
   }
 }

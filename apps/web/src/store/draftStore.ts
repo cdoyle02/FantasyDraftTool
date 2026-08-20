@@ -41,7 +41,7 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
   picks: [],
   settings: defaultLeague,
   recommendations: [],
-  engineMode: 'development-fallback',
+  engineMode: 'unavailable',
   offlineReady: false,
   hydrated: false,
   hydrate: async () => {
