@@ -18,6 +18,7 @@ Make the app safe to rehearse and use during a live draft, then improve recommen
 - Fix the existing Ruff, mypy, engine-version, and E2E package-filter failures in [ci.yml](../../.github/workflows/ci.yml), [csv_import.py](../../packages/dvs-engine/src/dvs_engine/csv_import.py), and engine metadata/tests.
 - Update [adapter.ts](../../apps/web/src/engine/adapter.ts) so production never silently uses the development scorer; expose an actionable unavailable-engine state while preserving manual draft state.
 - Align the offline wheel version and build references in [dvs.worker.ts](../../apps/web/src/workers/dvs.worker.ts) and package metadata.
+- **Local offline-engine runtime packaging:** bundle and serve the Pyodide browser runtime locally; direct the module worker away from CDN loading; retain an appropriate first-load readiness strategy; and verify the live browser reaches Offline Ready. Keep this separate from the ESPN MCP smoke test.
 - Tests: API success, Pyodide recovery, and both engines unavailable in production.
 
 ### 2. Replay/mock mode
