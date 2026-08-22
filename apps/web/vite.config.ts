@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  worker: {
+    format: 'es',
+  },
   plugins: [
     react(),
     VitePWA({
@@ -22,17 +25,8 @@ export default defineConfig({
       workbox: {
         clientsClaim: true,
         skipWaiting: true,
-        globPatterns: ['**/*.{js,css,html,svg,woff2,whl}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/pyodide\//,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'pyodide-runtime',
-              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 365 }
-            }
-          }
-        ]
+        globPatterns: ['**/*.{js,mjs,wasm,zip,json,css,html,svg,woff2,whl}'],
+        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
       }
     })
   ],

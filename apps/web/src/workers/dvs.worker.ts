@@ -1,28 +1,21 @@
 /// <reference lib="webworker" />
+import { loadPyodide } from 'pyodide'
 import { normalizeRecommendations, serializeRecommendationRequest, type RecommendationRequest } from '../api/client'
 
-declare const self: DedicatedWorkerGlobalScope & {
-  loadPyodide?: (options: { indexURL: string }) => Promise<{
-    loadPackage: (name: string) => Promise<void>
-    runPythonAsync: (code: string) => Promise<{ toJs?: (options: unknown) => unknown } | unknown>
-    globals: { set: (key: string, value: unknown) => void }
-  }>
-}
-
-const PYODIDE_VERSION = '314.0.4'
-const INDEX_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`
+const PYODIDE_INDEX_URL = '/pyodide/'
 const WHEEL_URL = import.meta.env.VITE_DVS_WHEEL_URL ?? '/engine/dvs_engine-0.1.0-py3-none-any.whl'
-let ready: Promise<Awaited<ReturnType<NonNullable<typeof self.loadPyodide>>>> | undefined
+let ready: Promise<Awaited<ReturnType<typeof loadPyodide>>> | undefined
 
 async function getPython() {
   if (!ready) {
     ready = (async () => {
-      importScripts(`${INDEX_URL}pyodide.js`)
-      if (!self.loadPyodide) throw new Error('Pyodide runtime did not load')
-      const python = await self.loadPyodide({ indexURL: INDEX_URL })
-      await python.loadPackage('micropip')
+      const python = await loadPyodide({ indexURL: PYODIDE_INDEX_URL })
       python.globals.set('wheel_url', WHEEL_URL)
-      await python.runPythonAsync('import micropip\nawait micropip.install(wheel_url)')
+      await python.runPythonAsync(
+        'from pyodide.http import pyfetch\n'
+        + 'response = await pyfetch(wheel_url)\n'
+        + 'await response.unpack_archive()'
+      )
       return python
     })()
   }
