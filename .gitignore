@@ -52,9 +52,7 @@ htmlcov/
 # IDE / editor
 .idea/
 .vscode/
-.cursor/*
-!.cursor/skills/
-!.cursor/skills/**
+.cursor/
 *.swp
 *.swo
 *~
