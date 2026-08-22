@@ -64,6 +64,7 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
     try {
       await prepareOfflineEngine()
       set({ offlineReady: true })
+      await get().refreshRecommendations()
     } catch (error) {
       set({
         offlineReady: false,

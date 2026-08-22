@@ -6,8 +6,12 @@ export type EngineMode = 'online-api' | 'offline-python' | 'development-fallback
 
 let worker: Worker | undefined
 
+export function createOfflineWorker() {
+  return new Worker(new URL('../workers/dvs.worker.ts', import.meta.url), { type: 'module' })
+}
+
 function getWorker() {
-  worker ??= new Worker(new URL('../workers/dvs.worker.ts', import.meta.url), { type: 'module' })
+  worker ??= createOfflineWorker()
   return worker
 }
 
