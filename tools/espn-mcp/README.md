@@ -59,11 +59,17 @@ reads its environment at startup.
 
 ```bash
 uv run python scripts/smoke_test.py
+uv run python scripts/public_draft_smoke_test.py
 uvx ruff check .
 ```
 
 The smoke test performs a real stdio handshake, lists the tools, and calls the
 two that need no league id.
+
+`public_draft_smoke_test.py` exercises the same draft-pick normalization used by
+`espn_draft_picks` against a known completed public 2020 league. It constructs a
+credential-free configuration directly, so it does not load `.env` or access
+private-league cookies.
 
 ## Caveats
 

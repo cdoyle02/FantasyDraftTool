@@ -169,8 +169,30 @@ async def espn_draft_picks(
             This downloads a large payload, so leave it off while polling.
     """
     config, resolved_league = _resolve(season, league_id)
+    return await draft_picks(
+        config,
+        _require_league(resolved_league),
+        limit=limit,
+        offset=offset,
+        resolve_names=resolve_names,
+    )
+
+
+async def draft_picks(
+    config: EspnConfig,
+    league_id: str,
+    *,
+    limit: int = 50,
+    offset: int = 0,
+    resolve_names: bool = False,
+) -> str:
+    """Fetch and normalize a league's draft picks with an explicit configuration.
+
+    Keeping the configuration explicit lets the public smoke test exercise the
+    production normalization path without loading local environment credentials.
+    """
     payload = await fetch(
-        league_url(config.season, _require_league(resolved_league)),
+        league_url(config.season, league_id),
         config=config,
         views=["mDraftDetail", "mTeam"],
     )
@@ -213,7 +235,7 @@ async def espn_draft_picks(
     return json.dumps(
         {
             "season": config.season,
-            "league_id": resolved_league,
+            "league_id": league_id,
             "drafted": detail.get("drafted"),
             "in_progress": detail.get("inProgress"),
             "total_picks": len(picks),
