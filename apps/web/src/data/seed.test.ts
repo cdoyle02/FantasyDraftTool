@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { SEED_VERSION, isLegacyDemoPool, seedPlayers } from './seed'
+import { SEED_VERSION, isCsvImportPool, isLegacyDemoPool, seedPlayers, shouldRefreshBundledAdp } from './seed'
 
 describe('bundled expert rankings seed', () => {
   it('loads a full PPR board instead of the 25-player demo', () => {
@@ -21,6 +21,34 @@ describe('bundled expert rankings seed', () => {
       tier: 1
     })))).toBe(true)
     expect(isLegacyDemoPool([{
+      id: 'csv-bijan-robinson-rb-atl',
+      name: 'Bijan Robinson',
+      position: 'RB',
+      team: 'ATL',
+      projectedPoints: 300,
+      adp: 4.2,
+      tier: 1
+    }])).toBe(false)
+    expect(isCsvImportPool([{
+      id: 'csv-bijan-robinson-rb-atl',
+      name: 'Bijan Robinson',
+      position: 'RB',
+      team: 'ATL',
+      projectedPoints: 300,
+      adp: 4.2,
+      tier: 1
+    }])).toBe(true)
+    expect(isCsvImportPool(seedPlayers)).toBe(false)
+  })
+
+  it('loads ESPN live-draft ADP onto the bundled board', () => {
+    const chase = seedPlayers.find((player) => player.name === "Ja'Marr Chase")
+    const gibbs = seedPlayers.find((player) => player.name === 'Jahmyr Gibbs')
+    expect(chase?.espnAdp).toBeGreaterThan(0)
+    expect(gibbs?.espnAdp).toBeGreaterThan(0)
+    expect(shouldRefreshBundledAdp(seedPlayers.map(({ espnAdp: _espnAdp, sleeperAdp: _sleeperAdp, ...player }) => player))).toBe(true)
+    expect(shouldRefreshBundledAdp(seedPlayers)).toBe(false)
+    expect(shouldRefreshBundledAdp([{
       id: 'csv-bijan-robinson-rb-atl',
       name: 'Bijan Robinson',
       position: 'RB',

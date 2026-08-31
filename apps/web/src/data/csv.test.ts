@@ -12,6 +12,21 @@ describe('player CSV import', () => {
     const [player] = await parsePlayerCsv(file)
     expect(player.id).toBe('csv-bijan-robinson-rb-atl')
     expect(player.projectedPoints).toBe(300)
+    expect(player.espnAdp).toBeUndefined()
+    expect(player.sleeperAdp).toBeUndefined()
+  })
+
+  it('reads optional ESPN and Sleeper ADP columns', async () => {
+    const file = new File(
+      ['Player,Team,POS,FPTS,ADP,ESPN ADP,Sleeper ADP,Tier\nBijan Robinson,ATL,RB,300,4.2,3.8,4.5,1\n'],
+      'players.csv',
+      { type: 'text/csv' }
+    )
+
+    const [player] = await parsePlayerCsv(file)
+    expect(player.adp).toBe(4.2)
+    expect(player.espnAdp).toBe(3.8)
+    expect(player.sleeperAdp).toBe(4.5)
   })
 
   it('rejects malformed rows instead of silently importing zero projections', async () => {

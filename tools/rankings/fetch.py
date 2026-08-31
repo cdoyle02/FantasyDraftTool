@@ -169,6 +169,10 @@ class FantasyProsClient:
                         _text(item, "player_position_id", "position_id", "position") or position
                     ),
                     adp=adp,
+                    espn_adp=_platform_adp(item, "espn_adp", "adp_espn", "espn", "rank_espn"),
+                    sleeper_adp=_platform_adp(
+                        item, "sleeper_adp", "adp_sleeper", "sleeper", "rank_sleeper"
+                    ),
                 )
             )
         return rows
@@ -270,6 +274,14 @@ def _optional_float(value: Any) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _platform_adp(item: Mapping[str, Any], *keys: str) -> float | None:
+    for key in keys:
+        value = _optional_float(item.get(key))
+        if value is not None and value > 0:
+            return value
+    return None
 
 
 def _norm(value: str) -> str:

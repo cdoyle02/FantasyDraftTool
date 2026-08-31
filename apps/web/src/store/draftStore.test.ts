@@ -79,6 +79,7 @@ describe('hydrate seed versioning', () => {
     vi.clearAllMocks()
     adjustmentsTable.toArray.mockResolvedValue([])
     settingsTable.get.mockResolvedValue(undefined)
+    metaTable.get.mockResolvedValue(undefined)
     picksTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     const { useDraftStore } = await import('./draftStore')
     useDraftStore.setState({
@@ -173,5 +174,59 @@ describe('hydrate seed versioning', () => {
     await useDraftStore.getState().draftPlayer(demoPlayers[2])
 
     expect(useDraftStore.getState().picks.map((pick) => pick.teamId)).toEqual([1, 2, 3])
+  })
+
+  it('reloads the bundled seed when stored players are missing ESPN ADP', async () => {
+    const { seedPlayers } = await import('../data/seed')
+    const { useDraftStore } = await import('./draftStore')
+    playersTable.toArray.mockResolvedValue(seedPlayers.map(({ espnAdp: _espnAdp, sleeperAdp: _sleeperAdp, ...player }) => player))
+    metaTable.get.mockResolvedValue({ id: 'seed', version: (await import('../data/seed')).SEED_VERSION })
+
+    await useDraftStore.getState().hydrate()
+
+    expect(playersTable.bulkPut).toHaveBeenCalledWith(seedPlayers)
+    expect(useDraftStore.getState().players.some((player) => player.espnAdp != null)).toBe(true)
+  })
+
+  it('reloads the bundled seed when the stored version is stale', async () => {
+    const { seedPlayers, SEED_VERSION } = await import('../data/seed')
+    const { useDraftStore } = await import('./draftStore')
+    playersTable.toArray.mockResolvedValue(seedPlayers)
+    metaTable.get.mockResolvedValue({ id: 'seed', version: 'old' })
+
+    await useDraftStore.getState().hydrate()
+
+    expect(playersTable.clear).toHaveBeenCalled()
+    expect(playersTable.bulkPut).toHaveBeenCalledWith(seedPlayers)
+    expect(metaTable.put).toHaveBeenCalledWith({ id: 'seed', version: SEED_VERSION })
+  })
+
+  it('leaves a matching bundled seed and a CSV import in place', async () => {
+    const { seedPlayers, SEED_VERSION } = await import('../data/seed')
+    const { useDraftStore } = await import('./draftStore')
+    playersTable.toArray.mockResolvedValue(seedPlayers)
+    metaTable.get.mockResolvedValue({ id: 'seed', version: SEED_VERSION })
+
+    await useDraftStore.getState().hydrate()
+
+    expect(playersTable.clear).not.toHaveBeenCalled()
+    expect(playersTable.bulkPut).not.toHaveBeenCalled()
+    expect(useDraftStore.getState().players).toBe(seedPlayers)
+
+    const csvPlayers: Player[] = [{
+      id: 'csv-bijan-robinson-rb-atl',
+      name: 'Bijan Robinson',
+      position: 'RB',
+      team: 'ATL',
+      projectedPoints: 300,
+      adp: 4.2,
+      tier: 1
+    }]
+    playersTable.toArray.mockResolvedValue(csvPlayers)
+    metaTable.get.mockResolvedValue({ id: 'seed', version: 'old' })
+
+    await useDraftStore.getState().hydrate()
+
+    expect(useDraftStore.getState().players).toEqual(csvPlayers)
   })
 })

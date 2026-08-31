@@ -26,13 +26,17 @@ _NAME_ALIASES = ("player", "player name", "name")
 _TEAM_ALIASES = ("team", "tm", "player_team_id")
 _POS_ALIASES = ("pos", "position", "player_position_id")
 _FPTS_ALIASES = ("fpts", "fantasy points", "projected points", "projection", "points", "points_ppr")
-_ADP_ALIASES = ("adp", "avg pick", "average draft position", "rank_ecr")
+_ADP_ALIASES = ("adp", "avg pick", "average draft position", "rank_ecr", "avg")
+_ESPN_ADP_ALIASES = ("espn adp", "espn", "adp espn")
+_SLEEPER_ADP_ALIASES = ("sleeper adp", "sleeper", "adp sleeper")
 
 
 def read_inbox(directory: Path) -> tuple[
     list[Projection],
     dict[str, list[RankedPlayer]],
     dict[str, list[RankedPlayer]],
+    list[AdpRow],
+    list[AdpRow],
     list[AdpRow],
 ]:
     if not directory.is_dir():
@@ -42,8 +46,12 @@ def read_inbox(directory: Path) -> tuple[
         raise FileNotFoundError(f"inbox directory has no CSV files: {directory}")
 
     projections = _read_projections(_require_file(files, "projection"))
-    adp_path = _find_file(files, "adp")
+    adp_path = _find_file(files, "adp", exclude=("espn", "sleeper"))
     adp_rows = _read_adp(adp_path) if adp_path else []
+    espn_path = _find_file(files, "espn-adp") or _find_file(files, "espn_adp")
+    sleeper_path = _find_file(files, "sleeper-adp") or _find_file(files, "sleeper_adp")
+    espn_rows = _read_adp(espn_path, platform_only=True) if espn_path else []
+    sleeper_rows = _read_adp(sleeper_path, platform_only=True) if sleeper_path else []
 
     pooled: dict[str, list[RankedPlayer]] = {}
     consensus: dict[str, list[RankedPlayer]] = {}
@@ -61,7 +69,7 @@ def read_inbox(directory: Path) -> tuple[
         raise FileNotFoundError(
             "inbox needs per-position rankings files named rankings-QB.csv through rankings-DST.csv"
         )
-    return projections, pooled, consensus, adp_rows
+    return projections, pooled, consensus, adp_rows, espn_rows, sleeper_rows
 
 
 def write_bundle(
@@ -84,7 +92,10 @@ def write_bundle(
     }
     json_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     with csv_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["Player", "Team", "POS", "FPTS", "ADP", "Tier"])
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=["Player", "Team", "POS", "FPTS", "ADP", "ESPN ADP", "Sleeper ADP", "Tier"],
+        )
         writer.writeheader()
         writer.writerows(csv_rows(players))
 
@@ -100,10 +111,19 @@ def _require_file(files: Mapping[str, Path], token: str) -> Path:
     return found
 
 
-def _find_file(files: Mapping[str, Path], token: str) -> Path | None:
+def _find_file(
+    files: Mapping[str, Path],
+    token: str,
+    *,
+    exclude: Sequence[str] = (),
+) -> Path | None:
     needle = token.lower()
+    exact = files.get(f"{needle}.csv")
+    if exact:
+        return exact
+    skipped = tuple(item.lower() for item in exclude)
     for name, path in files.items():
-        if needle in name:
+        if needle in name and not any(item in name for item in skipped):
             return path
     return None
 
@@ -153,7 +173,7 @@ def _read_rankings(path: Path, fallback_position: str) -> list[RankedPlayer]:
     return rows
 
 
-def _read_adp(path: Path) -> list[AdpRow]:
+def _read_adp(path: Path, *, platform_only: bool = False) -> list[AdpRow]:
     rows: list[AdpRow] = []
     for row in _dicts(path):
         name = _cell(row, _NAME_ALIASES)
@@ -161,12 +181,16 @@ def _read_adp(path: Path) -> list[AdpRow]:
         adp_text = _cell(row, _ADP_ALIASES)
         if not name or not position or not adp_text:
             continue
+        espn_text = "" if platform_only else _cell(row, _ESPN_ADP_ALIASES)
+        sleeper_text = "" if platform_only else _cell(row, _SLEEPER_ADP_ALIASES)
         rows.append(
             AdpRow(
                 name=name,
                 team=_cell(row, _TEAM_ALIASES),
                 position=normalize_position(position),
                 adp=_number(adp_text, "ADP"),
+                espn_adp=_number(espn_text, "ESPN ADP") if espn_text else None,
+                sleeper_adp=_number(sleeper_text, "Sleeper ADP") if sleeper_text else None,
             )
         )
     return rows

@@ -5,6 +5,7 @@ from merge import (
     RankedPlayer,
     gap_tiers,
     merge_rankings,
+    normalize_name,
     normalize_position,
 )
 
@@ -32,6 +33,11 @@ def test_nudge_is_clamped_so_totals_stay_realistic() -> None:
     )
 
     assert players[0].projected_points == 208.0
+
+
+def test_name_normalization_drops_generational_suffixes() -> None:
+    assert normalize_name("James Cook III") == normalize_name("James Cook")
+    assert normalize_name("Aaron Jones Sr.") == normalize_name("Aaron Jones")
 
 
 def test_dst_aliases_normalize_to_dst() -> None:
@@ -75,3 +81,29 @@ def test_projection_only_players_stay_in_the_pool() -> None:
 
 def test_gap_tiers_open_a_new_tier_on_large_rank_jumps() -> None:
     assert gap_tiers([1, 2, 6, 7], threshold=4) == [1, 1, 2, 2]
+
+
+def test_platform_adps_attach_and_dedicated_rows_override() -> None:
+    players = merge_rankings(
+        [Projection("Bijan Robinson", "ATL", "RB", 301.5, consensus_rank=1)],
+        {"RB": [RankedPlayer("Bijan Robinson", "ATL", "RB", 1, 1)]},
+        adp_rows=[AdpRow("Bijan Robinson", "ATL", "RB", 4.2, espn_adp=3.8, sleeper_adp=4.5)],
+        espn_adp_rows=[AdpRow("Bijan Robinson", "ATL", "RB", 3.1)],
+        sleeper_adp_rows=[],
+    )
+
+    assert players[0].adp == 4.2
+    assert players[0].espn_adp == 3.1
+    assert players[0].sleeper_adp == 4.5
+
+
+def test_missing_platform_adps_stay_none() -> None:
+    players = merge_rankings(
+        [Projection("Justin Tucker", "BAL", "K", 151.0)],
+        {"K": [RankedPlayer("Justin Tucker", "BAL", "K", 1)]},
+        config=MergeConfig(missing_adp=250.0),
+    )
+
+    assert players[0].adp == 250.0
+    assert players[0].espn_adp is None
+    assert players[0].sleeper_adp is None

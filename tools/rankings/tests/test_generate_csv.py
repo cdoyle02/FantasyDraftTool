@@ -13,7 +13,7 @@ def test_fixture_inbox_produces_importable_six_column_csv(tmp_path: Path) -> Non
     players = generate_from_inbox(FIXTURE_INBOX)
     rows = csv_rows(players)
 
-    assert list(rows[0]) == ["Player", "Team", "POS", "FPTS", "ADP", "Tier"]
+    assert list(rows[0]) == ["Player", "Team", "POS", "FPTS", "ADP", "ESPN ADP", "Sleeper ADP", "Tier"]
     assert {row["POS"] for row in rows} <= {"QB", "RB", "WR", "TE", "K", "DST"}
     assert any(row["Player"] == "Jets Defense" and row["POS"] == "DST" for row in rows)
     assert any(row["Player"] == "Deep Bench Back" for row in rows)
@@ -38,6 +38,11 @@ def test_pickens_nudge_from_fixture_inbox() -> None:
     # consensus 7 vs pooled 1, k=0.6 -> +3.6
     assert players["George Pickens"].projected_points == 249.8
     assert players["Justin Tucker"].adp == 250.0
+    assert players["Bijan Robinson"].espn_adp == 3.8
+    assert players["Bijan Robinson"].sleeper_adp == 4.5
+    assert players["George Pickens"].espn_adp == 41.0
+    assert players["George Pickens"].sleeper_adp == 36.2
+    assert players["Justin Tucker"].espn_adp is None
 
 
 def test_empty_inbox_is_a_structured_failure(tmp_path: Path) -> None:

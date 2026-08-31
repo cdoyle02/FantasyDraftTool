@@ -8,6 +8,12 @@ const get = (row: CsvRow, names: string[]) => {
   return entry?.[1]?.trim()
 }
 
+const optionalAdp = (value?: string) => {
+  if (value === undefined || value === '') return undefined
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
+}
+
 export function parsePlayerCsv(file: File): Promise<Player[]> {
   return new Promise((resolve, reject) => {
     Papa.parse<CsvRow>(file, {
@@ -44,6 +50,8 @@ export function parsePlayerCsv(file: File): Promise<Player[]> {
             team: get(row, ['team', 'tm']) ?? 'FA',
             projectedPoints: Number(get(row, ['projected points', 'points', 'proj', 'fpts'])) || 0,
             adp: Number(get(row, ['adp', 'average draft position', 'rank'])) || index + 1,
+            espnAdp: optionalAdp(get(row, ['espn adp', 'espn'])),
+            sleeperAdp: optionalAdp(get(row, ['sleeper adp', 'sleeper'])),
             tier: Number(get(row, ['tier'])) || Math.ceil((index + 1) / 12)
           } satisfies Player]
         })

@@ -1,7 +1,7 @@
-Player,Team,POS,ADP
-Bijan Robinson,ATL,RB,4.2
-Jahmyr Gibbs,DET,RB,5.1
-Breece Hall,NYJ,RB,12.8
-CeeDee Lamb,DAL,WR,2.1
-George Pickens,DAL,WR,38.4
-Jets Defense,NYJ,D/ST,132.0
+Player,Team,POS,ADP,ESPN,Sleeper
+Bijan Robinson,ATL,RB,4.2,3.8,4.5
+Jahmyr Gibbs,DET,RB,5.1,5.4,4.9
+Breece Hall,NYJ,RB,12.8,13.1,12.2
+CeeDee Lamb,DAL,WR,2.1,2.4,1.8
+George Pickens,DAL,WR,38.4,41.0,
+Jets Defense,NYJ,D/ST,132.0,128.0,140.0

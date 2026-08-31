@@ -16,8 +16,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from espn_adp import load_espn_adp
 from fetch import FantasyProsError, api_key_from_env, fetch_inputs
-from merge import MergeConfig, SeedPlayer, merge_rankings
+from merge import AdpRow, MergeConfig, SeedPlayer, merge_rankings
 from store import load_config, read_inbox, write_bundle
 
 HERE = Path(__file__).resolve().parent
@@ -26,7 +27,7 @@ DEFAULT_JSON = REPO / "apps" / "web" / "src" / "data" / "expertRankings.json"
 DEFAULT_CSV = HERE / "out" / "expert-rankings.csv"
 DEFAULT_CONFIG = HERE / "experts.json"
 DEFAULT_INBOX = HERE / "inbox"
-SEED_VERSION = "2026.1"
+SEED_VERSION = "2026.4"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -56,17 +57,22 @@ def main(argv: list[str] | None = None) -> int:
         gap_tier_threshold=int(config.get("gapTierThreshold", 4)),
     )
 
-    source, projections, pooled, consensus, adp_rows, experts = _load_inputs(
-        config,
-        inbox_dir=args.inbox_dir,
-        force_inbox=args.inbox,
-        from_data=args.from_data,
+    source, projections, pooled, consensus, adp_rows, espn_rows, sleeper_rows, experts = (
+        _load_inputs(
+            config,
+            inbox_dir=args.inbox_dir,
+            force_inbox=args.inbox,
+            from_data=args.from_data,
+        )
     )
+    espn_live = load_espn_adp(season=int(config.get("season", 2026)))
     players = merge_rankings(
         projections,
         pooled,
         consensus=consensus,
         adp_rows=adp_rows,
+        espn_adp_rows=(*espn_rows, *espn_live),
+        sleeper_adp_rows=sleeper_rows,
         config=merge_config,
     )
     if not players:
@@ -90,7 +96,16 @@ def _load_inputs(
     inbox_dir: Path,
     force_inbox: bool,
     from_data: bool,
-) -> tuple[str, list[Any], dict[str, list[Any]], dict[str, list[Any]], list[Any], dict[str, Any]]:
+) -> tuple[
+    str,
+    list[Any],
+    dict[str, list[Any]],
+    dict[str, list[Any]],
+    list[AdpRow],
+    list[AdpRow],
+    list[AdpRow],
+    dict[str, Any],
+]:
     if from_data:
         from board import board_inputs
 
@@ -101,18 +116,38 @@ def _load_inputs(
             pooled,
             consensus,
             adp_rows,
+            [],
+            [],
             _experts_from_config(config),
         )
     key = None if force_inbox else api_key_from_env()
     if key:
         try:
             projections, pooled, consensus, adp_rows, experts = fetch_inputs(config, api_key=key)
-            return "fantasypros-api", projections, pooled, consensus, adp_rows, experts
+            return (
+                "fantasypros-api",
+                projections,
+                pooled,
+                consensus,
+                adp_rows,
+                [],
+                [],
+                experts,
+            )
         except FantasyProsError as exc:
             print(f"FantasyPros API failed ({exc}); trying inbox", file=sys.stderr)
     if _inbox_has_csv(inbox_dir):
-        projections, pooled, consensus, adp_rows = read_inbox(inbox_dir)
-        return "inbox-csv", projections, pooled, consensus, adp_rows, _experts_from_config(config)
+        projections, pooled, consensus, adp_rows, espn_rows, sleeper_rows = read_inbox(inbox_dir)
+        return (
+            "inbox-csv",
+            projections,
+            pooled,
+            consensus,
+            adp_rows,
+            espn_rows,
+            sleeper_rows,
+            _experts_from_config(config),
+        )
     raise SystemExit(
         "No rankings source. Set FANTASYPROS_API_KEY, drop CSVs in tools/rankings/inbox/, "
         "or re-run with --from-data."
@@ -139,12 +174,14 @@ def generate_from_inbox(
     config_path: Path = DEFAULT_CONFIG,
 ) -> list[SeedPlayer]:
     config = load_config(config_path)
-    projections, pooled, consensus, adp_rows = read_inbox(inbox_dir)
+    projections, pooled, consensus, adp_rows, espn_rows, sleeper_rows = read_inbox(inbox_dir)
     return merge_rankings(
         projections,
         pooled,
         consensus=consensus,
         adp_rows=adp_rows,
+        espn_adp_rows=espn_rows,
+        sleeper_adp_rows=sleeper_rows,
         config=MergeConfig(
             k=float(config.get("k", 0.6)),
             nudge_clamp=float(config.get("nudgeClamp", 8.0)),

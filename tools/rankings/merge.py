@@ -34,6 +34,8 @@ class AdpRow:
     team: str
     position: str
     adp: float
+    espn_adp: float | None = None
+    sleeper_adp: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,9 +47,11 @@ class SeedPlayer:
     projected_points: float
     adp: float
     tier: int
+    espn_adp: float | None = None
+    sleeper_adp: float | None = None
 
     def as_web_dict(self) -> dict[str, str | float | int]:
-        return {
+        data: dict[str, str | float | int] = {
             "id": self.id,
             "name": self.name,
             "position": self.position,
@@ -56,6 +60,11 @@ class SeedPlayer:
             "adp": self.adp,
             "tier": self.tier,
         }
+        if self.espn_adp is not None:
+            data["espnAdp"] = self.espn_adp
+        if self.sleeper_adp is not None:
+            data["sleeperAdp"] = self.sleeper_adp
+        return data
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,6 +83,7 @@ def normalize_position(value: str) -> str:
 def normalize_name(value: str) -> str:
     text = value.lower()
     text = re.sub(r"\b(d/st|dst|defense|def)\b", "", text)
+    text = re.sub(r"\b(jr|sr|iii|ii|iv)\b", "", text)
     return re.sub(r"[^a-z0-9]+", " ", text).strip()
 
 
@@ -91,6 +101,8 @@ def merge_rankings(
     *,
     consensus: Mapping[str, Sequence[RankedPlayer]] | None = None,
     adp_rows: Sequence[AdpRow] = (),
+    espn_adp_rows: Sequence[AdpRow] = (),
+    sleeper_adp_rows: Sequence[AdpRow] = (),
     config: MergeConfig | None = None,
 ) -> list[SeedPlayer]:
     """Build formulaV2 rows: market ADP, specialist-nudged FPTS, pooled/gap tiers."""
@@ -98,6 +110,10 @@ def merge_rankings(
     pooled_index = _index_ranks(pooled)
     consensus_index = _index_ranks(consensus or {})
     adp_index = _index_adp(adp_rows)
+    espn_index = _index_platform_adp(adp_rows, "espn_adp")
+    espn_index.update(_index_adp(espn_adp_rows))
+    sleeper_index = _index_platform_adp(adp_rows, "sleeper_adp")
+    sleeper_index.update(_index_adp(sleeper_adp_rows))
     derived_consensus = _derived_consensus_ranks(projections)
 
     players: list[SeedPlayer] = []
@@ -135,6 +151,8 @@ def merge_rankings(
                 projected_points=fpts,
                 adp=float(adp),
                 tier=tier,
+                espn_adp=espn_index.get(key),
+                sleeper_adp=sleeper_index.get(key),
             )
         )
         seen.add(player_id)
@@ -173,9 +191,23 @@ def _index_ranks(
 def _index_adp(rows: Sequence[AdpRow]) -> dict[tuple[str, str], float]:
     result: dict[tuple[str, str], float] = {}
     for row in rows:
+        if row.adp <= 0:
+            continue
         key = player_key(row.name, row.position)
         if key not in result:
             result[key] = row.adp
+    return result
+
+
+def _index_platform_adp(rows: Sequence[AdpRow], attr: str) -> dict[tuple[str, str], float]:
+    result: dict[tuple[str, str], float] = {}
+    for row in rows:
+        value = getattr(row, attr)
+        if value is None or value <= 0:
+            continue
+        key = player_key(row.name, row.position)
+        if key not in result:
+            result[key] = float(value)
     return result
 
 
@@ -242,6 +274,8 @@ def csv_rows(players: Iterable[SeedPlayer]) -> list[dict[str, str]]:
             "POS": player.position,
             "FPTS": f"{player.projected_points:.1f}",
             "ADP": f"{player.adp:.1f}",
+            "ESPN ADP": f"{player.espn_adp:.1f}" if player.espn_adp is not None else "",
+            "Sleeper ADP": f"{player.sleeper_adp:.1f}" if player.sleeper_adp is not None else "",
             "Tier": str(player.tier),
         }
         for player in players

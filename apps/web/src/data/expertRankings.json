@@ -1,6 +1,6 @@
 {
-  "seedVersion": "2026.1",
-  "generatedAt": "2026-08-31T16:33:09+00:00",
+  "seedVersion": "2026.4",
+  "generatedAt": "2026-08-31T18:37:02+00:00",
   "source": "bundled-data",
   "experts": {
     "accuracyYear": 2025,
@@ -150,7 +150,8 @@
       "team": "CIN",
       "projectedPoints": 368.4,
       "adp": 1.4,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 4.3
     },
     {
       "id": "bijan-robinson-atl-rb",
@@ -159,7 +160,8 @@
       "team": "ATL",
       "projectedPoints": 332.6,
       "adp": 2.1,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 2.39
     },
     {
       "id": "justin-jefferson-min-wr",
@@ -168,7 +170,8 @@
       "team": "MIN",
       "projectedPoints": 352.1,
       "adp": 3.2,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 12.63
     },
     {
       "id": "jahmyr-gibbs-det-rb",
@@ -177,7 +180,8 @@
       "team": "DET",
       "projectedPoints": 318.4,
       "adp": 4.3,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 1.35
     },
     {
       "id": "ceedee-lamb-dal-wr",
@@ -186,7 +190,8 @@
       "team": "DAL",
       "projectedPoints": 341.2,
       "adp": 5.1,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 11.65
     },
     {
       "id": "puka-nacua-lar-wr",
@@ -195,7 +200,8 @@
       "team": "LAR",
       "projectedPoints": 336.8,
       "adp": 6.4,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 5.28
     },
     {
       "id": "saquon-barkley-phi-rb",
@@ -204,7 +210,8 @@
       "team": "PHI",
       "projectedPoints": 304.2,
       "adp": 7.6,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 14.19
     },
     {
       "id": "amon-ra-st-brown-det-wr",
@@ -213,7 +220,8 @@
       "team": "DET",
       "projectedPoints": 328.5,
       "adp": 8.2,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 8.34
     },
     {
       "id": "malik-nabers-nyg-wr",
@@ -222,7 +230,8 @@
       "team": "NYG",
       "projectedPoints": 319.8,
       "adp": 9.6,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 34.53
     },
     {
       "id": "christian-mccaffrey-sf-rb",
@@ -231,7 +240,8 @@
       "team": "SF",
       "projectedPoints": 296.8,
       "adp": 10.8,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 7.65
     },
     {
       "id": "nico-collins-hou-wr",
@@ -240,7 +250,8 @@
       "team": "HOU",
       "projectedPoints": 313.0,
       "adp": 11.3,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 25.95
     },
     {
       "id": "brian-thomas-jr-jax-wr",
@@ -249,7 +260,8 @@
       "team": "JAX",
       "projectedPoints": 305.4,
       "adp": 13.8,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 112.68
     },
     {
       "id": "de-von-achane-mia-rb",
@@ -258,7 +270,8 @@
       "team": "MIA",
       "projectedPoints": 281.5,
       "adp": 14.2,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 12.12
     },
     {
       "id": "a-j-brown-phi-wr",
@@ -267,7 +280,8 @@
       "team": "PHI",
       "projectedPoints": 298.2,
       "adp": 15.4,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 21.94
     },
     {
       "id": "ashton-jeanty-lv-rb",
@@ -276,7 +290,8 @@
       "team": "LV",
       "projectedPoints": 272.9,
       "adp": 16.9,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 21.4
     },
     {
       "id": "drake-london-atl-wr",
@@ -285,7 +300,8 @@
       "team": "ATL",
       "projectedPoints": 292.6,
       "adp": 17.1,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 19.91
     },
     {
       "id": "brock-bowers-lv-te",
@@ -294,7 +310,8 @@
       "team": "LV",
       "projectedPoints": 268.4,
       "adp": 18.6,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 24.01
     },
     {
       "id": "bucky-irving-tb-rb",
@@ -303,7 +320,8 @@
       "team": "TB",
       "projectedPoints": 267.4,
       "adp": 19.4,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 56.85
     },
     {
       "id": "ladd-mcconkey-lac-wr",
@@ -312,7 +330,8 @@
       "team": "LAC",
       "projectedPoints": 281.4,
       "adp": 21.6,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 46.71
     },
     {
       "id": "josh-jacobs-gb-rb",
@@ -321,7 +340,8 @@
       "team": "GB",
       "projectedPoints": 258.9,
       "adp": 22.7,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 52.45
     },
     {
       "id": "josh-allen-buf-qb",
@@ -330,7 +350,8 @@
       "team": "BUF",
       "projectedPoints": 386.2,
       "adp": 23.4,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 19.61
     },
     {
       "id": "tee-higgins-cin-wr",
@@ -339,7 +360,8 @@
       "team": "CIN",
       "projectedPoints": 274.3,
       "adp": 24.8,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 51.29
     },
     {
       "id": "jonathan-taylor-ind-rb",
@@ -348,7 +370,8 @@
       "team": "IND",
       "projectedPoints": 251.6,
       "adp": 25.3,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 6.43
     },
     {
       "id": "jaxon-smith-njigba-sea-wr",
@@ -357,7 +380,8 @@
       "team": "SEA",
       "projectedPoints": 271.9,
       "adp": 26.2,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 6.15
     },
     {
       "id": "breece-hall-nyj-rb",
@@ -366,7 +390,8 @@
       "team": "NYJ",
       "projectedPoints": 246.3,
       "adp": 27.8,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 35.78
     },
     {
       "id": "garrett-wilson-nyj-wr",
@@ -375,7 +400,8 @@
       "team": "NYJ",
       "projectedPoints": 266.8,
       "adp": 28.5,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 37.18
     },
     {
       "id": "lamar-jackson-bal-qb",
@@ -384,7 +410,8 @@
       "team": "BAL",
       "projectedPoints": 372.8,
       "adp": 29.1,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 35.41
     },
     {
       "id": "kyren-williams-lar-rb",
@@ -393,7 +420,8 @@
       "team": "LAR",
       "projectedPoints": 241.8,
       "adp": 30.4,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 36.81
     },
     {
       "id": "trey-mcbride-ari-te",
@@ -402,7 +430,8 @@
       "team": "ARI",
       "projectedPoints": 246.8,
       "adp": 31.4,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 22.35
     },
     {
       "id": "tyreek-hill-mia-wr",
@@ -411,7 +440,8 @@
       "team": "MIA",
       "projectedPoints": 256.6,
       "adp": 32.1,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 169.83
     },
     {
       "id": "chase-brown-cin-rb",
@@ -420,7 +450,8 @@
       "team": "CIN",
       "projectedPoints": 234.8,
       "adp": 33.6,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 17.63
     },
     {
       "id": "dk-metcalf-pit-wr",
@@ -429,7 +460,8 @@
       "team": "PIT",
       "projectedPoints": 254.1,
       "adp": 34.6,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 85.57
     },
     {
       "id": "jayden-daniels-was-qb",
@@ -438,7 +470,8 @@
       "team": "WAS",
       "projectedPoints": 361.4,
       "adp": 35.6,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 52.59
     },
     {
       "id": "marvin-harrison-jr-ari-wr",
@@ -447,7 +480,8 @@
       "team": "ARI",
       "projectedPoints": 249.7,
       "adp": 36.8,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 79.79
     },
     {
       "id": "james-cook-buf-rb",
@@ -456,7 +490,8 @@
       "team": "BUF",
       "projectedPoints": 228.5,
       "adp": 37.1,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 10.57
     },
     {
       "id": "george-pickens-dal-wr",
@@ -465,7 +500,8 @@
       "team": "DAL",
       "projectedPoints": 249.8,
       "adp": 38.4,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 28.65
     },
     {
       "id": "derrick-henry-bal-rb",
@@ -474,7 +510,8 @@
       "team": "BAL",
       "projectedPoints": 220.9,
       "adp": 40.5,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 16.96
     },
     {
       "id": "terry-mclaurin-was-wr",
@@ -483,7 +520,8 @@
       "team": "WAS",
       "projectedPoints": 241.5,
       "adp": 41.2,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 60.95
     },
     {
       "id": "jalen-hurts-phi-qb",
@@ -492,7 +530,8 @@
       "team": "PHI",
       "projectedPoints": 348.3,
       "adp": 42.8,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 53.88
     },
     {
       "id": "davante-adams-lar-wr",
@@ -501,7 +540,8 @@
       "team": "LAR",
       "projectedPoints": 238.2,
       "adp": 43.0,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 46.29
     },
     {
       "id": "kenneth-walker-iii-sea-rb",
@@ -510,7 +550,8 @@
       "team": "SEA",
       "projectedPoints": 217.3,
       "adp": 44.2,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 24.79
     },
     {
       "id": "mike-evans-tb-wr",
@@ -519,7 +560,8 @@
       "team": "TB",
       "projectedPoints": 233.6,
       "adp": 46.5,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 86.55
     },
     {
       "id": "alvin-kamara-no-rb",
@@ -528,7 +570,8 @@
       "team": "NO",
       "projectedPoints": 211.0,
       "adp": 47.8,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 160.23
     },
     {
       "id": "joe-burrow-cin-qb",
@@ -537,7 +580,8 @@
       "team": "CIN",
       "projectedPoints": 342.1,
       "adp": 48.3,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 54.5
     },
     {
       "id": "george-kittle-sf-te",
@@ -546,7 +590,8 @@
       "team": "SF",
       "projectedPoints": 227.9,
       "adp": 49.2,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 78.14
     },
     {
       "id": "dj-moore-chi-wr",
@@ -555,7 +600,8 @@
       "team": "CHI",
       "projectedPoints": 229.8,
       "adp": 49.8,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 62.27
     },
     {
       "id": "chuba-hubbard-car-rb",
@@ -564,7 +610,8 @@
       "team": "CAR",
       "projectedPoints": 204.9,
       "adp": 51.3,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 109.0
     },
     {
       "id": "jameson-williams-det-wr",
@@ -573,7 +620,8 @@
       "team": "DET",
       "projectedPoints": 224.1,
       "adp": 52.3,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 64.6
     },
     {
       "id": "joe-mixon-hou-rb",
@@ -582,7 +630,8 @@
       "team": "HOU",
       "projectedPoints": 198.0,
       "adp": 54.9,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 169.95
     },
     {
       "id": "zay-flowers-bal-wr",
@@ -591,7 +640,8 @@
       "team": "BAL",
       "projectedPoints": 219.8,
       "adp": 55.7,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 44.04
     },
     {
       "id": "patrick-mahomes-kc-qb",
@@ -600,7 +650,8 @@
       "team": "KC",
       "projectedPoints": 328.6,
       "adp": 56.7,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 107.68
     },
     {
       "id": "sam-laporta-det-te",
@@ -609,7 +660,8 @@
       "team": "DET",
       "projectedPoints": 216.9,
       "adp": 57.8,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 72.65
     },
     {
       "id": "courtland-sutton-den-wr",
@@ -618,7 +670,8 @@
       "team": "DEN",
       "projectedPoints": 220.0,
       "adp": 58.1,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 81.17
     },
     {
       "id": "james-conner-ari-rb",
@@ -627,7 +680,8 @@
       "team": "ARI",
       "projectedPoints": 193.8,
       "adp": 59.4,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 170.16
     },
     {
       "id": "jaylen-waddle-mia-wr",
@@ -636,7 +690,8 @@
       "team": "MIA",
       "projectedPoints": 215.9,
       "adp": 61.4,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 52.72
     },
     {
       "id": "aaron-jones-min-rb",
@@ -645,7 +700,8 @@
       "team": "MIN",
       "projectedPoints": 187.8,
       "adp": 63.0,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 116.69
     },
     {
       "id": "chris-olave-no-wr",
@@ -654,7 +710,8 @@
       "team": "NO",
       "projectedPoints": 208.5,
       "adp": 64.8,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 29.84
     },
     {
       "id": "david-montgomery-det-rb",
@@ -663,7 +720,8 @@
       "team": "DET",
       "projectedPoints": 182.4,
       "adp": 66.7,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 63.7
     },
     {
       "id": "devonta-smith-phi-wr",
@@ -672,7 +730,8 @@
       "team": "PHI",
       "projectedPoints": 205.2,
       "adp": 67.2,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 37.32
     },
     {
       "id": "baker-mayfield-tb-qb",
@@ -681,7 +740,8 @@
       "team": "TB",
       "projectedPoints": 311.8,
       "adp": 68.2,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 145.89
     },
     {
       "id": "xavier-worthy-kc-wr",
@@ -690,7 +750,8 @@
       "team": "KC",
       "projectedPoints": 203.4,
       "adp": 70.5,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 129.25
     },
     {
       "id": "d-andre-swift-chi-rb",
@@ -699,7 +760,8 @@
       "team": "CHI",
       "projectedPoints": 176.9,
       "adp": 71.2,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 54.72
     },
     {
       "id": "t-j-hockenson-min-te",
@@ -708,7 +770,8 @@
       "team": "MIN",
       "projectedPoints": 198.7,
       "adp": 72.4,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 147.87
     },
     {
       "id": "rome-odunze-chi-wr",
@@ -717,7 +780,8 @@
       "team": "CHI",
       "projectedPoints": 199.0,
       "adp": 73.1,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 64.73
     },
     {
       "id": "bo-nix-den-qb",
@@ -726,7 +790,8 @@
       "team": "DEN",
       "projectedPoints": 306.7,
       "adp": 74.5,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 99.42
     },
     {
       "id": "tony-pollard-ten-rb",
@@ -735,7 +800,8 @@
       "team": "TEN",
       "projectedPoints": 171.5,
       "adp": 75.8,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 92.42
     },
     {
       "id": "jerry-jeudy-cle-wr",
@@ -744,7 +810,8 @@
       "team": "CLE",
       "projectedPoints": 194.8,
       "adp": 76.4,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 168.27
     },
     {
       "id": "travis-kelce-kc-te",
@@ -753,7 +820,8 @@
       "team": "KC",
       "projectedPoints": 190.0,
       "adp": 78.9,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 95.15
     },
     {
       "id": "calvin-ridley-ten-wr",
@@ -762,7 +830,8 @@
       "team": "TEN",
       "projectedPoints": 190.6,
       "adp": 79.8,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 168.34
     },
     {
       "id": "rhamondre-stevenson-ne-rb",
@@ -771,7 +840,8 @@
       "team": "NE",
       "projectedPoints": 166.1,
       "adp": 80.3,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 80.62
     },
     {
       "id": "justin-herbert-lac-qb",
@@ -780,7 +850,8 @@
       "team": "LAC",
       "projectedPoints": 303.4,
       "adp": 81.3,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 89.58
     },
     {
       "id": "jordan-addison-min-wr",
@@ -789,7 +860,8 @@
       "team": "MIN",
       "projectedPoints": 188.2,
       "adp": 82.3,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 119.82
     },
     {
       "id": "javonte-williams-dal-rb",
@@ -798,7 +870,8 @@
       "team": "DAL",
       "projectedPoints": 160.8,
       "adp": 84.9,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 33.55
     },
     {
       "id": "chris-godwin-tb-wr",
@@ -807,7 +880,8 @@
       "team": "TB",
       "projectedPoints": 184.1,
       "adp": 85.6,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 125.73
     },
     {
       "id": "mark-andrews-bal-te",
@@ -816,7 +890,8 @@
       "team": "BAL",
       "projectedPoints": 185.2,
       "adp": 86.3,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 125.63
     },
     {
       "id": "dak-prescott-dal-qb",
@@ -825,7 +900,8 @@
       "team": "DAL",
       "projectedPoints": 292.5,
       "adp": 88.6,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 73.89
     },
     {
       "id": "jakobi-meyers-lv-wr",
@@ -834,7 +910,8 @@
       "team": "LV",
       "projectedPoints": 180.5,
       "adp": 88.9,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 122.23
     },
     {
       "id": "isiah-pacheco-kc-rb",
@@ -843,7 +920,8 @@
       "team": "KC",
       "projectedPoints": 154.8,
       "adp": 89.4,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 157.91
     },
     {
       "id": "khalil-shakir-buf-wr",
@@ -852,7 +930,8 @@
       "team": "BUF",
       "projectedPoints": 177.2,
       "adp": 91.4,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 139.74
     },
     {
       "id": "travis-etienne-jax-rb",
@@ -861,7 +940,8 @@
       "team": "JAX",
       "projectedPoints": 150.6,
       "adp": 93.9,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 42.41
     },
     {
       "id": "tetairoa-mcmillan-car-wr",
@@ -870,7 +950,8 @@
       "team": "CAR",
       "projectedPoints": 173.8,
       "adp": 94.7,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 41.74
     },
     {
       "id": "drake-maye-ne-qb",
@@ -879,7 +960,8 @@
       "team": "NE",
       "projectedPoints": 287.4,
       "adp": 95.4,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 47.43
     },
     {
       "id": "david-njoku-cle-te",
@@ -888,7 +970,8 @@
       "team": "CLE",
       "projectedPoints": 176.7,
       "adp": 96.8,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 169.66
     },
     {
       "id": "jauan-jennings-sf-wr",
@@ -897,7 +980,8 @@
       "team": "SF",
       "projectedPoints": 170.4,
       "adp": 97.2,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 171.12
     },
     {
       "id": "rachaad-white-tb-rb",
@@ -906,7 +990,8 @@
       "team": "TB",
       "projectedPoints": 144.6,
       "adp": 98.5,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 126.02
     },
     {
       "id": "keon-coleman-buf-wr",
@@ -915,7 +1000,8 @@
       "team": "BUF",
       "projectedPoints": 166.9,
       "adp": 100.5,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 170.32
     },
     {
       "id": "caleb-williams-chi-qb",
@@ -924,7 +1010,8 @@
       "team": "CHI",
       "projectedPoints": 279.8,
       "adp": 102.1,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 92.43
     },
     {
       "id": "rico-dowdle-car-rb",
@@ -933,7 +1020,8 @@
       "team": "CAR",
       "projectedPoints": 139.3,
       "adp": 103.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 96.5
     },
     {
       "id": "rashid-shaheed-no-wr",
@@ -942,7 +1030,8 @@
       "team": "NO",
       "projectedPoints": 163.3,
       "adp": 104.1,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 159.94
     },
     {
       "id": "tucker-kraft-gb-te",
@@ -951,7 +1040,8 @@
       "team": "GB",
       "projectedPoints": 168.4,
       "adp": 105.4,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 90.81
     },
     {
       "id": "darnell-mooney-atl-wr",
@@ -960,7 +1050,8 @@
       "team": "ATL",
       "projectedPoints": 159.8,
       "adp": 107.6,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 170.43
     },
     {
       "id": "tyrone-tracy-jr-nyg-rb",
@@ -969,7 +1060,8 @@
       "team": "NYG",
       "projectedPoints": 133.9,
       "adp": 107.6,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 170.34
     },
     {
       "id": "jordan-love-gb-qb",
@@ -978,7 +1070,8 @@
       "team": "GB",
       "projectedPoints": 273.4,
       "adp": 108.7,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 155.65
     },
     {
       "id": "brandon-aiyuk-sf-wr",
@@ -987,7 +1080,8 @@
       "team": "SF",
       "projectedPoints": 154.6,
       "adp": 110.2,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.96
     },
     {
       "id": "zach-charbonnet-sea-rb",
@@ -996,7 +1090,8 @@
       "team": "SEA",
       "projectedPoints": 128.5,
       "adp": 112.1,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 153.14
     },
     {
       "id": "michael-pittman-jr-ind-wr",
@@ -1005,7 +1100,8 @@
       "team": "IND",
       "projectedPoints": 153.1,
       "adp": 113.8,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 90.12
     },
     {
       "id": "evan-engram-den-te",
@@ -1014,7 +1110,8 @@
       "team": "DEN",
       "projectedPoints": 160.8,
       "adp": 114.7,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 170.03
     },
     {
       "id": "brock-purdy-sf-qb",
@@ -1023,7 +1120,8 @@
       "team": "SF",
       "projectedPoints": 264.9,
       "adp": 116.4,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 108.95
     },
     {
       "id": "jaylen-warren-pit-rb",
@@ -1032,7 +1130,8 @@
       "team": "PIT",
       "projectedPoints": 123.1,
       "adp": 116.7,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 90.17
     },
     {
       "id": "cooper-kupp-sea-wr",
@@ -1041,7 +1140,8 @@
       "team": "SEA",
       "projectedPoints": 148.4,
       "adp": 117.3,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.21
     },
     {
       "id": "brandon-aubrey-dal-k",
@@ -1050,7 +1150,8 @@
       "team": "DAL",
       "projectedPoints": 168.4,
       "adp": 118.2,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 85.79
     },
     {
       "id": "josh-downs-ind-wr",
@@ -1059,7 +1160,8 @@
       "team": "IND",
       "projectedPoints": 146.8,
       "adp": 120.5,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 137.23
     },
     {
       "id": "najee-harris-lac-rb",
@@ -1068,7 +1170,8 @@
       "team": "LAC",
       "projectedPoints": 117.2,
       "adp": 121.2,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 170.22
     },
     {
       "id": "eagles-dst-phi-dst",
@@ -1077,7 +1180,8 @@
       "team": "PHI",
       "projectedPoints": 148.6,
       "adp": 122.4,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 137.61
     },
     {
       "id": "jared-goff-det-qb",
@@ -1086,7 +1190,8 @@
       "team": "DET",
       "projectedPoints": 259.7,
       "adp": 123.8,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 135.96
     },
     {
       "id": "romeo-doubs-gb-wr",
@@ -1095,7 +1200,8 @@
       "team": "GB",
       "projectedPoints": 142.8,
       "adp": 124.1,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 148.26
     },
     {
       "id": "tyler-allgeier-atl-rb",
@@ -1104,7 +1210,8 @@
       "team": "ATL",
       "projectedPoints": 113.0,
       "adp": 125.8,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 162.76
     },
     {
       "id": "jake-ferguson-dal-te",
@@ -1113,7 +1220,8 @@
       "team": "DAL",
       "projectedPoints": 153.2,
       "adp": 126.1,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 108.85
     },
     {
       "id": "deebo-samuel-was-wr",
@@ -1122,7 +1230,8 @@
       "team": "WAS",
       "projectedPoints": 139.5,
       "adp": 127.6,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 140.83
     },
     {
       "id": "austin-ekeler-was-rb",
@@ -1131,7 +1240,8 @@
       "team": "WAS",
       "projectedPoints": 107.0,
       "adp": 130.3,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.97
     },
     {
       "id": "kyler-murray-ari-qb",
@@ -1140,7 +1250,8 @@
       "team": "ARI",
       "projectedPoints": 254.6,
       "adp": 131.2,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 139.83
     },
     {
       "id": "cedric-tillman-cle-wr",
@@ -1158,7 +1269,8 @@
       "team": "LAC",
       "projectedPoints": 161.2,
       "adp": 132.6,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 112.09
     },
     {
       "id": "wan-dale-robinson-nyg-wr",
@@ -1167,7 +1279,8 @@
       "team": "NYG",
       "projectedPoints": 132.7,
       "adp": 134.8,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 115.55
     },
     {
       "id": "braelon-allen-nyj-rb",
@@ -1176,7 +1289,8 @@
       "team": "NYJ",
       "projectedPoints": 101.6,
       "adp": 134.9,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 170.99
     },
     {
       "id": "ravens-dst-bal-dst",
@@ -1185,7 +1299,8 @@
       "team": "BAL",
       "projectedPoints": 144.2,
       "adp": 136.8,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 133.73
     },
     {
       "id": "dallas-goedert-phi-te",
@@ -1194,7 +1309,8 @@
       "team": "PHI",
       "projectedPoints": 145.6,
       "adp": 137.5,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 104.06
     },
     {
       "id": "christian-kirk-hou-wr",
@@ -1203,7 +1319,8 @@
       "team": "HOU",
       "projectedPoints": 129.4,
       "adp": 138.3,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.93
     },
     {
       "id": "trevor-lawrence-jax-qb",
@@ -1212,7 +1329,8 @@
       "team": "JAX",
       "projectedPoints": 247.0,
       "adp": 138.6,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 97.49
     },
     {
       "id": "kendre-miller-no-rb",
@@ -1221,7 +1339,8 @@
       "team": "NO",
       "projectedPoints": 96.3,
       "adp": 139.4,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 170.16
     },
     {
       "id": "jake-bates-det-k",
@@ -1230,7 +1349,8 @@
       "team": "DET",
       "projectedPoints": 156.8,
       "adp": 141.4,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 157.16
     },
     {
       "id": "adam-thielen-car-wr",
@@ -1239,7 +1359,8 @@
       "team": "CAR",
       "projectedPoints": 126.0,
       "adp": 142.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.99
     },
     {
       "id": "tank-bigsby-jax-rb",
@@ -1248,7 +1369,8 @@
       "team": "JAX",
       "projectedPoints": 90.9,
       "adp": 144.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.72
     },
     {
       "id": "marvin-mims-jr-den-wr",
@@ -1257,7 +1379,8 @@
       "team": "DEN",
       "projectedPoints": 122.6,
       "adp": 145.6,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 170.16
     },
     {
       "id": "c-j-stroud-hou-qb",
@@ -1266,7 +1389,8 @@
       "team": "HOU",
       "projectedPoints": 240.6,
       "adp": 146.0,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 165.23
     },
     {
       "id": "broncos-dst-den-dst",
@@ -1275,7 +1399,8 @@
       "team": "DEN",
       "projectedPoints": 139.2,
       "adp": 147.2,
-      "tier": 1
+      "tier": 1,
+      "espnAdp": 98.96
     },
     {
       "id": "ray-davis-buf-rb",
@@ -1284,7 +1409,8 @@
       "team": "BUF",
       "projectedPoints": 85.5,
       "adp": 148.5,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 171.05
     },
     {
       "id": "kyle-pitts-atl-te",
@@ -1293,7 +1419,8 @@
       "team": "ATL",
       "projectedPoints": 137.4,
       "adp": 149.0,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 67.76
     },
     {
       "id": "ricky-pearsall-sf-wr",
@@ -1302,7 +1429,8 @@
       "team": "SF",
       "projectedPoints": 119.3,
       "adp": 149.1,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.94
     },
     {
       "id": "ka-imi-fairbairn-hou-k",
@@ -1311,7 +1439,8 @@
       "team": "HOU",
       "projectedPoints": 151.8,
       "adp": 150.2,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 126.14
     },
     {
       "id": "joshua-palmer-buf-wr",
@@ -1320,7 +1449,8 @@
       "team": "BUF",
       "projectedPoints": 116.0,
       "adp": 152.7,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.95
     },
     {
       "id": "blake-corum-lar-rb",
@@ -1329,7 +1459,8 @@
       "team": "LAR",
       "projectedPoints": 80.1,
       "adp": 153.1,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 127.62
     },
     {
       "id": "justin-fields-nyj-qb",
@@ -1338,7 +1469,8 @@
       "team": "NYJ",
       "projectedPoints": 234.3,
       "adp": 153.4,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 169.97
     },
     {
       "id": "diontae-johnson-cle-wr",
@@ -1347,7 +1479,8 @@
       "team": "CLE",
       "projectedPoints": 112.6,
       "adp": 156.2,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 169.99
     },
     {
       "id": "trey-benson-ari-rb",
@@ -1356,7 +1489,8 @@
       "team": "ARI",
       "projectedPoints": 74.8,
       "adp": 157.6,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.96
     },
     {
       "id": "steelers-dst-pit-dst",
@@ -1365,7 +1499,8 @@
       "team": "PIT",
       "projectedPoints": 136.0,
       "adp": 158.6,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 121.21
     },
     {
       "id": "chase-mclaughlin-tb-k",
@@ -1374,7 +1509,8 @@
       "team": "TB",
       "projectedPoints": 148.6,
       "adp": 159.0,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 170.21
     },
     {
       "id": "amari-cooper-fa-wr",
@@ -1383,7 +1519,8 @@
       "team": "FA",
       "projectedPoints": 109.2,
       "adp": 159.8,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 169.97
     },
     {
       "id": "tua-tagovailoa-mia-qb",
@@ -1392,7 +1529,8 @@
       "team": "MIA",
       "projectedPoints": 227.3,
       "adp": 160.8,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 170.09
     },
     {
       "id": "hunter-henry-ne-te",
@@ -1401,7 +1539,8 @@
       "team": "NE",
       "projectedPoints": 131.0,
       "adp": 161.4,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 151.39
     },
     {
       "id": "isaac-guerendo-sf-rb",
@@ -1410,7 +1549,8 @@
       "team": "SF",
       "projectedPoints": 69.4,
       "adp": 162.2,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 170.11
     },
     {
       "id": "keenan-allen-ind-wr",
@@ -1419,7 +1559,8 @@
       "team": "IND",
       "projectedPoints": 105.9,
       "adp": 163.4,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 165.61
     },
     {
       "id": "jordan-mason-min-rb",
@@ -1428,7 +1569,8 @@
       "team": "MIN",
       "projectedPoints": 64.0,
       "adp": 166.7,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 139.31
     },
     {
       "id": "luther-burden-iii-chi-wr",
@@ -1437,7 +1579,8 @@
       "team": "CHI",
       "projectedPoints": 102.5,
       "adp": 166.9,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 76.11
     },
     {
       "id": "harrison-butker-kc-k",
@@ -1446,7 +1589,8 @@
       "team": "KC",
       "projectedPoints": 142.4,
       "adp": 167.8,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 143.64
     },
     {
       "id": "matthew-stafford-lar-qb",
@@ -1455,7 +1599,8 @@
       "team": "LAR",
       "projectedPoints": 222.1,
       "adp": 168.2,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 90.65
     },
     {
       "id": "vikings-dst-min-dst",
@@ -1464,7 +1609,8 @@
       "team": "MIN",
       "projectedPoints": 131.0,
       "adp": 169.0,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 168.92
     },
     {
       "id": "emeka-egbuka-tb-wr",
@@ -1473,7 +1619,8 @@
       "team": "TB",
       "projectedPoints": 99.2,
       "adp": 170.5,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 45.45
     },
     {
       "id": "jaylen-wright-mia-rb",
@@ -1482,7 +1629,8 @@
       "team": "MIA",
       "projectedPoints": 58.6,
       "adp": 171.3,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 170.57
     },
     {
       "id": "pat-freiermuth-pit-te",
@@ -1491,7 +1639,8 @@
       "team": "PIT",
       "projectedPoints": 122.8,
       "adp": 173.8,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 169.54
     },
     {
       "id": "matthew-golden-gb-wr",
@@ -1500,7 +1649,8 @@
       "team": "GB",
       "projectedPoints": 95.8,
       "adp": 174.0,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 111.06
     },
     {
       "id": "geno-smith-lv-qb",
@@ -1509,7 +1659,8 @@
       "team": "LV",
       "projectedPoints": 215.2,
       "adp": 175.6,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 170.08
     },
     {
       "id": "kimani-vidal-lac-rb",
@@ -1518,7 +1669,8 @@
       "team": "LAC",
       "projectedPoints": 53.3,
       "adp": 175.8,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 170.97
     },
     {
       "id": "tyler-loop-bal-k",
@@ -1527,7 +1679,8 @@
       "team": "BAL",
       "projectedPoints": 139.8,
       "adp": 176.6,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 165.15
     },
     {
       "id": "tre-tucker-lv-wr",
@@ -1536,7 +1689,8 @@
       "team": "LV",
       "projectedPoints": 92.5,
       "adp": 177.6,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 169.12
     },
     {
       "id": "texans-dst-hou-dst",
@@ -1545,7 +1699,8 @@
       "team": "HOU",
       "projectedPoints": 126.6,
       "adp": 179.4,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 91.15
     },
     {
       "id": "audric-estime-den-rb",
@@ -1554,7 +1709,8 @@
       "team": "DEN",
       "projectedPoints": 47.9,
       "adp": 180.4,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.99
     },
     {
       "id": "dontayvion-wicks-gb-wr",
@@ -1563,7 +1719,8 @@
       "team": "GB",
       "projectedPoints": 89.1,
       "adp": 181.2,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 170.98
     },
     {
       "id": "sam-darnold-sea-qb",
@@ -1572,7 +1729,8 @@
       "team": "SEA",
       "projectedPoints": 208.8,
       "adp": 183.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 162.18
     },
     {
       "id": "adonai-mitchell-ind-wr",
@@ -1581,7 +1739,8 @@
       "team": "IND",
       "projectedPoints": 85.8,
       "adp": 184.7,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 171.06
     },
     {
       "id": "justice-hill-bal-rb",
@@ -1590,7 +1749,8 @@
       "team": "BAL",
       "projectedPoints": 42.5,
       "adp": 184.9,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 168.5
     },
     {
       "id": "jason-myers-sea-k",
@@ -1599,7 +1759,8 @@
       "team": "SEA",
       "projectedPoints": 135.4,
       "adp": 185.4,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 116.27
     },
     {
       "id": "dalton-kincaid-buf-te",
@@ -1608,7 +1769,8 @@
       "team": "BUF",
       "projectedPoints": 115.2,
       "adp": 186.2,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 130.79
     },
     {
       "id": "jalen-mcmillan-tb-wr",
@@ -1617,7 +1779,8 @@
       "team": "TB",
       "projectedPoints": 82.4,
       "adp": 188.3,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 165.09
     },
     {
       "id": "jerome-ford-cle-rb",
@@ -1635,7 +1798,8 @@
       "team": "KC",
       "projectedPoints": 121.6,
       "adp": 189.8,
-      "tier": 2
+      "tier": 2,
+      "espnAdp": 165.8
     },
     {
       "id": "bryce-young-car-qb",
@@ -1644,7 +1808,8 @@
       "team": "CAR",
       "projectedPoints": 202.4,
       "adp": 190.4,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 168.89
     },
     {
       "id": "xavier-legette-car-wr",
@@ -1653,7 +1818,8 @@
       "team": "CAR",
       "projectedPoints": 79.1,
       "adp": 191.8,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 170.72
     },
     {
       "id": "samaje-perine-cin-rb",
@@ -1662,7 +1828,8 @@
       "team": "CIN",
       "projectedPoints": 31.8,
       "adp": 194.0,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 171.17
     },
     {
       "id": "will-reichard-min-k",
@@ -1671,7 +1838,8 @@
       "team": "MIN",
       "projectedPoints": 130.4,
       "adp": 194.2,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 167.74
     },
     {
       "id": "andrei-iosivas-cin-wr",
@@ -1680,7 +1848,8 @@
       "team": "CIN",
       "projectedPoints": 75.7,
       "adp": 195.4,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 170.13
     },
     {
       "id": "michael-penix-jr-atl-qb",
@@ -1689,7 +1858,8 @@
       "team": "ATL",
       "projectedPoints": 195.5,
       "adp": 197.8,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 170.1
     },
     {
       "id": "colston-loveland-chi-te",
@@ -1698,7 +1868,8 @@
       "team": "CHI",
       "projectedPoints": 107.6,
       "adp": 198.6,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 42.9
     },
     {
       "id": "alexander-mattison-mia-rb",
@@ -1707,7 +1878,8 @@
       "team": "MIA",
       "projectedPoints": 26.4,
       "adp": 198.6,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 169.99
     },
     {
       "id": "demario-douglas-ne-wr",
@@ -1716,7 +1888,8 @@
       "team": "NE",
       "projectedPoints": 72.4,
       "adp": 198.9,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 170.44
     },
     {
       "id": "bills-dst-buf-dst",
@@ -1725,7 +1898,8 @@
       "team": "BUF",
       "projectedPoints": 118.4,
       "adp": 200.2,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 168.99
     },
     {
       "id": "kayshon-boutte-ne-wr",
@@ -1734,7 +1908,8 @@
       "team": "NE",
       "projectedPoints": 69.0,
       "adp": 202.5,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 170.6
     },
     {
       "id": "chris-boswell-pit-k",
@@ -1743,7 +1918,8 @@
       "team": "PIT",
       "projectedPoints": 126.0,
       "adp": 203.0,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 164.46
     },
     {
       "id": "emanuel-wilson-gb-rb",
@@ -1752,7 +1928,8 @@
       "team": "GB",
       "projectedPoints": 24.1,
       "adp": 203.1,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 170.21
     },
     {
       "id": "j-j-mccarthy-min-qb",
@@ -1761,7 +1938,8 @@
       "team": "MIN",
       "projectedPoints": 190.3,
       "adp": 205.2,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 169.89
     },
     {
       "id": "parker-washington-jax-wr",
@@ -1770,7 +1948,8 @@
       "team": "JAX",
       "projectedPoints": 65.7,
       "adp": 206.1,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 90.75
     },
     {
       "id": "sean-tucker-tb-rb",
@@ -1779,7 +1958,8 @@
       "team": "TB",
       "projectedPoints": 21.8,
       "adp": 207.7,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 170.34
     },
     {
       "id": "jalen-coker-car-wr",
@@ -1788,7 +1968,8 @@
       "team": "CAR",
       "projectedPoints": 62.3,
       "adp": 209.6,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 155.91
     },
     {
       "id": "rams-dst-lar-dst",
@@ -1797,7 +1978,8 @@
       "team": "LAR",
       "projectedPoints": 113.4,
       "adp": 210.6,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 105.93
     },
     {
       "id": "tyler-warren-ind-te",
@@ -1806,7 +1988,8 @@
       "team": "IND",
       "projectedPoints": 100.0,
       "adp": 211.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 51.93
     },
     {
       "id": "younghoe-koo-atl-k",
@@ -1815,7 +1998,8 @@
       "team": "ATL",
       "projectedPoints": 121.6,
       "adp": 211.8,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 169.77
     },
     {
       "id": "chris-rodriguez-jr-was-rb",
@@ -1824,7 +2008,8 @@
       "team": "WAS",
       "projectedPoints": 19.5,
       "adp": 212.2,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 164.93
     },
     {
       "id": "cam-ward-ten-qb",
@@ -1833,7 +2018,8 @@
       "team": "TEN",
       "projectedPoints": 183.3,
       "adp": 212.6,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 169.21
     },
     {
       "id": "luke-mccaffrey-was-wr",
@@ -1842,7 +2028,8 @@
       "team": "WAS",
       "projectedPoints": 59.0,
       "adp": 213.2,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 169.91
     },
     {
       "id": "jalen-nailor-min-wr",
@@ -1851,7 +2038,8 @@
       "team": "MIN",
       "projectedPoints": 55.6,
       "adp": 216.7,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 171.08
     },
     {
       "id": "dameon-pierce-hou-rb",
@@ -1869,7 +2057,8 @@
       "team": "IND",
       "projectedPoints": 176.3,
       "adp": 220.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 169.98
     },
     {
       "id": "tutu-atwell-lar-wr",
@@ -1878,7 +2067,8 @@
       "team": "LAR",
       "projectedPoints": 52.3,
       "adp": 220.3,
-      "tier": 12
+      "tier": 12,
+      "espnAdp": 170.09
     },
     {
       "id": "jake-elliott-phi-k",
@@ -1887,7 +2077,8 @@
       "team": "PHI",
       "projectedPoints": 117.2,
       "adp": 220.6,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 169.01
     },
     {
       "id": "seahawks-dst-sea-dst",
@@ -1896,7 +2087,8 @@
       "team": "SEA",
       "projectedPoints": 109.0,
       "adp": 221.0,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 111.78
     },
     {
       "id": "tyjae-spears-ten-rb",
@@ -1905,7 +2097,8 @@
       "team": "TEN",
       "projectedPoints": 15.8,
       "adp": 221.3,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 146.79
     },
     {
       "id": "isaiah-likely-bal-te",
@@ -1914,7 +2107,8 @@
       "team": "BAL",
       "projectedPoints": 92.4,
       "adp": 223.4,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 123.29
     },
     {
       "id": "van-jefferson-ten-wr",
@@ -1923,7 +2117,8 @@
       "team": "TEN",
       "projectedPoints": 48.9,
       "adp": 223.8,
-      "tier": 12
+      "tier": 12,
+      "espnAdp": 169.97
     },
     {
       "id": "kyle-monangai-chi-rb",
@@ -1932,7 +2127,8 @@
       "team": "CHI",
       "projectedPoints": 14.4,
       "adp": 225.9,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 124.26
     },
     {
       "id": "daniel-jones-ind-qb",
@@ -1941,7 +2137,8 @@
       "team": "IND",
       "projectedPoints": 171.2,
       "adp": 227.4,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 159.36
     },
     {
       "id": "tim-patrick-det-wr",
@@ -1950,7 +2147,8 @@
       "team": "DET",
       "projectedPoints": 45.6,
       "adp": 227.4,
-      "tier": 12
+      "tier": 12,
+      "espnAdp": 169.98
     },
     {
       "id": "cameron-little-jax-k",
@@ -1968,7 +2166,8 @@
       "team": "CLE",
       "projectedPoints": 13.0,
       "adp": 230.4,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 169.08
     },
     {
       "id": "kalif-raymond-det-wr",
@@ -1977,7 +2176,8 @@
       "team": "DET",
       "projectedPoints": 42.2,
       "adp": 231.0,
-      "tier": 12
+      "tier": 12,
+      "espnAdp": 169.97
     },
     {
       "id": "49ers-dst-sf-dst",
@@ -1986,7 +2186,8 @@
       "team": "SF",
       "projectedPoints": 104.6,
       "adp": 231.4,
-      "tier": 3
+      "tier": 3,
+      "espnAdp": 168.97
     },
     {
       "id": "olamide-zaccheaus-chi-wr",
@@ -1995,7 +2196,8 @@
       "team": "CHI",
       "projectedPoints": 38.9,
       "adp": 234.5,
-      "tier": 12
+      "tier": 12,
+      "espnAdp": 169.99
     },
     {
       "id": "aaron-rodgers-pit-qb",
@@ -2004,7 +2206,8 @@
       "team": "PIT",
       "projectedPoints": 164.2,
       "adp": 234.8,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.19
     },
     {
       "id": "ollie-gordon-ii-mia-rb",
@@ -2013,7 +2216,8 @@
       "team": "MIA",
       "projectedPoints": 11.6,
       "adp": 235.0,
-      "tier": 10
+      "tier": 10,
+      "espnAdp": 170.67
     },
     {
       "id": "jonnu-smith-pit-te",
@@ -2022,7 +2226,8 @@
       "team": "PIT",
       "projectedPoints": 84.8,
       "adp": 235.8,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 169.96
     },
     {
       "id": "allen-lazard-nyj-wr",
@@ -2031,7 +2236,8 @@
       "team": "NYJ",
       "projectedPoints": 35.5,
       "adp": 238.1,
-      "tier": 12
+      "tier": 12,
+      "espnAdp": 170.0
     },
     {
       "id": "matt-gay-was-k",
@@ -2040,7 +2246,8 @@
       "team": "WAS",
       "projectedPoints": 108.4,
       "adp": 238.2,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 169.57
     },
     {
       "id": "kaleb-johnson-pit-rb",
@@ -2049,7 +2256,8 @@
       "team": "PIT",
       "projectedPoints": 10.2,
       "adp": 239.5,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 169.93
     },
     {
       "id": "nelson-agholor-fa-wr",
@@ -2058,7 +2266,8 @@
       "team": "FA",
       "projectedPoints": 32.2,
       "adp": 241.6,
-      "tier": 13
+      "tier": 13,
+      "espnAdp": 170.0
     },
     {
       "id": "packers-dst-gb-dst",
@@ -2067,7 +2276,8 @@
       "team": "GB",
       "projectedPoints": 100.2,
       "adp": 241.8,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 169.19
     },
     {
       "id": "russell-wilson-nyg-qb",
@@ -2076,7 +2286,8 @@
       "team": "NYG",
       "projectedPoints": 157.8,
       "adp": 242.2,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.96
     },
     {
       "id": "quinshon-judkins-cle-rb",
@@ -2085,7 +2296,8 @@
       "team": "CLE",
       "projectedPoints": 9.4,
       "adp": 244.1,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 50.28
     },
     {
       "id": "sterling-shepard-tb-wr",
@@ -2094,7 +2306,8 @@
       "team": "TB",
       "projectedPoints": 28.8,
       "adp": 245.2,
-      "tier": 13
+      "tier": 13,
+      "espnAdp": 169.99
     },
     {
       "id": "jalen-tolbert-dal-wr",
@@ -2103,7 +2316,8 @@
       "team": "DAL",
       "projectedPoints": 26.4,
       "adp": 246.8,
-      "tier": 13
+      "tier": 13,
+      "espnAdp": 170.55
     },
     {
       "id": "daniel-carlson-lv-k",
@@ -2112,7 +2326,8 @@
       "team": "LV",
       "projectedPoints": 104.0,
       "adp": 247.0,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 170.19
     },
     {
       "id": "cade-otton-tb-te",
@@ -2121,7 +2336,8 @@
       "team": "TB",
       "projectedPoints": 77.2,
       "adp": 248.2,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 170.35
     },
     {
       "id": "demarcus-robinson-sf-wr",
@@ -2130,7 +2346,8 @@
       "team": "SF",
       "projectedPoints": 24.1,
       "adp": 248.4,
-      "tier": 13
+      "tier": 13,
+      "espnAdp": 169.98
     },
     {
       "id": "trevor-etienne-car-rb",
@@ -2139,7 +2356,8 @@
       "team": "CAR",
       "projectedPoints": 8.6,
       "adp": 248.6,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 170.04
     },
     {
       "id": "kirk-cousins-atl-qb",
@@ -2148,7 +2366,8 @@
       "team": "ATL",
       "projectedPoints": 151.5,
       "adp": 249.6,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.97
     },
     {
       "id": "joe-flacco-cle-qb",
@@ -2157,7 +2376,8 @@
       "team": "CLE",
       "projectedPoints": 145.1,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.97
     },
     {
       "id": "gardner-minshew-kc-qb",
@@ -2166,7 +2386,8 @@
       "team": "KC",
       "projectedPoints": 138.7,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.98
     },
     {
       "id": "mac-jones-sf-qb",
@@ -2175,7 +2396,8 @@
       "team": "SF",
       "projectedPoints": 132.4,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.98
     },
     {
       "id": "aidan-o-connell-lv-qb",
@@ -2184,7 +2406,8 @@
       "team": "LV",
       "projectedPoints": 126.0,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.99
     },
     {
       "id": "wil-lutz-den-k",
@@ -2193,7 +2416,8 @@
       "team": "DEN",
       "projectedPoints": 99.6,
       "adp": 250.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 169.63
     },
     {
       "id": "chargers-dst-lac-dst",
@@ -2202,7 +2426,8 @@
       "team": "LAC",
       "projectedPoints": 95.8,
       "adp": 250.0,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 165.64
     },
     {
       "id": "justin-tucker-fa-k",
@@ -2211,7 +2436,8 @@
       "team": "FA",
       "projectedPoints": 93.4,
       "adp": 250.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 169.69
     },
     {
       "id": "evan-mcpherson-cin-k",
@@ -2220,7 +2446,8 @@
       "team": "CIN",
       "projectedPoints": 91.4,
       "adp": 250.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 169.28
     },
     {
       "id": "lions-dst-det-dst",
@@ -2229,7 +2456,8 @@
       "team": "DET",
       "projectedPoints": 91.4,
       "adp": 250.0,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 154.51
     },
     {
       "id": "cowboys-dst-dal-dst",
@@ -2238,7 +2466,8 @@
       "team": "DAL",
       "projectedPoints": 87.0,
       "adp": 250.0,
-      "tier": 4
+      "tier": 4,
+      "espnAdp": 167.04
     },
     {
       "id": "cairo-santos-chi-k",
@@ -2247,7 +2476,8 @@
       "team": "CHI",
       "projectedPoints": 86.4,
       "adp": 250.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 168.98
     },
     {
       "id": "jason-sanders-mia-k",
@@ -2256,7 +2486,8 @@
       "team": "MIA",
       "projectedPoints": 83.2,
       "adp": 250.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 169.88
     },
     {
       "id": "dolphins-dst-mia-dst",
@@ -2265,7 +2496,8 @@
       "team": "MIA",
       "projectedPoints": 82.6,
       "adp": 250.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 169.66
     },
     {
       "id": "bears-dst-chi-dst",
@@ -2274,7 +2506,8 @@
       "team": "CHI",
       "projectedPoints": 78.2,
       "adp": 250.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 169.62
     },
     {
       "id": "graham-gano-nyg-k",
@@ -2283,7 +2516,8 @@
       "team": "NYG",
       "projectedPoints": 77.6,
       "adp": 250.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 169.99
     },
     {
       "id": "bengals-dst-cin-dst",
@@ -2292,7 +2526,8 @@
       "team": "CIN",
       "projectedPoints": 73.8,
       "adp": 250.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 169.71
     },
     {
       "id": "chad-ryland-ari-k",
@@ -2301,7 +2536,8 @@
       "team": "ARI",
       "projectedPoints": 73.2,
       "adp": 250.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 169.91
     },
     {
       "id": "juwan-johnson-no-te",
@@ -2310,7 +2546,8 @@
       "team": "NO",
       "projectedPoints": 69.6,
       "adp": 250.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 158.94
     },
     {
       "id": "commanders-dst-was-dst",
@@ -2319,7 +2556,8 @@
       "team": "WAS",
       "projectedPoints": 69.4,
       "adp": 250.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 169.73
     },
     {
       "id": "nick-folk-nyj-k",
@@ -2328,7 +2566,8 @@
       "team": "NYJ",
       "projectedPoints": 68.8,
       "adp": 250.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 170.33
     },
     {
       "id": "falcons-dst-atl-dst",
@@ -2337,7 +2576,8 @@
       "team": "ATL",
       "projectedPoints": 65.0,
       "adp": 250.0,
-      "tier": 5
+      "tier": 5,
+      "espnAdp": 170.07
     },
     {
       "id": "brandon-mcmanus-gb-k",
@@ -2346,7 +2586,8 @@
       "team": "GB",
       "projectedPoints": 64.4,
       "adp": 250.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 169.95
     },
     {
       "id": "chig-okonkwo-ten-te",
@@ -2355,7 +2596,8 @@
       "team": "TEN",
       "projectedPoints": 62.0,
       "adp": 250.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 170.16
     },
     {
       "id": "colts-dst-ind-dst",
@@ -2364,7 +2606,8 @@
       "team": "IND",
       "projectedPoints": 60.6,
       "adp": 250.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 170.1
     },
     {
       "id": "matt-prater-buf-k",
@@ -2373,7 +2616,8 @@
       "team": "BUF",
       "projectedPoints": 60.0,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.95
     },
     {
       "id": "buccaneers-dst-tb-dst",
@@ -2382,7 +2626,8 @@
       "team": "TB",
       "projectedPoints": 56.2,
       "adp": 250.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 170.4
     },
     {
       "id": "andres-borregales-ne-k",
@@ -2400,7 +2645,8 @@
       "team": "SEA",
       "projectedPoints": 54.4,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.98
     },
     {
       "id": "jets-dst-nyj-dst",
@@ -2409,7 +2655,8 @@
       "team": "NYJ",
       "projectedPoints": 51.8,
       "adp": 250.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 170.2
     },
     {
       "id": "joshua-karty-lar-k",
@@ -2427,7 +2674,8 @@
       "team": "NE",
       "projectedPoints": 47.4,
       "adp": 250.0,
-      "tier": 6
+      "tier": 6,
+      "espnAdp": 152.97
     },
     {
       "id": "jake-moody-sf-k",
@@ -2445,7 +2693,8 @@
       "team": "WAS",
       "projectedPoints": 46.8,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.98
     },
     {
       "id": "cardinals-dst-ari-dst",
@@ -2454,7 +2703,8 @@
       "team": "ARI",
       "projectedPoints": 43.0,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.85
     },
     {
       "id": "blake-grupe-no-k",
@@ -2472,7 +2722,8 @@
       "team": "CIN",
       "projectedPoints": 39.2,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 170.25
     },
     {
       "id": "raiders-dst-lv-dst",
@@ -2481,7 +2732,8 @@
       "team": "LV",
       "projectedPoints": 38.6,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.8
     },
     {
       "id": "eddy-pineiro-sf-k",
@@ -2490,7 +2742,8 @@
       "team": "SF",
       "projectedPoints": 38.0,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 141.03
     },
     {
       "id": "saints-dst-no-dst",
@@ -2499,7 +2752,8 @@
       "team": "NO",
       "projectedPoints": 34.2,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 170.53
     },
     {
       "id": "spencer-shrader-ind-k",
@@ -2508,7 +2762,8 @@
       "team": "IND",
       "projectedPoints": 33.6,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.89
     },
     {
       "id": "tyler-higbee-atl-te",
@@ -2517,7 +2772,8 @@
       "team": "ATL",
       "projectedPoints": 31.6,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 169.88
     },
     {
       "id": "jaguars-dst-jax-dst",
@@ -2526,7 +2782,8 @@
       "team": "JAX",
       "projectedPoints": 29.8,
       "adp": 250.0,
-      "tier": 7
+      "tier": 7,
+      "espnAdp": 167.97
     },
     {
       "id": "riley-patterson-cle-k",
@@ -2535,7 +2792,8 @@
       "team": "CLE",
       "projectedPoints": 29.2,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.95
     },
     {
       "id": "cole-kmet-chi-te",
@@ -2544,7 +2802,8 @@
       "team": "CHI",
       "projectedPoints": 28.4,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.74
     },
     {
       "id": "titans-dst-ten-dst",
@@ -2553,7 +2812,8 @@
       "team": "TEN",
       "projectedPoints": 25.4,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.89
     },
     {
       "id": "dawson-knox-buf-te",
@@ -2562,7 +2822,8 @@
       "team": "BUF",
       "projectedPoints": 25.2,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.8
     },
     {
       "id": "gerald-everett-chi-te",
@@ -2571,7 +2832,8 @@
       "team": "CHI",
       "projectedPoints": 22.0,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 170.0
     },
     {
       "id": "tyler-lockett-lv-wr",
@@ -2580,7 +2842,8 @@
       "team": "LV",
       "projectedPoints": 21.8,
       "adp": 250.0,
-      "tier": 14
+      "tier": 14,
+      "espnAdp": 169.99
     },
     {
       "id": "giants-dst-nyg-dst",
@@ -2589,7 +2852,8 @@
       "team": "NYG",
       "projectedPoints": 21.0,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.66
     },
     {
       "id": "curtis-samuel-buf-wr",
@@ -2598,7 +2862,8 @@
       "team": "BUF",
       "projectedPoints": 19.5,
       "adp": 250.0,
-      "tier": 14
+      "tier": 14,
+      "espnAdp": 170.0
     },
     {
       "id": "noah-gray-kc-te",
@@ -2607,7 +2872,8 @@
       "team": "KC",
       "projectedPoints": 18.8,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.93
     },
     {
       "id": "elijah-moore-buf-wr",
@@ -2616,7 +2882,8 @@
       "team": "BUF",
       "projectedPoints": 17.2,
       "adp": 250.0,
-      "tier": 14
+      "tier": 14,
+      "espnAdp": 169.99
     },
     {
       "id": "panthers-dst-car-dst",
@@ -2625,7 +2892,8 @@
       "team": "CAR",
       "projectedPoints": 16.6,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 169.84
     },
     {
       "id": "will-dissly-lac-te",
@@ -2634,7 +2902,8 @@
       "team": "LAC",
       "projectedPoints": 15.6,
       "adp": 250.0,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 170.0
     },
     {
       "id": "parris-campbell-dal-wr",
@@ -2643,7 +2912,8 @@
       "team": "DAL",
       "projectedPoints": 14.9,
       "adp": 250.0,
-      "tier": 14
+      "tier": 14,
+      "espnAdp": 169.99
     },
     {
       "id": "skyy-moore-kc-wr",
@@ -2652,7 +2922,8 @@
       "team": "KC",
       "projectedPoints": 12.6,
       "adp": 250.0,
-      "tier": 14
+      "tier": 14,
+      "espnAdp": 169.98
     },
     {
       "id": "austin-hooper-ne-te",
@@ -2661,7 +2932,8 @@
       "team": "NE",
       "projectedPoints": 12.4,
       "adp": 250.0,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 169.99
     },
     {
       "id": "browns-dst-cle-dst",
@@ -2670,7 +2942,8 @@
       "team": "CLE",
       "projectedPoints": 12.2,
       "adp": 250.0,
-      "tier": 8
+      "tier": 8,
+      "espnAdp": 157.64
     },
     {
       "id": "foster-moreau-no-te",
@@ -2679,7 +2952,8 @@
       "team": "NO",
       "projectedPoints": 10.8,
       "adp": 250.0,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 169.99
     },
     {
       "id": "justyn-ross-kc-wr",
@@ -2697,7 +2971,8 @@
       "team": "LAC",
       "projectedPoints": 9.2,
       "adp": 250.0,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 169.98
     },
     {
       "id": "jalen-brooks-dal-wr",
@@ -2706,7 +2981,8 @@
       "team": "DAL",
       "projectedPoints": 8.0,
       "adp": 250.0,
-      "tier": 15
+      "tier": 15,
+      "espnAdp": 169.99
     },
     {
       "id": "dj-giddens-ind-rb",
@@ -2715,7 +2991,8 @@
       "team": "IND",
       "projectedPoints": 7.8,
       "adp": 250.0,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 170.15
     },
     {
       "id": "brenton-strange-jax-te",
@@ -2724,7 +3001,8 @@
       "team": "JAX",
       "projectedPoints": 7.6,
       "adp": 250.0,
-      "tier": 9
+      "tier": 9,
+      "espnAdp": 167.55
     },
     {
       "id": "woody-marks-hou-rb",
@@ -2733,7 +3011,8 @@
       "team": "HOU",
       "projectedPoints": 7.0,
       "adp": 250.0,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 151.4
     },
     {
       "id": "xavier-hutchinson-hou-wr",
@@ -2742,7 +3021,8 @@
       "team": "HOU",
       "projectedPoints": 6.4,
       "adp": 250.0,
-      "tier": 15
+      "tier": 15,
+      "espnAdp": 170.06
     },
     {
       "id": "bhayshul-tuten-jax-rb",
@@ -2751,7 +3031,8 @@
       "team": "JAX",
       "projectedPoints": 6.2,
       "adp": 250.0,
-      "tier": 11
+      "tier": 11,
+      "espnAdp": 63.78
     },
     {
       "id": "tahj-brooks-cin-rb",
@@ -2760,7 +3041,8 @@
       "team": "CIN",
       "projectedPoints": 5.4,
       "adp": 250.0,
-      "tier": 12
+      "tier": 12,
+      "espnAdp": 170.14
     },
     {
       "id": "lequint-allen-jax-rb",
@@ -2769,7 +3051,8 @@
       "team": "JAX",
       "projectedPoints": 4.8,
       "adp": 250.0,
-      "tier": 12
+      "tier": 12,
+      "espnAdp": 170.33
     },
     {
       "id": "jarquez-hunter-lar-rb",
@@ -2787,7 +3070,8 @@
       "team": "NO",
       "projectedPoints": 3.6,
       "adp": 250.0,
-      "tier": 12
+      "tier": 12,
+      "espnAdp": 170.0
     },
     {
       "id": "jaydon-blue-dal-rb",
@@ -2805,7 +3089,8 @@
       "team": "SF",
       "projectedPoints": 2.6,
       "adp": 250.0,
-      "tier": 12
+      "tier": 12,
+      "espnAdp": 170.97
     },
     {
       "id": "brashard-smith-kc-rb",
@@ -2814,7 +3099,8 @@
       "team": "KC",
       "projectedPoints": 2.2,
       "adp": 250.0,
-      "tier": 13
+      "tier": 13,
+      "espnAdp": 170.08
     },
     {
       "id": "rj-harvey-den-rb",
@@ -2823,7 +3109,8 @@
       "team": "DEN",
       "projectedPoints": 1.8,
       "adp": 250.0,
-      "tier": 13
+      "tier": 13,
+      "espnAdp": 127.37
     },
     {
       "id": "cam-skattebo-nyg-rb",
@@ -2832,7 +3119,8 @@
       "team": "NYG",
       "projectedPoints": 1.5,
       "adp": 250.0,
-      "tier": 13
+      "tier": 13,
+      "espnAdp": 45.49
     },
     {
       "id": "omarion-hampton-lac-rb",
@@ -2841,7 +3129,8 @@
       "team": "LAC",
       "projectedPoints": 1.2,
       "adp": 250.0,
-      "tier": 13
+      "tier": 13,
+      "espnAdp": 19.88
     },
     {
       "id": "raheim-sanders-cle-rb",
@@ -2850,7 +3139,8 @@
       "team": "CLE",
       "projectedPoints": 1.0,
       "adp": 250.0,
-      "tier": 13
+      "tier": 13,
+      "espnAdp": 169.99
     },
     {
       "id": "phil-mafah-dal-rb",
@@ -2877,7 +3167,8 @@
       "team": "WAS",
       "projectedPoints": 0.5,
       "adp": 250.0,
-      "tier": 14
+      "tier": 14,
+      "espnAdp": 135.84
     },
     {
       "id": "kalel-mullings-ten-rb",

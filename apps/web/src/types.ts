@@ -9,6 +9,8 @@ export interface Player {
   team: string
   projectedPoints: number
   adp: number
+  espnAdp?: number
+  sleeperAdp?: number
   tier: number
 }
 

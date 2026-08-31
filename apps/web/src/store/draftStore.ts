@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { db, queueEvent } from '../data/db'
-import { SEED_VERSION, isLegacyDemoPool, seedPlayers } from '../data/seed'
+import { SEED_VERSION, isCsvImportPool, isLegacyDemoPool, seedPlayers, shouldRefreshBundledAdp } from '../data/seed'
 import type { DraftPick, LeagueSettings, Player, Recommendation, UserAdjustment } from '../types'
 import { defaultLeague } from '../types'
 import { getRecommendations, prepareOfflineEngine, type EngineMode } from '../engine/adapter'
@@ -64,13 +64,18 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
   offlineReady: false,
   hydrated: false,
   hydrate: async () => {
-    const [storedPlayers, storedAdjustments, picks, storedSettings] = await Promise.all([
+    const [storedPlayers, storedAdjustments, picks, storedSettings, storedMeta] = await Promise.all([
       db.players.toArray(),
       db.adjustments.toArray(),
       db.picks.orderBy('pickNumber').toArray(),
-      db.settings.get('active')
+      db.settings.get('active'),
+      db.meta.get('seed')
     ])
-    const shouldLoadBundle = !storedPlayers.length || isLegacyDemoPool(storedPlayers)
+    const seedChanged = storedMeta?.version !== SEED_VERSION
+    const shouldLoadBundle = !storedPlayers.length
+      || isLegacyDemoPool(storedPlayers)
+      || shouldRefreshBundledAdp(storedPlayers)
+      || (seedChanged && !isCsvImportPool(storedPlayers))
     const players = shouldLoadBundle ? seedPlayers : storedPlayers
     if (shouldLoadBundle) {
       await db.transaction('rw', db.players, db.meta, async () => {

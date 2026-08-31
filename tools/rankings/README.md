@@ -17,7 +17,8 @@ set FANTASYPROS_API_KEY=your_key
 uv run python tools/rankings/generate.py
 
 # Or drop FantasyPros exports into inbox/ (one rankings file per position,
-# plus projections.csv and adp.csv)
+# plus projections.csv and adp.csv). Optional ESPN/Sleeper columns or
+# espn-adp.csv / sleeper-adp.csv attach platform ADPs for the Player Pool.
 uv run python tools/rankings/generate.py --inbox
 
 # Offline bootstrap used when neither a key nor inbox CSVs are present
@@ -27,6 +28,12 @@ uv run python tools/rankings/generate.py --from-data
 Edit `experts.json` to change the per-position pool, season, scoring, or the
 rank-residual constant `k`. A six-spot specialist bump is a few points, not a
 new WR1.
+
+Generate attaches ESPN ADP from [Live Draft Trends](https://fantasy.espn.com/football/livedraftresults)
+(`AVG PICK` / `ownership.averageDraftPosition`) and writes a snapshot to
+`tools/rankings/data/espn-adp.csv`. A private `ESPN_LEAGUE_ID` still overrides
+that public board. Sleeper has no official ADP API, so Sleeper values come from
+inbox CSVs or any Sleeper field FantasyPros already returns.
 
 There is no in-app "refresh from the internet" button. User boosts, fades, and
 tags live in a separate IndexedDB table and survive **Load bundled rankings**.
