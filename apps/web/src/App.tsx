@@ -98,9 +98,9 @@ function PickSearch({ correctionId, onCorrectionDone }: { correctionId?: string;
   </div>
 }
 
-function ScoreBar({ label, value, max = 100 }: { label: string; value: number; max?: number }) {
+function ScoreBar({ label, value, max = 100, title }: { label: string; value: number; max?: number; title: string }) {
   const width = Math.max(2, Math.min(100, Math.abs(value) / max * 100))
-  return <div><div className="mb-1 flex justify-between text-[11px] text-muted"><span>{label}</span><span>{value.toFixed(value < 2 ? 2 : 0)}</span></div><div className="h-1 rounded bg-white/5"><div className="h-1 rounded bg-mint" style={{ width: `${width}%` }} /></div></div>
+  return <div title={title}><div className="mb-1 flex justify-between text-[11px] text-muted"><span>{label}</span><span>{value.toFixed(value < 2 ? 2 : 0)}</span></div><div className="h-1 rounded bg-white/5"><div className="h-1 rounded bg-mint" style={{ width: `${width}%` }} /></div></div>
 }
 
 function RecommendationCard({ recommendation, rank }: { recommendation: Recommendation; rank: number }) {
@@ -113,8 +113,10 @@ function RecommendationCard({ recommendation, rank }: { recommendation: Recommen
       <p className="mt-1 text-xs leading-5 text-muted">{recommendation.explanation}</p>
     </div><div className="text-right"><div className="text-xl font-bold text-mint">{recommendation.dvsScore}</div><div className="text-[9px] uppercase tracking-wider text-muted">DVS</div></div></div>
     <details className="mt-3"><summary className="cursor-pointer text-xs font-semibold text-muted">Why this pick?</summary><div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
-      <ScoreBar label="VORP" value={recommendation.breakdown.vorp} /><ScoreBar label="Tier urgency" value={recommendation.breakdown.tierUrgency} max={30} />
-      <ScoreBar label="Need multiplier" value={recommendation.breakdown.needMultiplier} max={1.5} /><ScoreBar label="Survival chance" value={recommendation.breakdown.survivalProbability * 100} />
+      <ScoreBar label="VORP" value={recommendation.breakdown.vorp} title="Points above a replacement starter at this position" />
+      <ScoreBar label="Tier urgency" value={recommendation.breakdown.tierUrgency} max={30} title="How close this talent tier is to running out" />
+      <ScoreBar label="Need multiplier" value={recommendation.breakdown.needMultiplier} max={1.5} title="How much your roster still needs this position" />
+      <ScoreBar label="Survival chance" value={recommendation.breakdown.survivalProbability * 100} title="Odds this player lasts until your next pick" />
     </div></details>
     <button className="mt-4 w-full rounded-lg bg-mint/10 py-2 text-xs font-bold text-mint hover:bg-mint/20" onClick={() => void draftPlayer(player)}>Draft {player.name}</button>
   </article>
