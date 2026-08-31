@@ -56,6 +56,22 @@ describe('snake draft order', () => {
     expect(teamForPick(25, 12)).toBe(1)
   })
 
+  it('groups each team roster from snake pick numbers, not stored teamId', async () => {
+    const { rosterForTeam, roundForPick } = await import('./draftStore')
+    const picks = [
+      { id: '1', pickNumber: 1, teamId: 1, playerId: 'a', playerName: 'Alpha', position: 'RB' as const, timestamp: 1 },
+      { id: '2', pickNumber: 2, teamId: 1, playerId: 'b', playerName: 'Bravo', position: 'WR' as const, timestamp: 2 },
+      { id: '3', pickNumber: 3, teamId: 1, playerId: 'c', playerName: 'Charlie', position: 'TE' as const, timestamp: 3 },
+      { id: '5', pickNumber: 5, teamId: 1, playerId: 'e', playerName: 'Echo', position: 'RB' as const, timestamp: 5 },
+      { id: '8', pickNumber: 8, teamId: 1, playerId: 'h', playerName: 'Hotel', position: 'QB' as const, timestamp: 8 }
+    ]
+    expect(rosterForTeam(picks, 1, 4).map((pick) => pick.playerName)).toEqual(['Alpha', 'Hotel'])
+    expect(rosterForTeam(picks, 2, 4).map((pick) => pick.playerName)).toEqual(['Bravo'])
+    expect(rosterForTeam(picks, 4, 4).map((pick) => pick.playerName)).toEqual(['Echo'])
+    expect(roundForPick(2, 4)).toBe(1)
+    expect(roundForPick(5, 4)).toBe(2)
+    expect(roundForPick(8, 4)).toBe(2)
+  })
 })
 
 describe('hydrate seed versioning', () => {
@@ -140,5 +156,22 @@ describe('hydrate seed versioning', () => {
       tag: 'myGuy'
     })
     expect(useDraftStore.getState().players).toHaveLength(seedPlayers.length)
+  })
+
+  it('assigns sequential picks to the next snake-order team', async () => {
+    const { defaultLeague } = await import('../types')
+    const { useDraftStore } = await import('./draftStore')
+    picksTable.put.mockResolvedValue(undefined)
+    useDraftStore.setState({
+      players: demoPlayers,
+      picks: [],
+      settings: { ...defaultLeague, teamCount: 4, userTeam: 1 }
+    })
+
+    await useDraftStore.getState().draftPlayer(demoPlayers[0])
+    await useDraftStore.getState().draftPlayer(demoPlayers[1])
+    await useDraftStore.getState().draftPlayer(demoPlayers[2])
+
+    expect(useDraftStore.getState().picks.map((pick) => pick.teamId)).toEqual([1, 2, 3])
   })
 })

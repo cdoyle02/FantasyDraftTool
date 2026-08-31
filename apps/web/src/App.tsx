@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { parsePlayerCsv } from './data/csv'
-import { teamForPick, useDraftStore } from './store/draftStore'
+import { rosterForTeam, roundForPick, teamForPick, useDraftStore } from './store/draftStore'
 import type { Player, Recommendation, UserAdjustment } from './types'
 
 const positionStyle: Record<Player['position'], string> = {
@@ -175,12 +175,27 @@ function AvailablePlayers() {
   </section>
 }
 
-function Rosters() {
+export function Rosters() {
   const { picks, settings } = useDraftStore()
-  return <section className="panel lg:col-span-3"><div className="panel-heading"><div><p className="eyebrow">Snake board</p><h2>League rosters</h2></div><span className="text-xs text-muted">{settings.teamCount} teams</span></div>
+  return <section className="panel lg:col-span-3" data-testid="snake-board"><div className="panel-heading"><div><p className="eyebrow">Snake board</p><h2>League rosters</h2></div><span className="text-xs text-muted">{settings.teamCount} teams</span></div>
     <div className="max-h-[490px] space-y-2 overflow-auto p-3">{Array.from({ length: settings.teamCount }, (_, index) => index + 1).map((team) => {
-      const roster = picks.filter((pick) => pick.teamId === team)
-      return <details key={team} open={team === settings.userTeam} className={`rounded-lg border ${team === settings.userTeam ? 'border-mint/40 bg-mint/5' : 'border-line bg-ink/30'}`}><summary className="flex cursor-pointer list-none items-center justify-between p-3"><span className="text-xs font-semibold">Team {team} {team === settings.userTeam && <span className="ml-1 text-mint">YOU</span>}</span><span className="text-[10px] text-muted">{roster.length} picks</span></summary><div className="space-y-1 border-t border-line/60 p-2">{roster.map((pick) => <div key={pick.id} className="flex items-center gap-2 rounded bg-black/10 px-2 py-1.5 text-xs"><PositionPill position={pick.position} /><span className="truncate">{pick.playerName}</span></div>)}{!roster.length && <p className="p-2 text-xs text-muted">No picks yet.</p>}</div></details>
+      const roster = rosterForTeam(picks, team, settings.teamCount)
+      const latest = roster.at(-1)
+      const isUser = team === settings.userTeam
+      return <details key={team} data-testid={`roster-team-${team}`} open={isUser ? true : undefined} className={`rounded-lg border ${isUser ? 'border-mint/40 bg-mint/5' : 'border-line bg-ink/30'}`}>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-3">
+          <span className="text-xs font-semibold">Team {team} {isUser && <span className="ml-1 text-mint">YOU</span>}</span>
+          <span className="min-w-0 truncate text-right text-[10px] text-muted">
+            {latest
+              ? <span className="inline-flex max-w-full items-center gap-1.5"><span className="font-mono">R{roundForPick(latest.pickNumber, settings.teamCount)}</span><span className="truncate">{latest.playerName}</span></span>
+              : `${roster.length} picks`}
+          </span>
+        </summary>
+        <div className="space-y-1 border-t border-line/60 p-2">
+          {roster.map((pick) => <div key={pick.id} className="flex items-center gap-2 rounded bg-black/10 px-2 py-1.5 text-xs"><span className="w-6 shrink-0 font-mono text-[10px] text-muted">R{roundForPick(pick.pickNumber, settings.teamCount)}</span><PositionPill position={pick.position} /><span className="truncate">{pick.playerName}</span></div>)}
+          {!roster.length && <p className="p-2 text-xs text-muted">No picks yet.</p>}
+        </div>
+      </details>
     })}</div>
   </section>
 }

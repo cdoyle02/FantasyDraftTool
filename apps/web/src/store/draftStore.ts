@@ -34,6 +34,24 @@ export function teamForPick(pickNumber: number, teamCount: number) {
   return round % 2 === 0 ? slot + 1 : teamCount - slot
 }
 
+export function roundForPick(pickNumber: number, teamCount: number) {
+  return Math.floor((pickNumber - 1) / teamCount) + 1
+}
+
+export function rosterForTeam(picks: DraftPick[], team: number, teamCount: number) {
+  return picks
+    .filter((pick) => teamForPick(pick.pickNumber, teamCount) === team)
+    .sort((a, b) => a.pickNumber - b.pickNumber)
+}
+
+let draftWriteChain = Promise.resolve()
+
+function enqueueDraftWrite<T>(work: () => Promise<T>): Promise<T> {
+  const run = draftWriteChain.then(work, work)
+  draftWriteChain = run.then(() => undefined, () => undefined)
+  return run
+}
+
 let recommendationRequestId = 0
 
 export const useDraftStore = create<DraftStore>((set, get) => ({
@@ -93,7 +111,7 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
     await get().importPlayers(seedPlayers)
     await db.meta.put({ id: 'seed', version: SEED_VERSION })
   },
-  draftPlayer: async (player) => {
+  draftPlayer: async (player) => enqueueDraftWrite(async () => {
     if (get().picks.some((pick) => pick.playerId === player.id)) return
     const totalRounds = Object.values(get().settings.rosterSlots).reduce((sum, count) => sum + count, 0)
     if (get().picks.length >= get().settings.teamCount * totalRounds) return
@@ -111,7 +129,7 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
     await queueEvent('PICK_CREATED', pick)
     set((state) => ({ picks: [...state.picks, pick] }))
     await get().refreshRecommendations()
-  },
+  }),
   correctPick: async (id, player) => {
     const current = get().picks.find((pick) => pick.id === id)
     if (!current || get().picks.some((pick) => pick.id !== id && pick.playerId === player.id)) return
