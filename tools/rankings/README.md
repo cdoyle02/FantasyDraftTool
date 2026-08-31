@@ -1,8 +1,18 @@
 # Expert rankings generator
 
-Builds the committed PPR draft board from a pool of high-accuracy FantasyPros
-draft experts. The app never talks to FantasyPros. Re-run this script, commit
-the outputs, and rebuild when you want a new board.
+Builds the committed PPR draft board for the DVS engine. The app never fetches
+projections at runtime. Re-run this script, commit the outputs, and rebuild
+when you want a new board.
+
+## Data sources
+
+| Positions | Source |
+|-----------|--------|
+| QB, RB, WR, TE | Fantasy Footballers workbook (`data/footballers-2026.xlsx`) — equal-weight average of Mike, Andy, and Jason counting stats, converted to season-total full PPR |
+| K, DST | FantasyPros expert pool when `FANTASYPROS_API_KEY` is set; otherwise bundled rows in `board.py` |
+
+Skill-position ranks are derived **within each position** from averaged PPR
+points (no rank-residual nudge). K/DST still use the specialist rank residual.
 
 ## Outputs
 
@@ -12,22 +22,29 @@ the outputs, and rebuild when you want a new board.
 ## How to refresh
 
 ```bash
-# Preferred: official API (key stays in the environment, never in the app)
+# Default: Footballers workbook + bundled K/DST + ESPN live ADP
+uv run python tools/rankings/generate.py
+
+# Same, but skip live FantasyPros (K/DST from board.py)
+uv run python tools/rankings/generate.py --from-data
+
+# Optional: refresh K/DST from FantasyPros when a key is set
 set FANTASYPROS_API_KEY=your_key
 uv run python tools/rankings/generate.py
 
-# Or drop FantasyPros exports into inbox/ (one rankings file per position,
-# plus projections.csv and adp.csv). Optional ESPN/Sleeper columns or
-# espn-adp.csv / sleeper-adp.csv attach platform ADPs for the Player Pool.
+# Legacy inbox path for tests / manual overrides
 uv run python tools/rankings/generate.py --inbox
-
-# Offline bootstrap used when neither a key nor inbox CSVs are present
-uv run python tools/rankings/generate.py --from-data
 ```
 
-Edit `experts.json` to change the per-position pool, season, scoring, or the
-rank-residual constant `k`. A six-spot specialist bump is a few points, not a
-new WR1.
+Drop FantasyPros exports into `inbox/` (one rankings file per position, plus
+`projections.csv` and `adp.csv`) when using `--inbox`. Optional ESPN/Sleeper
+columns or `espn-adp.csv` / `sleeper-adp.csv` attach platform ADPs.
+
+Replace `data/footballers-2026.xlsx` (or set `footballersWorkbook` in
+`experts.json`) when the Footballers UDK projections update.
+
+Edit `experts.json` for season, scoring, gap-tier threshold, or K/DST expert
+pools. Skill positions list Mike/Andy/Jason for bundle metadata only.
 
 Generate attaches ESPN ADP from [Live Draft Trends](https://fantasy.espn.com/football/livedraftresults)
 (`AVG PICK` / `ownership.averageDraftPosition`) and writes a snapshot to

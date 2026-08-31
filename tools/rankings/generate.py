@@ -5,8 +5,8 @@ Usage:
   uv run python tools/rankings/generate.py --inbox
   uv run python tools/rankings/generate.py --from-data
 
-API key (never shipped in the app): FANTASYPROS_API_KEY
-Without a key, drop FantasyPros CSVs in tools/rankings/inbox/ or use --from-data.
+Default: Fantasy Footballers workbook for QB/RB/WR/TE, bundled or FantasyPros K/DST.
+API key (never shipped in the app): FANTASYPROS_API_KEY (K/DST refresh only).
 """
 
 from __future__ import annotations
@@ -17,7 +17,8 @@ from pathlib import Path
 from typing import Any
 
 from espn_adp import load_espn_adp
-from fetch import FantasyProsError, api_key_from_env, fetch_inputs
+from fetch import FantasyProsError, api_key_from_env, fetch_k_dst_inputs
+from footballers import DEFAULT_WORKBOOK, footballers_inputs
 from merge import AdpRow, MergeConfig, SeedPlayer, merge_rankings
 from store import load_config, read_inbox, write_bundle
 
@@ -27,7 +28,7 @@ DEFAULT_JSON = REPO / "apps" / "web" / "src" / "data" / "expertRankings.json"
 DEFAULT_CSV = HERE / "out" / "expert-rankings.csv"
 DEFAULT_CONFIG = HERE / "experts.json"
 DEFAULT_INBOX = HERE / "inbox"
-SEED_VERSION = "2026.4"
+SEED_VERSION = "2026.5"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -44,7 +45,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--from-data",
         action="store_true",
-        help="Use the bundled 2026 board in data.py (no live FantasyPros fetch)",
+        help="Use Footballers workbook + bundled K/DST (no live FantasyPros fetch)",
     )
     parser.add_argument("--seed-version", default=SEED_VERSION)
     args = parser.parse_args(argv)
@@ -106,37 +107,7 @@ def _load_inputs(
     list[AdpRow],
     dict[str, Any],
 ]:
-    if from_data:
-        from board import board_inputs
-
-        projections, pooled, consensus, adp_rows = board_inputs()
-        return (
-            "bundled-data",
-            projections,
-            pooled,
-            consensus,
-            adp_rows,
-            [],
-            [],
-            _experts_from_config(config),
-        )
-    key = None if force_inbox else api_key_from_env()
-    if key:
-        try:
-            projections, pooled, consensus, adp_rows, experts = fetch_inputs(config, api_key=key)
-            return (
-                "fantasypros-api",
-                projections,
-                pooled,
-                consensus,
-                adp_rows,
-                [],
-                [],
-                experts,
-            )
-        except FantasyProsError as exc:
-            print(f"FantasyPros API failed ({exc}); trying inbox", file=sys.stderr)
-    if _inbox_has_csv(inbox_dir):
+    if force_inbox and _inbox_has_csv(inbox_dir):
         projections, pooled, consensus, adp_rows, espn_rows, sleeper_rows = read_inbox(inbox_dir)
         return (
             "inbox-csv",
@@ -148,10 +119,71 @@ def _load_inputs(
             sleeper_rows,
             _experts_from_config(config),
         )
+
+    if from_data or not force_inbox:
+        return _load_footballers_hybrid(config, from_data=from_data)
+
     raise SystemExit(
-        "No rankings source. Set FANTASYPROS_API_KEY, drop CSVs in tools/rankings/inbox/, "
-        "or re-run with --from-data."
+        "No rankings source. Drop CSVs in tools/rankings/inbox/ and use --inbox, "
+        "or re-run without --inbox to use the Footballers workbook."
     )
+
+
+def _load_footballers_hybrid(
+    config: dict[str, Any],
+    *,
+    from_data: bool,
+) -> tuple[
+    str,
+    list[Any],
+    dict[str, list[Any]],
+    dict[str, list[Any]],
+    list[AdpRow],
+    list[AdpRow],
+    list[AdpRow],
+    dict[str, Any],
+]:
+    workbook = _workbook_path(config)
+    gap = int(config.get("gapTierThreshold", 4))
+    skill_projections, skill_pooled, skill_consensus = footballers_inputs(
+        workbook,
+        gap_tier_threshold=gap,
+    )
+
+    k_dst_source = "bundled-k-dst"
+    k_projections: list[Any] = []
+    k_pooled: dict[str, list[Any]] = {}
+    k_consensus: dict[str, list[Any]] = {}
+    adp_rows: list[AdpRow] = []
+
+    key = None if from_data else api_key_from_env()
+    if key:
+        try:
+            k_projections, k_pooled, k_consensus, adp_rows = fetch_k_dst_inputs(config, api_key=key)
+            k_dst_source = "fantasypros-k-dst"
+        except FantasyProsError as exc:
+            print(f"FantasyPros K/DST fetch failed ({exc}); using bundled K/DST", file=sys.stderr)
+
+    if not k_projections:
+        from board import k_dst_board_inputs
+
+        k_projections, k_pooled, k_consensus, adp_rows = k_dst_board_inputs()
+
+    projections = [*skill_projections, *k_projections]
+    pooled = {**skill_pooled, **k_pooled}
+    consensus = {**skill_consensus, **k_consensus}
+    source = f"footballers+{k_dst_source}"
+    return source, projections, pooled, consensus, adp_rows, [], [], _experts_from_config(config)
+
+
+def _workbook_path(config: dict[str, Any]) -> Path:
+    configured = config.get("footballersWorkbook")
+    if configured:
+        path = Path(configured)
+        if not path.is_absolute():
+            path = HERE / path
+        return path
+    return DEFAULT_WORKBOOK
 
 
 def _experts_from_config(config: dict[str, Any]) -> dict[str, Any]:

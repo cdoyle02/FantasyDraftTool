@@ -60,6 +60,38 @@ def fetch_inputs(
     return projections, pooled, consensus, adp_rows, resolved_experts
 
 
+def fetch_k_dst_inputs(
+    config: Mapping[str, Any],
+    *,
+    api_key: str,
+    timeout: float = 30.0,
+) -> tuple[
+    list[Projection],
+    dict[str, list[RankedPlayer]],
+    dict[str, list[RankedPlayer]],
+    list[AdpRow],
+]:
+    """Fetch only K and DST from FantasyPros (skill positions come from Footballers)."""
+    season = int(config["season"])
+    scoring = str(config["scoring"])
+    client = FantasyProsClient(api_key, timeout=timeout)
+    pooled: dict[str, list[RankedPlayer]] = {}
+    consensus: dict[str, list[RankedPlayer]] = {}
+    projections: list[Projection] = []
+    adp_rows: list[AdpRow] = []
+
+    for position in ("K", "DST"):
+        configured = list(config.get("positions", {}).get(position, []))
+        experts = client.resolve_experts(season, scoring, position, configured)
+        filters = ":".join(str(item["id"]) for item in experts if item.get("id"))
+        pooled[position] = client.consensus_rankings(season, scoring, position, filters=filters)
+        consensus[position] = client.consensus_rankings(season, scoring, position)
+        projections.extend(client.projections(season, scoring, position))
+        adp_rows.extend(client.adp(season, scoring, position))
+
+    return projections, pooled, consensus, adp_rows
+
+
 class FantasyProsClient:
     def __init__(self, api_key: str, *, timeout: float = 30.0) -> None:
         self.api_key = api_key
