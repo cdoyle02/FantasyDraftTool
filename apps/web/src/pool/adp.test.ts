@@ -23,7 +23,7 @@ describe('player pool ADP helpers', () => {
     expect(formatAdp(3.8)).toBe('3.8')
   })
 
-  it('sorts by FantasyPros ADP with the boost/fade nudge by default', () => {
+  it('sorts by Footballers ADP with the boost/fade nudge by default', () => {
     const early = player({ id: 'a', name: 'Alpha', adp: 5 })
     const later = player({ id: 'b', name: 'Bravo', adp: 6 })
     expect(compareAvailablePlayers(early, later, 'adp', 'asc', {})).toBeLessThan(0)

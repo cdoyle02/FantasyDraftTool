@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from footballers import (
     DEFAULT_WORKBOOK,
     footballers_inputs,
@@ -79,17 +78,27 @@ def test_hybrid_seed_includes_k_dst_and_skill_players() -> None:
         config=MergeConfig(),
     )
     positions = {player.position for player in players}
-    assert source == "footballers+bundled-k-dst"
+    assert source == "footballers+cheatsheet+bundled-k-dst"
     assert positions == {"QB", "RB", "WR", "TE", "K", "DST"}
     assert len(players) >= 370
     by_name = {player.name: player for player in players}
     assert by_name["Jahmyr Gibbs"].projected_points == 379.0
+    assert by_name["Jahmyr Gibbs"].adp == 1.9
+    assert by_name["Jahmyr Gibbs"].tier == 1
+    assert by_name["Josh Allen"].adp == 21.0
     assert by_name["Justin Tucker"].position == "K"
+    assert by_name["Brandon Aubrey"].adp == 118.2
     assert by_name["Jets DST"].position == "DST"
+    unmatched = next(
+        player
+        for player in players
+        if player.position in {"QB", "RB", "WR", "TE"} and player.adp == 250.0
+    )
+    assert unmatched.tier >= 1
 
 
 def test_seed_version_bumped() -> None:
-    assert SEED_VERSION == "2026.5"
+    assert SEED_VERSION == "2026.6"
 
 
 def test_workbook_missing_raises() -> None:

@@ -8,6 +8,7 @@
   "missingAdpDefault": 250,
   "gapTierThreshold": 4,
   "footballersWorkbook": "data/footballers-2026.xlsx",
+  "footballersCheatsheet": "data/footballers-cheatsheet-2026.csv",
   "positions": {
     "QB": [
       {"name": "Mike", "source": "Fantasy Footballers"},

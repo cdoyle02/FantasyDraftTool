@@ -9,10 +9,10 @@ test.describe('player pool ADP source', () => {
 
   test('keeps one ADP column and can switch sources from the header', async ({ page }) => {
     const firstRow = page.locator('section', { hasText: 'Player pool' }).locator('tbody tr').first()
-    await expect(firstRow).toContainText("Ja'Marr Chase")
-    await expect(firstRow).toContainText('1.4')
+    await expect(firstRow).toContainText('Jahmyr Gibbs')
+    await expect(firstRow).toContainText('1.9')
 
-    await page.getByRole('button', { name: 'ADP source, FantasyPros' }).click()
+    await page.getByRole('button', { name: 'ADP source, Footballers' }).click()
     await expect(page.getByRole('menu', { name: 'ADP source' })).toBeVisible()
     await page.getByRole('menuitemradio', { name: 'ESPN' }).click()
     await expect(page.getByRole('button', { name: 'ADP source, ESPN' })).toBeVisible()
@@ -27,7 +27,7 @@ test.describe('player pool ADP source', () => {
 
   test('ADP header still fits on a narrow viewport', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
-    await expect(page.getByRole('button', { name: 'ADP source, FantasyPros' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'ADP source, Footballers' })).toBeVisible()
     const pool = page.locator('section', { hasText: 'Player pool' })
     await expect(pool).not.toHaveCSS('overflow-x', 'scroll')
   })

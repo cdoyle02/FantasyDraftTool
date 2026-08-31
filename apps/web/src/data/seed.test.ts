@@ -46,6 +46,8 @@ describe('bundled expert rankings seed', () => {
     const gibbs = seedPlayers.find((player) => player.name === 'Jahmyr Gibbs')
     expect(chase?.espnAdp).toBeGreaterThan(0)
     expect(gibbs?.espnAdp).toBeGreaterThan(0)
+    expect(gibbs?.adp).toBe(1.9)
+    expect(gibbs?.tier).toBe(1)
     expect(shouldRefreshBundledAdp(seedPlayers.map(({ espnAdp: _espnAdp, sleeperAdp: _sleeperAdp, ...player }) => player))).toBe(true)
     expect(shouldRefreshBundledAdp(seedPlayers)).toBe(false)
     expect(shouldRefreshBundledAdp([{

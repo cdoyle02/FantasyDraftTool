@@ -8,11 +8,14 @@ when you want a new board.
 
 | Positions | Source |
 |-----------|--------|
-| QB, RB, WR, TE | Fantasy Footballers workbook (`data/footballers-2026.xlsx`) — equal-weight average of Mike, Andy, and Jason counting stats, converted to season-total full PPR |
+| QB, RB, WR, TE | Fantasy Footballers workbook (`data/footballers-2026.xlsx`) for season-total full PPR (equal-weight Mike/Andy/Jason counting stats). Official positional tiers and ADP from `data/footballers-cheatsheet-2026.csv` |
 | K, DST | FantasyPros expert pool when `FANTASYPROS_API_KEY` is set; otherwise bundled rows in `board.py` |
 
-Skill-position ranks are derived **within each position** from averaged PPR
-points (no rank-residual nudge). K/DST still use the specialist rank residual.
+Skill-position **ranks** stay derived **within each position** from averaged PPR
+points (no rank-residual nudge). Official cheatsheet `tier_number` and
+`adp_overall` overlay those ranks so Formula V2 survival / wait-loss and tier
+cliffs use Footballers draft data. Players missing from the cheatsheet keep
+gap tiers and ADP 250. K/DST still use the specialist rank residual.
 
 ## Outputs
 
@@ -22,7 +25,7 @@ points (no rank-residual nudge). K/DST still use the specialist rank residual.
 ## How to refresh
 
 ```bash
-# Default: Footballers workbook + bundled K/DST + ESPN live ADP
+# Default: Footballers workbook + cheatsheet + bundled K/DST + ESPN live ADP
 uv run python tools/rankings/generate.py
 
 # Same, but skip live FantasyPros (K/DST from board.py)
@@ -41,7 +44,9 @@ Drop FantasyPros exports into `inbox/` (one rankings file per position, plus
 columns or `espn-adp.csv` / `sleeper-adp.csv` attach platform ADPs.
 
 Replace `data/footballers-2026.xlsx` (or set `footballersWorkbook` in
-`experts.json`) when the Footballers UDK projections update.
+`experts.json`) when the Footballers UDK projections update. Replace
+`data/footballers-cheatsheet-2026.csv` (or set `footballersCheatsheet`) when
+the UDK cheatsheet tiers/ADP update.
 
 Edit `experts.json` for season, scoring, gap-tier threshold, or K/DST expert
 pools. Skill positions list Mike/Andy/Jason for bundle metadata only.

@@ -5,7 +5,7 @@ Usage:
   uv run python tools/rankings/generate.py --inbox
   uv run python tools/rankings/generate.py --from-data
 
-Default: Fantasy Footballers workbook for QB/RB/WR/TE, bundled or FantasyPros K/DST.
+Default: Fantasy Footballers workbook + cheatsheet for QB/RB/WR/TE, bundled or FantasyPros K/DST.
 API key (never shipped in the app): FANTASYPROS_API_KEY (K/DST refresh only).
 """
 
@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from cheatsheet import DEFAULT_CHEATSHEET, cheatsheet_inputs, overlay_cheatsheet_tiers
 from espn_adp import load_espn_adp
 from fetch import FantasyProsError, api_key_from_env, fetch_k_dst_inputs
 from footballers import DEFAULT_WORKBOOK, footballers_inputs
@@ -28,7 +29,7 @@ DEFAULT_JSON = REPO / "apps" / "web" / "src" / "data" / "expertRankings.json"
 DEFAULT_CSV = HERE / "out" / "expert-rankings.csv"
 DEFAULT_CONFIG = HERE / "experts.json"
 DEFAULT_INBOX = HERE / "inbox"
-SEED_VERSION = "2026.5"
+SEED_VERSION = "2026.6"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -45,7 +46,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--from-data",
         action="store_true",
-        help="Use Footballers workbook + bundled K/DST (no live FantasyPros fetch)",
+        help="Use Footballers workbook + cheatsheet + bundled K/DST (no live FantasyPros fetch)",
     )
     parser.add_argument("--seed-version", default=SEED_VERSION)
     args = parser.parse_args(argv)
@@ -149,6 +150,9 @@ def _load_footballers_hybrid(
         workbook,
         gap_tier_threshold=gap,
     )
+    cheat_ranked, cheat_adp = cheatsheet_inputs(_cheatsheet_path(config))
+    skill_pooled = overlay_cheatsheet_tiers(skill_pooled, cheat_ranked)
+    skill_consensus = overlay_cheatsheet_tiers(skill_consensus, cheat_ranked)
 
     k_dst_source = "bundled-k-dst"
     k_projections: list[Any] = []
@@ -172,8 +176,17 @@ def _load_footballers_hybrid(
     projections = [*skill_projections, *k_projections]
     pooled = {**skill_pooled, **k_pooled}
     consensus = {**skill_consensus, **k_consensus}
-    source = f"footballers+{k_dst_source}"
-    return source, projections, pooled, consensus, adp_rows, [], [], _experts_from_config(config)
+    source = f"footballers+cheatsheet+{k_dst_source}"
+    return (
+        source,
+        projections,
+        pooled,
+        consensus,
+        [*cheat_adp, *adp_rows],
+        [],
+        [],
+        _experts_from_config(config),
+    )
 
 
 def _workbook_path(config: dict[str, Any]) -> Path:
@@ -184,6 +197,16 @@ def _workbook_path(config: dict[str, Any]) -> Path:
             path = HERE / path
         return path
     return DEFAULT_WORKBOOK
+
+
+def _cheatsheet_path(config: dict[str, Any]) -> Path:
+    configured = config.get("footballersCheatsheet")
+    if configured:
+        path = Path(configured)
+        if not path.is_absolute():
+            path = HERE / path
+        return path
+    return DEFAULT_CHEATSHEET
 
 
 def _experts_from_config(config: dict[str, Any]) -> dict[str, Any]:

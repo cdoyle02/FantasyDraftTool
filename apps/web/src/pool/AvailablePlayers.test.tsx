@@ -57,7 +57,7 @@ describe('available players ADP source', () => {
     })
   })
 
-  it('keeps one ADP column and defaults to FantasyPros order', () => {
+  it('keeps one ADP column and defaults to Footballers order', () => {
     render(<AvailablePlayers />)
     const rows = screen.getAllByRole('row').slice(1)
     expect(rows.map((row) => within(row).getAllByRole('cell')[1].textContent)).toEqual([
@@ -66,14 +66,14 @@ describe('available players ADP source', () => {
       expect.stringContaining('CeeDee Lamb')
     ])
     expect(within(rows[0]).getAllByRole('cell')[3]).toHaveTextContent('1.4')
-    expect(screen.getByRole('button', { name: 'ADP source, FantasyPros' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'ADP source, Footballers' })).toBeInTheDocument()
   })
 
   it('switches the visible value and sort when ESPN or Sleeper is chosen', async () => {
     const user = userEvent.setup()
     render(<AvailablePlayers />)
 
-    await user.click(screen.getByRole('button', { name: 'ADP source, FantasyPros' }))
+    await user.click(screen.getByRole('button', { name: 'ADP source, Footballers' }))
     await user.click(screen.getByRole('menuitemradio', { name: 'ESPN' }))
 
     let rows = screen.getAllByRole('row').slice(1)
@@ -93,11 +93,11 @@ describe('available players ADP source', () => {
     const user = userEvent.setup()
     render(<AvailablePlayers />)
 
-    await user.click(screen.getByRole('button', { name: /Sort by FantasyPros ADP/ }))
+    await user.click(screen.getByRole('button', { name: /Sort by Footballers ADP/ }))
     const rows = screen.getAllByRole('row').slice(1)
     expect(within(rows[0]).getAllByRole('cell')[1]).toHaveTextContent('CeeDee Lamb')
 
-    await user.click(screen.getByRole('button', { name: 'ADP source, FantasyPros' }))
+    await user.click(screen.getByRole('button', { name: 'ADP source, Footballers' }))
     expect(screen.getByRole('menu', { name: 'ADP source' })).toBeInTheDocument()
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('menu', { name: 'ADP source' })).not.toBeInTheDocument()

@@ -4,7 +4,7 @@ export type AdpSource = 'adp' | 'espnAdp' | 'sleeperAdp'
 export type SortDir = 'asc' | 'desc'
 
 export const ADP_SOURCES = [
-  { key: 'adp', short: 'FP', label: 'FantasyPros' },
+  { key: 'adp', short: 'TFF', label: 'Footballers' },
   { key: 'espnAdp', short: 'ESPN', label: 'ESPN' },
   { key: 'sleeperAdp', short: 'Sleeper', label: 'Sleeper' }
 ] as const satisfies ReadonlyArray<{ key: AdpSource; short: string; label: string }>
