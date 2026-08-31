@@ -106,7 +106,11 @@ function ScoreBar({ label, value, max = 100, title }: { label: string; value: nu
 function RecommendationCard({ recommendation, rank }: { recommendation: Recommendation; rank: number }) {
   const player = useDraftStore((state) => state.players.find((item) => item.id === recommendation.playerId))
   const draftPlayer = useDraftStore((state) => state.draftPlayer)
+  const settings = useDraftStore((state) => state.settings)
+  const picks = useDraftStore((state) => state.picks)
   if (!player) return null
+  const onClockTeam = teamForPick(picks.length + 1, settings.teamCount)
+  const destLabel = onClockTeam === settings.userTeam ? 'YOU' : `T${onClockTeam}`
   return <article className={`rounded-xl border p-4 ${rank === 0 ? 'border-mint/50 bg-mint/[.06] shadow-glow' : 'border-line bg-ink/35'}`}>
     <div className="flex items-start gap-3"><span className="grid h-7 w-7 place-items-center rounded-full bg-white/5 text-xs font-bold text-muted">{rank + 1}</span><div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-center gap-2"><h3 className="truncate font-semibold">{player.name}</h3><PositionPill position={player.position} /><span className={`rounded-full px-2 py-0.5 text-[9px] font-black tracking-wider ${recommendation.tierLabel === "CAN'T PASS" ? 'bg-lime text-ink' : 'bg-white/10 text-muted'}`}>{recommendation.tierLabel}</span></div>
@@ -118,7 +122,7 @@ function RecommendationCard({ recommendation, rank }: { recommendation: Recommen
       <ScoreBar label="Need multiplier" value={recommendation.breakdown.needMultiplier} max={1.5} title="How much your roster still needs this position" />
       <ScoreBar label="Survival chance" value={recommendation.breakdown.survivalProbability * 100} title="Odds this player lasts until your next pick" />
     </div></details>
-    <button className="mt-4 w-full rounded-lg bg-mint/10 py-2 text-xs font-bold text-mint hover:bg-mint/20" onClick={() => void draftPlayer(player)}>Draft {player.name}</button>
+    <button className="mt-4 w-full rounded-lg bg-mint/10 py-2 text-xs font-bold text-mint hover:bg-mint/20" onClick={() => void draftPlayer(player)}>Draft {player.name} · {destLabel}</button>
   </article>
 }
 
@@ -280,7 +284,7 @@ export default function App() {
       </section>
       {engineWarning && <div role="status" className="mb-4 rounded-lg border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-xs text-amber-100">{engineWarning}</div>}
       <div className="grid gap-4 lg:grid-cols-12">
-        <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><span className="text-xs text-muted">Explainable</span></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 6).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
+        <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><span className="text-xs text-muted">For your roster · pick goes to on-clock team</span></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 6).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
         <AvailablePlayers /><Rosters /><div className="lg:col-span-8"><PickHistory onCorrect={setCorrectionId} /></div>
       </div>
     </main>
