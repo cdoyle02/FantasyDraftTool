@@ -85,11 +85,15 @@ def default_superflex_weights() -> dict[str, float]:
     return {"QB": 0.65, "RB": 0.15, "WR": 0.15, "TE": 0.05}
 
 
+def default_depth_bench_weights() -> dict[str, float]:
+    return {"RB": 0.5, "WR": 0.5}
+
+
 @dataclass(frozen=True, slots=True)
 class FormulaParams:
     """Tunable DVS coefficients."""
 
-    formula_version: int = 2
+    formula_version: int = 3
     replacement_index_offset: int = 1
     flex_weights: Mapping[str, float] = field(default_factory=default_flex_weights)
     superflex_weights: Mapping[str, float] = field(default_factory=default_superflex_weights)
@@ -99,10 +103,27 @@ class FormulaParams:
     need_flex_boost: float = 0.08
     need_bench_penalty_base: float = 0.08
     need_floor: float = 0.55
-    # v2 roster utility
+    # v2/v3 roster utility
     wait_loss_weight: float = 1.0
     bench_discount_default: float = 0.25
     bench_discount_by_depth: tuple[float, ...] = (0.35, 0.25, 0.15)
+    # v3 roster-shape need
+    need_starter_boost: float = 0.35
+    need_flex_boost_v3: float = 0.12
+    need_depth_boost: float = 0.08
+    need_balance_weight: float = 2.5
+    need_duplicate_penalty: float = 0.40
+    need_over_target_penalty: float = 0.35
+    need_v3_floor: float = 0.35
+    need_v3_ceiling: float = 2.0
+    need_override_points: float = 30.0
+    depth_bench_weights: Mapping[str, float] = field(default_factory=default_depth_bench_weights)
+    max_qb: int = 1
+    max_te: int = 1
+    backup_qb_min_team_count: int = 12
+    backup_qb_final_rounds: int = 3
+    position_cap_penalty_multiple: float = 6.0
+    backup_qb_window_penalty_multiple: float = 0.5
     # shared survival / demand
     survival_default_no_adp: float = 0.5
     survival_spread_min: float = 4.0
@@ -117,14 +138,14 @@ class FormulaParams:
     cant_pass_vorp_min: float = 20.0
     cant_pass_survival_max: float = 0.30
     safe_to_wait_survival_min: float = 0.65
-    # v2 labels
+    # v2/v3 labels
     value_min: float = 5.0
     urgent_wait_loss: float = 8.0
     safe_wait_loss: float = 3.0
 
     def __post_init__(self) -> None:
-        if self.formula_version not in (1, 2):
-            raise ValueError("formula_version must be 1 or 2")
+        if self.formula_version not in (1, 2, 3):
+            raise ValueError("formula_version must be 1, 2, or 3")
 
 
 @dataclass(frozen=True, slots=True)

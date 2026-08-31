@@ -1,5 +1,5 @@
 import pytest
-from dvs_engine import DraftState, LeagueSettings, Player, Position
+from dvs_engine import DraftState, FormulaParams, LeagueSettings, Player, Position
 
 
 @pytest.fixture
@@ -8,6 +8,7 @@ def settings() -> LeagueSettings:
         team_count=4,
         roster_slots={"QB": 1, "RB": 1, "WR": 1, "TE": 1, "FLEX": 1, "BENCH": 2},
         user_team_id="1",
+        formula_params=FormulaParams(formula_version=2),
     )
 
 

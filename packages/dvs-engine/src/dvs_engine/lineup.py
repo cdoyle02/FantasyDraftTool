@@ -7,6 +7,8 @@ from collections.abc import Mapping, Sequence
 
 from .models import FormulaParams, LeagueSettings, Player, Position
 
+_UNBOUNDED_CAP = 10_000
+
 FLEX_ELIGIBLE = (Position.RB, Position.WR, Position.TE)
 SUPERFLEX_ELIGIBLE = (Position.QB, Position.RB, Position.WR, Position.TE)
 DIRECT_POSITIONS = (
@@ -52,6 +54,7 @@ def roster_utility(
     settings: LeagueSettings,
     levels: Mapping[Position, float],
     params: FormulaParams,
+    position_caps: Mapping[Position, int] | None = None,
 ) -> float:
     """Starter assignment plus discounted bench value for the user's roster."""
     if not roster:
@@ -60,6 +63,7 @@ def roster_utility(
     slots = _user_slot_cap(settings)
     remaining = list(roster)
     utility = 0.0
+    assigned: Counter[Position] = Counter()
 
     def consume(position: Position, count: int) -> None:
         nonlocal remaining, utility
@@ -69,21 +73,50 @@ def roster_utility(
         matches.sort(key=lambda player: player.projected_points, reverse=True)
         chosen = matches[:count]
         remaining = [player for player in remaining if player not in chosen]
+        assigned[position] += len(chosen)
         utility += sum(_position_surplus(player, levels) for player in chosen)
 
     for position in DIRECT_POSITIONS:
         consume(position, slots[position.value])
 
-    flex_pool = [player for player in remaining if player.position in FLEX_ELIGIBLE]
+    def _under_cap(player: Player) -> bool:
+        if position_caps is None:
+            return True
+        cap = position_caps.get(player.position, _UNBOUNDED_CAP)
+        return assigned[player.position] < cap
+
+    flex_pool = [
+        player
+        for player in remaining
+        if player.position in FLEX_ELIGIBLE and _under_cap(player)
+    ]
     flex_pool.sort(key=lambda player: _position_surplus(player, levels), reverse=True)
-    for player in flex_pool[: slots["FLEX"]]:
+    flex_taken = 0
+    for player in flex_pool:
+        if flex_taken >= slots["FLEX"]:
+            break
+        if not _under_cap(player):
+            continue
         remaining.remove(player)
+        assigned[player.position] += 1
+        flex_taken += 1
         utility += _position_surplus(player, levels)
 
-    superflex_pool = [player for player in remaining if player.position in SUPERFLEX_ELIGIBLE]
+    superflex_pool = [
+        player
+        for player in remaining
+        if player.position in SUPERFLEX_ELIGIBLE and _under_cap(player)
+    ]
     superflex_pool.sort(key=lambda player: _position_surplus(player, levels), reverse=True)
-    for player in superflex_pool[: slots["SUPERFLEX"]]:
+    superflex_taken = 0
+    for player in superflex_pool:
+        if superflex_taken >= slots["SUPERFLEX"]:
+            break
+        if not _under_cap(player):
+            continue
         remaining.remove(player)
+        assigned[player.position] += 1
+        superflex_taken += 1
         utility += _position_surplus(player, levels)
 
     bench_pool = sorted(
@@ -106,8 +139,9 @@ def marginal_value(
     settings: LeagueSettings,
     levels: Mapping[Position, float],
     params: FormulaParams,
+    position_caps: Mapping[Position, int] | None = None,
 ) -> float:
     """Change in roster utility from adding one player."""
-    baseline = roster_utility(roster, settings, levels, params)
-    with_player = roster_utility((*roster, player), settings, levels, params)
+    baseline = roster_utility(roster, settings, levels, params, position_caps)
+    with_player = roster_utility((*roster, player), settings, levels, params, position_caps)
     return with_player - baseline

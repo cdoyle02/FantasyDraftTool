@@ -198,6 +198,141 @@ def roster_need_multiplier(
     )
 
 
+def _effective_position_cap(position: Position, settings: LeagueSettings) -> int | None:
+    params = settings.formula_params
+    slots = settings.roster_slots
+    superflex = int(slots.get("SUPERFLEX", slots.get("SF", 0)))
+    if position == Position.TE:
+        return int(params.max_te)
+    if position == Position.QB:
+        return int(max(params.max_qb, 1 + superflex))
+    if position in (Position.K, Position.DST):
+        return int(slots.get(position.value, 0))
+    return None
+
+
+def position_caps_map(settings: LeagueSettings) -> dict[Position, int]:
+    caps: dict[Position, int] = {}
+    for position in (Position.QB, Position.TE, Position.K, Position.DST):
+        cap = _effective_position_cap(position, settings)
+        if cap is not None:
+            caps[position] = cap
+    return caps
+
+
+def _flex_share(position: Position, settings: LeagueSettings) -> float:
+    params = settings.formula_params
+    slots = settings.roster_slots
+    share = 0.0
+    flex = int(slots.get("FLEX", 0))
+    if flex and position in FLEX_POSITIONS:
+        weights = {
+            Position.RB: float(params.flex_weights.get("RB", 0.45)),
+            Position.WR: float(params.flex_weights.get("WR", 0.45)),
+            Position.TE: float(params.flex_weights.get("TE", 0.10)),
+        }
+        total = sum(weights.values())
+        if total > 0:
+            share += flex * weights[position] / total
+    superflex = int(slots.get("SUPERFLEX", slots.get("SF", 0)))
+    if superflex and position in SUPERFLEX_POSITIONS:
+        weights = {
+            Position.QB: float(params.superflex_weights.get("QB", 0.65)),
+            Position.RB: float(params.superflex_weights.get("RB", 0.15)),
+            Position.WR: float(params.superflex_weights.get("WR", 0.15)),
+            Position.TE: float(params.superflex_weights.get("TE", 0.05)),
+        }
+        total = sum(weights.values())
+        if total > 0:
+            share += superflex * weights[position] / total
+    return share
+
+
+def starter_capacity(position: Position, settings: LeagueSettings) -> float:
+    direct = int(settings.roster_slots.get(position.value, 0))
+    capacity = direct + _flex_share(position, settings)
+    cap = _effective_position_cap(position, settings)
+    if cap is not None:
+        capacity = min(capacity, float(cap))
+    return capacity
+
+
+def depth_target(position: Position, settings: LeagueSettings) -> float:
+    capacity = starter_capacity(position, settings)
+    cap = _effective_position_cap(position, settings)
+    if cap is not None:
+        return float(cap)
+    bench = int(settings.roster_slots.get("BENCH", 0))
+    weights = settings.formula_params.depth_bench_weights
+    weight_sum = sum(float(value) for value in weights.values())
+    if bench <= 0 or weight_sum <= 0:
+        return capacity
+    share = bench * float(weights.get(position.value, 0.0)) / weight_sum
+    return capacity + share
+
+
+def _open_required_starters(counts: Mapping[Position, int], settings: LeagueSettings) -> int:
+    open_required = 0
+    for position in (
+        Position.QB,
+        Position.RB,
+        Position.WR,
+        Position.TE,
+    ):
+        required = int(settings.roster_slots.get(position.value, 0))
+        cap = _effective_position_cap(position, settings)
+        if cap is not None:
+            required = min(required, cap)
+        open_required += max(0, required - int(counts.get(position, 0)))
+    return open_required
+
+
+def roster_shape_need(
+    position: Position,
+    roster: Sequence[Player],
+    settings: LeagueSettings,
+    current_round: int,
+) -> float:
+    """V3 roster-construction need: starter holes, RB/WR balance, and depth targets."""
+    params = settings.formula_params
+    counts = Counter(player.position for player in roster)
+    filled = counts[position]
+    direct = int(settings.roster_slots.get(position.value, 0))
+    capacity = starter_capacity(position, settings)
+    target = max(1e-6, depth_target(position, settings))
+    progress = current_round / max(1, settings.rounds)
+    remaining_picks = max(1, settings.rounds - current_round + 1)
+    need = 1.0
+
+    if filled < direct:
+        slot_share = (direct - filled) / max(1, direct)
+        need += params.need_starter_boost * (1.0 + progress) * (0.5 + 0.5 * slot_share)
+    elif filled < capacity:
+        span = max(1e-6, capacity - direct)
+        need += params.need_flex_boost_v3 * (1.0 + progress) * ((capacity - filled) / span)
+    elif filled < target:
+        span = max(1e-6, target - capacity)
+        need += params.need_depth_boost * ((target - filled) / span)
+    else:
+        need -= params.need_over_target_penalty * ((filled - target) + 1.0)
+
+    if position in (Position.RB, Position.WR):
+        rb_target = max(1e-6, depth_target(Position.RB, settings))
+        wr_target = max(1e-6, depth_target(Position.WR, settings))
+        rb_ratio = counts[Position.RB] / rb_target
+        wr_ratio = counts[Position.WR] / wr_target
+        mean_ratio = (rb_ratio + wr_ratio) / 2.0
+        fill_ratio = filled / target
+        need += params.need_balance_weight * (mean_ratio - fill_ratio)
+
+    if filled >= capacity:
+        open_required = _open_required_starters(counts, settings)
+        if open_required > 0:
+            need -= params.need_duplicate_penalty * min(1.0, open_required / remaining_picks)
+
+    return _clamp(need, params.need_v3_floor, params.need_v3_ceiling)
+
+
 def opponent_demand_factor(
     position: Position,
     state: DraftState,
@@ -247,6 +382,27 @@ def guardrail_adjustment(
             adjustment -= weight * min(1.5, imbalance * 0.25)
         elif imbalance <= -2:
             adjustment += weight * 0.25
+    if settings.formula_params.formula_version >= 3:
+        params = settings.formula_params
+        counts = Counter(item.position for item in roster)
+        if player.position == Position.TE and counts[Position.TE] >= params.max_te:
+            adjustment -= weight * params.position_cap_penalty_multiple
+        elif player.position == Position.QB:
+            superflex = int(
+                settings.roster_slots.get("SUPERFLEX", settings.roster_slots.get("SF", 0))
+            )
+            cap = max(params.max_qb, 1 + superflex)
+            if counts[Position.QB] >= cap:
+                late_window = (
+                    settings.team_count >= params.backup_qb_min_team_count
+                    and current_round > settings.rounds - params.backup_qb_final_rounds
+                )
+                multiple = (
+                    params.backup_qb_window_penalty_multiple
+                    if late_window
+                    else params.position_cap_penalty_multiple
+                )
+                adjustment -= weight * multiple
     return adjustment
 
 
@@ -296,9 +452,11 @@ def recommend(
     if limit < 1:
         raise ValueError("limit must be positive")
     params = settings.formula_params
-    if params.formula_version >= 2:
+    if params.formula_version == 1:
+        return _recommend_v1(players, state, settings, adjustments, limit)
+    if params.formula_version == 2:
         return _recommend_v2(players, state, settings, adjustments, limit)
-    return _recommend_v1(players, state, settings, adjustments, limit)
+    return _recommend_v3(players, state, settings, adjustments, limit)
 
 
 def _recommend_v1(
@@ -485,6 +643,187 @@ def _recommend_v2(
             label = RecommendationLabel.BEST_PICK
         labeled.append(replace(result, tier_label=label))
     return labeled
+
+
+def _recommend_v3(
+    players: Sequence[Player],
+    state: DraftState,
+    settings: LeagueSettings,
+    adjustments: Mapping[str, UserAdjustment] | None,
+    limit: int,
+) -> list[RecommendationResult]:
+    params = settings.formula_params
+    adjustments = adjustments or {}
+    drafted_ids = {pick.player_id for pick in state.pick_history}
+    adjusted_all = [effective_player(player, adjustments.get(player.id)) for player in players]
+    available = [player for player in adjusted_all if player.id not in drafted_ids]
+    if params.exclude_avoid_tag:
+        available = [
+            player
+            for player in available
+            if adjustments.get(player.id) is None or adjustments[player.id].tag != "avoid"
+        ]
+    player_map = {player.id: player for player in adjusted_all}
+    levels = replacement_levels(adjusted_all, settings)
+    roster = [
+        player_map[player_id]
+        for player_id in state.rosters.get(settings.user_team_id, ())
+        if player_id in player_map
+    ]
+    current_round = (state.current_pick - 1) // settings.team_count + 1
+    until_next = picks_until_team_turn(state, settings.user_team_id)
+    caps = position_caps_map(settings)
+    marginals = {
+        player.id: marginal_value(player, roster, settings, levels, params, caps)
+        for player in available
+    }
+    survival_by_id = {
+        player.id: survival_probability(player, state.current_pick, until_next, params)
+        for player in available
+    }
+    raw_need_by_id = {
+        player.id: roster_shape_need(player.position, roster, settings, current_round)
+        for player in available
+    }
+    loss_by_id = {
+        player.id: wait_loss(player, available, marginals, survival_by_id) for player in available
+    }
+    base_by_id = {
+        player.id: marginals[player.id] + params.wait_loss_weight * loss_by_id[player.id]
+        for player in available
+    }
+    needed_bases = [
+        base_by_id[player.id] for player in available if raw_need_by_id[player.id] >= 1.0
+    ]
+    best_needed_base = max(needed_bases) if needed_bases else None
+    scored: list[RecommendationResult] = []
+    for player in available:
+        player_vorp = vorp(player, levels)
+        survival = survival_by_id[player.id]
+        marginal = marginals[player.id]
+        loss = loss_by_id[player.id]
+        cliff = tier_cliff_urgency(player, available, survival)
+        demand = 1.0
+        guardrail = guardrail_adjustment(player, marginal, roster, settings, current_round)
+        need = raw_need_by_id[player.id]
+        base = base_by_id[player.id]
+        overridden = False
+        if (
+            best_needed_base is not None
+            and base - best_needed_base >= params.need_override_points
+            and need < 1.0
+        ):
+            need = 1.0
+            overridden = True
+        adjustment = adjustments.get(player.id)
+        opinion = adjustment.points_delta if adjustment else 0.0
+        tag_bonus = params.my_guy_bonus if adjustment and adjustment.tag == "myGuy" else 0.0
+        score = (base * need) + guardrail + tag_bonus
+        reasons = _reasons_v3(
+            player,
+            player_vorp,
+            marginal,
+            loss,
+            cliff,
+            survival,
+            need,
+            guardrail,
+            adjustment,
+            roster,
+            settings,
+            current_round,
+            overridden,
+        )
+        scored.append(
+            RecommendationResult(
+                player.id,
+                player.name,
+                player.position,
+                round(score, 4),
+                RecommendationLabel.BEST_PICK,
+                RecommendationBreakdown(
+                    round(player_vorp, 4),
+                    round(cliff, 4),
+                    round(survival, 4),
+                    round(need, 4),
+                    round(demand, 4),
+                    round(guardrail, 4),
+                    round(opinion, 4),
+                    round(marginal, 4),
+                    round(loss, 4),
+                ),
+                reasons,
+            )
+        )
+    scored.sort(
+        key=lambda result: (
+            -result.dvs_score,
+            player_map[result.player_id].adp or float("inf"),
+            result.player_id,
+        )
+    )
+    labeled: list[RecommendationResult] = []
+    for index, result in enumerate(scored[:limit]):
+        breakdown = result.breakdown
+        if (
+            breakdown.marginal_value >= params.value_min
+            and breakdown.wait_loss >= params.urgent_wait_loss
+        ):
+            label = RecommendationLabel.CANT_PASS
+        elif (
+            index > 0
+            and breakdown.survival_probability >= params.safe_to_wait_survival_min
+            and breakdown.wait_loss <= params.safe_wait_loss
+        ):
+            label = RecommendationLabel.SAFE_TO_WAIT
+        else:
+            label = RecommendationLabel.BEST_PICK
+        labeled.append(replace(result, tier_label=label))
+    return labeled
+
+
+def _reasons_v3(
+    player: Player,
+    player_vorp: float,
+    marginal: float,
+    loss: float,
+    cliff: float,
+    survival: float,
+    need: float,
+    guardrail: float,
+    adjustment: UserAdjustment | None,
+    roster: Sequence[Player],
+    settings: LeagueSettings,
+    current_round: int,
+    overridden: bool,
+) -> tuple[str, ...]:
+    reasons = list(
+        _reasons_v2(player_vorp, marginal, loss, cliff, survival, guardrail, adjustment)
+    )
+    counts = Counter(item.position for item in roster)
+    direct = int(settings.roster_slots.get(player.position.value, 0))
+    if overridden:
+        reasons.append("elite value overrides roster need")
+    elif need > 1.05:
+        if counts[player.position] < direct:
+            reasons.append("fills an open starter slot")
+        else:
+            reasons.append("fills a roster need")
+    elif need < 0.9:
+        reasons.append("position already filled")
+    if player.position == Position.TE and counts[Position.TE] >= settings.formula_params.max_te:
+        reasons.append("roster already has a TE")
+    if player.position == Position.QB:
+        cap = _effective_position_cap(Position.QB, settings) or settings.formula_params.max_qb
+        if counts[Position.QB] >= cap:
+            late_window = (
+                settings.team_count >= settings.formula_params.backup_qb_min_team_count
+                and current_round
+                > settings.rounds - settings.formula_params.backup_qb_final_rounds
+            )
+            if late_window:
+                reasons.append("backup QB only late")
+    return tuple(reasons)
 
 
 def _reasons_v2(

@@ -119,7 +119,7 @@ function RecommendationCard({ recommendation, rank }: { recommendation: Recommen
     <details className="mt-3"><summary className="cursor-pointer text-xs font-semibold text-muted">Why this pick?</summary><div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
       <ScoreBar label="VORP" value={recommendation.breakdown.vorp} title="Points above a replacement starter at this position" />
       <ScoreBar label="Tier urgency" value={recommendation.breakdown.tierUrgency} max={30} title="How close this talent tier is to running out" />
-      <ScoreBar label="Need multiplier" value={recommendation.breakdown.needMultiplier} max={1.5} title="How much your roster still needs this position" />
+      <ScoreBar label="Need multiplier" value={recommendation.breakdown.needMultiplier} max={2} title="How much your roster still needs this position" />
       <ScoreBar label="Survival chance" value={recommendation.breakdown.survivalProbability * 100} title="Odds this player lasts until your next pick" />
     </div></details>
     <button className="mt-4 w-full rounded-lg bg-mint/10 py-2 text-xs font-bold text-mint hover:bg-mint/20" onClick={() => void draftPlayer(player)}>Draft {player.name} · {destLabel}</button>

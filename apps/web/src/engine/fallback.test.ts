@@ -15,6 +15,20 @@ describe('development fallback scorer', () => {
     }))
   })
 
+  it('suppresses a second tight end after one is rostered', () => {
+    const picks = [{
+      id: 'p1',
+      pickNumber: 1,
+      teamId: defaultLeague.userTeam,
+      playerId: 'seed-16',
+      playerName: 'Sam LaPorta',
+      position: 'TE' as const,
+      timestamp: 1
+    }]
+    const result = developmentFallbackScore(fallbackFixturePlayers, picks, defaultLeague)
+    expect(result.slice(0, 3).map((recommendation) => recommendation.playerId)).not.toContain('seed-21')
+  })
+
   it('suppresses kicker and defense before final rounds', () => {
     const result = developmentFallbackScore(fallbackFixturePlayers, [], defaultLeague)
     expect(result.map((recommendation) => recommendation.playerId)).not.toContain('seed-24')

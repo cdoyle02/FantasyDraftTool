@@ -30,7 +30,13 @@ export function developmentFallbackScore(
     const survivalProbability = Math.max(0.08, Math.min(0.94, 1 - (picks.length + settings.teamCount - player.adp) / 35))
     const target = settings.rosterSlots[player.position] ?? 1
     const needMultiplier = Math.max(0.72, 1.22 - (counts[player.position] ?? 0) / Math.max(1, target) * 0.28)
-    const guardrailAdjustment = ['K', 'DST'].includes(player.position) && round < 13 ? -80 : 0
+    const totalRounds = Object.values(settings.rosterSlots).reduce((sum, value) => sum + value, 0)
+    let guardrailAdjustment = ['K', 'DST'].includes(player.position) && round < 13 ? -80 : 0
+    if (player.position === 'TE' && (counts.TE ?? 0) >= 1) {
+      guardrailAdjustment -= 72
+    } else if (player.position === 'QB' && (counts.QB ?? 0) >= 1) {
+      guardrailAdjustment -= round > totalRounds - 3 ? 6 : 72
+    }
     const opponentDemandFactor = 1
     const tagAdjustment = opinion?.tag === 'myGuy' ? 6 : opinion?.tag === 'avoid' ? -1000 : 0
     const dvsScore = vorp * needMultiplier + tierUrgency * (1 - survivalProbability) + (opinion?.pointsDelta ?? 0) + tagAdjustment + guardrailAdjustment
