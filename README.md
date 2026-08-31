@@ -38,6 +38,21 @@ Open `http://localhost:5173`. The API defaults to `http://localhost:8000`;
 put `VITE_API_BASE_URL` in `apps/web/.env.local` to override the web client and
 set the API variables from `.env.example` in the API process environment.
 
+### Windows: `git pull` Permission denied on `.git/FETCH_HEAD`
+
+On this machine, Git can fail with `cannot open '.git/FETCH_HEAD': Permission denied`
+when the Windows Hidden attribute is set on files inside `.git`. That is usually
+not a real ACL/lock problem. From the repo root in PowerShell or cmd:
+
+```bat
+attrib -h /s /d .git\*
+attrib +h .git
+```
+
+Leave `.git` itself hidden. If the error comes back, a sandboxed process (for
+example Codex sandbox SIDs on the file ACL) may be remounting the folder and
+re-hiding files.
+
 ## Checks
 
 ```bash
