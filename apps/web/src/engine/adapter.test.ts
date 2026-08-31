@@ -11,7 +11,6 @@ describe('offline Python worker', () => {
 
     expect(createOfflineWorker()).toBe(worker)
     expect(WorkerMock).toHaveBeenCalledTimes(1)
-    expect(WorkerMock.mock.calls[0][1]).toEqual({ type: 'module' })
-    expect(WorkerMock.mock.calls[0][0]).toBeInstanceOf(URL)
+    expect(WorkerMock).toHaveBeenCalledWith(expect.any(URL), { type: 'module' })
   })
 })

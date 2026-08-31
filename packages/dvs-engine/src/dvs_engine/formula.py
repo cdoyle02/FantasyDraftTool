@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import math
 from collections import Counter
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import replace
-from typing import Iterable, Mapping, Sequence
 
 from .draft import validate_state
 from .lineup import marginal_value
@@ -217,7 +217,9 @@ def opponent_demand_factor(
         )
         if count < int(settings.roster_slots.get(position.value, 0)):
             needing += 1
-    return 1.0 if not opponents else 1.0 + settings.formula_params.opponent_demand_weight * needing / opponents
+    if not opponents:
+        return 1.0
+    return 1.0 + settings.formula_params.opponent_demand_weight * needing / opponents
 
 
 def guardrail_adjustment(
