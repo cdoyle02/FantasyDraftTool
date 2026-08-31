@@ -105,4 +105,40 @@ describe('snake board rosters', () => {
     expect(screen.getByTestId('roster-view-team')).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByTestId('roster-team-detail-2')).toHaveTextContent('Bravo Receiver')
   })
+
+  it('highlights the team on the clock in board view', () => {
+    render(<Rosters />)
+    expect(screen.getByTestId('roster-team-4')).toHaveAttribute('data-on-clock', 'true')
+    expect(screen.getByTestId('roster-team-1')).not.toHaveAttribute('data-on-clock')
+    expect(screen.getByTestId('roster-team-2')).not.toHaveAttribute('data-on-clock')
+    expect(screen.getByTestId('roster-team-3')).not.toHaveAttribute('data-on-clock')
+    expect(screen.getByTestId('roster-team-4')).toHaveTextContent('ON CLOCK')
+  })
+
+  it('moves on-clock highlight after the next pick', () => {
+    useDraftStore.setState({
+      settings: { ...defaultLeague, teamCount: 4, userTeam: 1 },
+      picks: [
+        pick({ id: '1', pickNumber: 1, playerName: 'Alpha Runner' }),
+        pick({ id: '2', pickNumber: 2, playerName: 'Bravo Receiver' }),
+        pick({ id: '3', pickNumber: 3, playerName: 'Charlie Back' }),
+        pick({ id: '4', pickNumber: 4, playerName: 'Delta Tight' })
+      ]
+    })
+    render(<Rosters />)
+    expect(screen.getByTestId('roster-team-4')).toHaveAttribute('data-on-clock', 'true')
+    expect(screen.getByTestId('roster-team-1')).not.toHaveAttribute('data-on-clock')
+  })
+
+  it('shows both YOU and ON CLOCK when user team is on the clock', () => {
+    useDraftStore.setState({
+      settings: { ...defaultLeague, teamCount: 4, userTeam: 1 },
+      picks: []
+    })
+    render(<Rosters />)
+    const team1 = screen.getByTestId('roster-team-1')
+    expect(team1).toHaveAttribute('data-on-clock', 'true')
+    expect(team1).toHaveTextContent('YOU')
+    expect(team1).toHaveTextContent('ON CLOCK')
+  })
 })

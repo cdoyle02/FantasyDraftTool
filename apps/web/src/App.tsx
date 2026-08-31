@@ -145,6 +145,13 @@ function TeamLineup({ roster, rosterSlots }: { roster: DraftPick[]; rosterSlots:
   </div>
 }
 
+function rosterBoardRowClass(isUser: boolean, isOnClock: boolean) {
+  if (isUser && isOnClock) return 'border-mint/40 bg-mint/5 border-l-4 border-l-lime'
+  if (isUser) return 'border-mint/40 bg-mint/5'
+  if (isOnClock) return 'border-lime/50 bg-lime/[.06] shadow-[0_0_20px_rgba(198,245,111,.08)]'
+  return 'border-line bg-ink/30'
+}
+
 export function Rosters() {
   const { picks, settings } = useDraftStore()
   const [view, setView] = useState<'board' | 'team'>('board')
@@ -159,6 +166,7 @@ export function Rosters() {
     setView('team')
   }
 
+  const onClockTeam = teamForPick(picks.length + 1, settings.teamCount)
   const selectedRoster = rosterForTeam(picks, selectedTeam, settings.teamCount)
 
   return <section className="panel lg:col-span-3" data-testid="snake-board">
@@ -184,9 +192,10 @@ export function Rosters() {
         const roster = rosterForTeam(picks, team, settings.teamCount)
         const latest = roster.at(-1)
         const isUser = team === settings.userTeam
-        return <details key={team} data-testid={`roster-team-${team}`} open={isUser ? true : undefined} className={`rounded-lg border ${isUser ? 'border-mint/40 bg-mint/5' : 'border-line bg-ink/30'}`}>
+        const isOnClock = team === onClockTeam
+        return <details key={team} data-testid={`roster-team-${team}`} data-on-clock={isOnClock || undefined} open={isUser ? true : undefined} className={`rounded-lg border ${rosterBoardRowClass(isUser, isOnClock)}`}>
           <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-3">
-            <span className="text-xs font-semibold">Team {team} {isUser && <span className="ml-1 text-mint">YOU</span>}</span>
+            <span className="text-xs font-semibold">Team {team} {isUser && <span className="ml-1 text-mint">YOU</span>}{isOnClock && <span className="ml-1 text-[10px] font-bold uppercase tracking-wide text-lime">ON CLOCK</span>}</span>
             <span className="flex min-w-0 items-center gap-2">
               <button type="button" data-testid={`view-team-${team}`} className="shrink-0 text-[10px] font-semibold text-mint hover:underline" onClick={(event) => { event.preventDefault(); openTeamView(team) }}>View roster</button>
               <span className="min-w-0 truncate text-right text-[10px] text-muted">
