@@ -75,3 +75,21 @@ Phase 1 targets full-PPR snake redraft leagues with configurable roster settings
 FantasyPros-style CSV imports, fast manual pick entry, persistent player
 adjustments, and explainable recommendations. Opponent demand modeling, Sleeper
 sync, simulations, and accounts are later phases.
+
+## Default player pool
+
+The web app ships a committed expert-pooled rankings seed (QB/RB/WR/TE/K/DST),
+not the old 25-player demo. First visit loads it automatically. Existing
+browsers still on the demo are upgraded in place. A **Load bundled rankings**
+button replaces a CSV import without wiping boosts, fades, or tags.
+
+Refresh the board by re-running the generator and rebuilding — there is no live
+FantasyPros fetch in the app:
+
+```bash
+uv run python tools/rankings/generate.py
+```
+
+See [`tools/rankings/README.md`](tools/rankings/README.md). Set
+`FANTASYPROS_API_KEY` in the environment, or drop exported CSVs in
+`tools/rankings/inbox/`.

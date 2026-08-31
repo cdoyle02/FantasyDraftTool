@@ -32,5 +32,5 @@ warn_unused_configs = true
 
 [tool.pytest.ini_options]
 addopts = "-q"
-testpaths = ["packages/dvs-engine/tests", "apps/api/tests"]
-pythonpath = ["apps/api/src", "packages/dvs-engine/src"]
+testpaths = ["packages/dvs-engine/tests", "apps/api/tests", "tools/rankings/tests"]
+pythonpath = ["apps/api/src", "packages/dvs-engine/src", "tools/rankings"]

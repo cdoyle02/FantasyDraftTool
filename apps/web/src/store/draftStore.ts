@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { db, queueEvent } from '../data/db'
-import { seedPlayers } from '../data/seed'
+import { SEED_VERSION, isLegacyDemoPool, seedPlayers } from '../data/seed'
 import type { DraftPick, LeagueSettings, Player, Recommendation, UserAdjustment } from '../types'
 import { defaultLeague } from '../types'
 import { getRecommendations, prepareOfflineEngine, type EngineMode } from '../engine/adapter'
@@ -17,6 +17,7 @@ interface DraftStore {
   hydrated: boolean
   hydrate: () => Promise<void>
   importPlayers: (players: Player[]) => Promise<void>
+  loadBundledRankings: () => Promise<void>
   draftPlayer: (player: Player) => Promise<void>
   correctPick: (id: string, player: Player) => Promise<void>
   undoLastPick: () => Promise<void>
@@ -51,8 +52,15 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       db.picks.orderBy('pickNumber').toArray(),
       db.settings.get('active')
     ])
-    const players = storedPlayers.length ? storedPlayers : seedPlayers
-    if (!storedPlayers.length) await db.players.bulkPut(players)
+    const shouldLoadBundle = !storedPlayers.length || isLegacyDemoPool(storedPlayers)
+    const players = shouldLoadBundle ? seedPlayers : storedPlayers
+    if (shouldLoadBundle) {
+      await db.transaction('rw', db.players, db.meta, async () => {
+        if (storedPlayers.length) await db.players.clear()
+        await db.players.bulkPut(players)
+        await db.meta.put({ id: 'seed', version: SEED_VERSION })
+      })
+    }
     set({
       players,
       adjustments: Object.fromEntries(storedAdjustments.map((item) => [item.playerId, item])),
@@ -80,6 +88,10 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
     })
     set({ players })
     await get().refreshRecommendations()
+  },
+  loadBundledRankings: async () => {
+    await get().importPlayers(seedPlayers)
+    await db.meta.put({ id: 'seed', version: SEED_VERSION })
   },
   draftPlayer: async (player) => {
     if (get().picks.some((pick) => pick.playerId === player.id)) return

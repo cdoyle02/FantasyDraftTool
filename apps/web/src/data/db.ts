@@ -1,6 +1,11 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { DraftPick, LeagueSettings, Player, UserAdjustment } from '../types'
 
+export interface SeedMeta {
+  id: 'seed'
+  version: string
+}
+
 export interface QueueEvent {
   id: string
   type: 'PICK_CREATED' | 'PICK_UNDONE' | 'PICK_REMOVED' | 'PICK_CORRECTED' | 'PLAYER_ADJUSTED' | 'CSV_IMPORTED' | 'SETTINGS_UPDATED'
@@ -15,6 +20,7 @@ class DraftDatabase extends Dexie {
   settings!: EntityTable<LeagueSettings & { id: string }, 'id'>
   adjustments!: EntityTable<UserAdjustment, 'playerId'>
   events!: EntityTable<QueueEvent, 'id'>
+  meta!: EntityTable<SeedMeta, 'id'>
 
   constructor() {
     super('fantasy-draft-tool')
@@ -30,6 +36,14 @@ class DraftDatabase extends Dexie {
       settings: 'id',
       adjustments: 'playerId, tag',
       events: 'id, status, createdAt'
+    })
+    this.version(3).stores({
+      players: 'id, name, position, adp',
+      picks: 'id, pickNumber, teamId, playerId',
+      settings: 'id',
+      adjustments: 'playerId, tag',
+      events: 'id, status, createdAt',
+      meta: 'id'
     })
   }
 }

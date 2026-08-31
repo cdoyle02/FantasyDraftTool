@@ -193,7 +193,7 @@ function PickHistory({ onCorrect }: { onCorrect: (id: string) => void }) {
 }
 
 export default function App() {
-  const { hydrate, hydrated, refreshRecommendations, settings, players, adjustments, picks, recommendations, engineMode, engineWarning, offlineReady } = useDraftStore()
+  const { hydrate, hydrated, refreshRecommendations, loadBundledRankings, settings, players, adjustments, picks, recommendations, engineMode, engineWarning, offlineReady } = useDraftStore()
   const [modal, setModal] = useState<'setup' | 'import' | null>(null)
   const [correctionId, setCorrectionId] = useState<string>()
   const [online, setOnline] = useState(navigator.onLine)
@@ -229,7 +229,18 @@ export default function App() {
     <header className="sticky top-0 z-20 border-b border-line bg-ink/95 backdrop-blur">
       <div className="mx-auto flex max-w-[1600px] items-center gap-3 px-4 py-3 sm:px-6"><div className="grid h-9 w-9 place-items-center rounded-lg bg-mint font-black text-ink">F</div><div className="mr-auto"><h1 className="text-sm font-bold sm:text-base">Fantasy Draft Tool</h1><p className="hidden text-[10px] text-muted sm:block">{settings.name} · {settings.scoring.replace('_', ' ')} · Snake</p></div>
         <div data-testid="offline-status" data-ready={offlineReady} className={`flex items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${offlineReady ? 'border-mint/30 text-mint' : 'border-amber-300/30 text-amber-200'}`}><span className={`h-1.5 w-1.5 rounded-full ${offlineReady ? 'bg-mint' : 'bg-amber-300'}`} /><span className="hidden sm:inline">{online ? (offlineReady ? 'ONLINE · OFFLINE READY' : 'ONLINE · PREPARING OFFLINE') : (offlineReady ? 'OFFLINE READY' : 'OFFLINE NOT READY')}</span><span className="sm:hidden">{offlineReady ? 'READY' : 'SETUP'}</span></div>
-        <button className="button-secondary" onClick={exportBackup}>Export</button><button className="button-secondary" onClick={() => setModal('import')}>Import CSV</button><button className="button-secondary" onClick={() => setModal('setup')}>League setup</button>
+        <button className="button-secondary" onClick={exportBackup}>Export</button>
+        <button
+          className="button-secondary"
+          title="Replace the player pool with the committed expert rankings. Does not fetch from the internet."
+          onClick={() => {
+            if (window.confirm('Replace the current player pool with the bundled expert rankings? Boosts, fades, and tags stay.')) {
+              void loadBundledRankings()
+            }
+          }}
+        >Load bundled rankings</button>
+        <button className="button-secondary" onClick={() => setModal('import')}>Import CSV</button>
+        <button className="button-secondary" onClick={() => setModal('setup')}>League setup</button>
       </div>
     </header>
     <main className="mx-auto max-w-[1600px] p-4 sm:p-6">

@@ -1,0 +1,54 @@
+{
+  "season": 2026,
+  "scoring": "PPR",
+  "accuracyYear": 2025,
+  "poolSize": 5,
+  "k": 0.6,
+  "nudgeClamp": 8.0,
+  "missingAdpDefault": 250,
+  "gapTierThreshold": 4,
+  "positions": {
+    "QB": [
+      {"name": "Justin Elick", "source": "Daily Fantasy Circuit"},
+      {"name": "Seth Miller", "source": "Crossroads Fantasy Football"},
+      {"name": "Guilherme Gianni", "source": "Fantasy Futebolista"},
+      {"name": "Michael Bobal", "source": "SquareEdgeMike"},
+      {"name": "Marc Shannep", "source": "Fantasy Knockout"}
+    ],
+    "RB": [
+      {"name": "Jason Willan", "source": "Gridiron Experts"},
+      {"name": "Guilherme Gianni", "source": "Fantasy Futebolista"},
+      {"name": "Michael Bobal", "source": "SquareEdgeMike"},
+      {"name": "Seth Miller", "source": "Crossroads Fantasy Football"},
+      {"name": "Marc Shannep", "source": "Fantasy Knockout"}
+    ],
+    "WR": [
+      {"name": "Seth Miller", "source": "Crossroads Fantasy Football"},
+      {"name": "Guilherme Gianni", "source": "Fantasy Futebolista"},
+      {"name": "Michael Bobal", "source": "SquareEdgeMike"},
+      {"name": "Jason Willan", "source": "Gridiron Experts"},
+      {"name": "Marc Shannep", "source": "Fantasy Knockout"}
+    ],
+    "TE": [
+      {"name": "Matthew Mutchler", "source": "Fantasy Sports Advice Network"},
+      {"name": "Seth Miller", "source": "Crossroads Fantasy Football"},
+      {"name": "Guilherme Gianni", "source": "Fantasy Futebolista"},
+      {"name": "Michael Bobal", "source": "SquareEdgeMike"},
+      {"name": "Jason Willan", "source": "Gridiron Experts"}
+    ],
+    "K": [
+      {"name": "Ben Wasley", "source": "The Fantasy First Down"},
+      {"name": "Seth Miller", "source": "Crossroads Fantasy Football"},
+      {"name": "Guilherme Gianni", "source": "Fantasy Futebolista"},
+      {"name": "Michael Bobal", "source": "SquareEdgeMike"},
+      {"name": "Jason Willan", "source": "Gridiron Experts"}
+    ],
+    "DST": [
+      {"name": "Brandon Murchison", "source": "RotoBaller"},
+      {"name": "Seth Miller", "source": "Crossroads Fantasy Football"},
+      {"name": "Guilherme Gianni", "source": "Fantasy Futebolista"},
+      {"name": "Michael Bobal", "source": "SquareEdgeMike"},
+      {"name": "Jason Willan", "source": "Gridiron Experts"}
+    ]
+  }
+}

@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { seedPlayers } from '../data/seed'
 import { defaultLeague } from '../types'
 import { developmentFallbackScore } from './fallback'
+import { fallbackFixturePlayers } from './fallback.fixture'
 
 describe('development fallback scorer', () => {
   it('ranks available players and exposes explainable components', () => {
-    const recommendations = developmentFallbackScore(seedPlayers, [], defaultLeague)
+    const recommendations = developmentFallbackScore(fallbackFixturePlayers, [], defaultLeague)
     expect(recommendations).toHaveLength(8)
     expect(recommendations[0].dvsScore).toBeGreaterThan(recommendations[1].dvsScore)
     expect(recommendations[0].breakdown).toEqual(expect.objectContaining({
@@ -16,7 +16,7 @@ describe('development fallback scorer', () => {
   })
 
   it('suppresses kicker and defense before final rounds', () => {
-    const result = developmentFallbackScore(seedPlayers, [], defaultLeague)
+    const result = developmentFallbackScore(fallbackFixturePlayers, [], defaultLeague)
     expect(result.map((recommendation) => recommendation.playerId)).not.toContain('seed-24')
   })
 })
