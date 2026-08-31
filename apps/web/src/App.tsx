@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { parsePlayerCsv } from './data/csv'
 import { rosterForTeam, roundForPick, teamForPick, useDraftStore } from './store/draftStore'
-import type { Player, Recommendation, UserAdjustment } from './types'
+import { assignRosterSlots, SLOT_LABELS } from './store/rosterSlots'
+import type { DraftPick, LeagueSettings, Player, Recommendation, UserAdjustment } from './types'
 
 const positionStyle: Record<Player['position'], string> = {
   QB: 'bg-violet-400/15 text-violet-300',
@@ -175,28 +176,87 @@ function AvailablePlayers() {
   </section>
 }
 
+function RosterPickRow({ pick, teamCount }: { pick: DraftPick; teamCount: number }) {
+  return <div className="flex items-center gap-2 rounded bg-black/10 px-2 py-1.5 text-xs"><span className="w-6 shrink-0 font-mono text-[10px] text-muted">R{roundForPick(pick.pickNumber, teamCount)}</span><PositionPill position={pick.position} /><span className="truncate">{pick.playerName}</span></div>
+}
+
+function RosterPickList({ roster, teamCount }: { roster: DraftPick[]; teamCount: number }) {
+  return <div className="space-y-1">{roster.map((pick) => <RosterPickRow key={pick.id} pick={pick} teamCount={teamCount} />)}{!roster.length && <p className="p-2 text-xs text-muted">No picks yet.</p>}</div>
+}
+
+function TeamLineup({ roster, rosterSlots }: { roster: DraftPick[]; rosterSlots: LeagueSettings['rosterSlots'] }) {
+  const fills = assignRosterSlots(roster, rosterSlots)
+  return <div className="space-y-1" data-testid="team-lineup">
+    {fills.map((fill, index) => {
+      const kindIndex = fills.slice(0, index).filter((row) => row.slot === fill.slot).length
+      return <div key={`${fill.slot}-${index}`} data-testid={`roster-slot-${fill.slot}-${kindIndex}`} className="flex items-center gap-2 rounded bg-black/10 px-2 py-1.5 text-xs">
+        <span className="w-9 shrink-0 font-mono text-[10px] font-bold text-muted">{SLOT_LABELS[fill.slot]}</span>
+        {fill.pick
+          ? <><PositionPill position={fill.pick.position} /><span className="truncate">{fill.pick.playerName}</span></>
+          : <span className="text-muted">—</span>}
+      </div>
+    })}
+  </div>
+}
+
 export function Rosters() {
   const { picks, settings } = useDraftStore()
-  return <section className="panel lg:col-span-3" data-testid="snake-board"><div className="panel-heading"><div><p className="eyebrow">Snake board</p><h2>League rosters</h2></div><span className="text-xs text-muted">{settings.teamCount} teams</span></div>
-    <div className="max-h-[490px] space-y-2 overflow-auto p-3">{Array.from({ length: settings.teamCount }, (_, index) => index + 1).map((team) => {
-      const roster = rosterForTeam(picks, team, settings.teamCount)
-      const latest = roster.at(-1)
-      const isUser = team === settings.userTeam
-      return <details key={team} data-testid={`roster-team-${team}`} open={isUser ? true : undefined} className={`rounded-lg border ${isUser ? 'border-mint/40 bg-mint/5' : 'border-line bg-ink/30'}`}>
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-3">
-          <span className="text-xs font-semibold">Team {team} {isUser && <span className="ml-1 text-mint">YOU</span>}</span>
-          <span className="min-w-0 truncate text-right text-[10px] text-muted">
-            {latest
-              ? <span className="inline-flex max-w-full items-center gap-1.5"><span className="font-mono">R{roundForPick(latest.pickNumber, settings.teamCount)}</span><span className="truncate">{latest.playerName}</span></span>
-              : `${roster.length} picks`}
-          </span>
-        </summary>
-        <div className="space-y-1 border-t border-line/60 p-2">
-          {roster.map((pick) => <div key={pick.id} className="flex items-center gap-2 rounded bg-black/10 px-2 py-1.5 text-xs"><span className="w-6 shrink-0 font-mono text-[10px] text-muted">R{roundForPick(pick.pickNumber, settings.teamCount)}</span><PositionPill position={pick.position} /><span className="truncate">{pick.playerName}</span></div>)}
-          {!roster.length && <p className="p-2 text-xs text-muted">No picks yet.</p>}
-        </div>
-      </details>
-    })}</div>
+  const [view, setView] = useState<'board' | 'team'>('board')
+  const [selectedTeam, setSelectedTeam] = useState(settings.userTeam)
+
+  useEffect(() => {
+    setSelectedTeam((current) => Math.min(Math.max(1, current), settings.teamCount))
+  }, [settings.userTeam, settings.teamCount])
+
+  const openTeamView = (team: number) => {
+    setSelectedTeam(team)
+    setView('team')
+  }
+
+  const selectedRoster = rosterForTeam(picks, selectedTeam, settings.teamCount)
+
+  return <section className="panel lg:col-span-3" data-testid="snake-board">
+    <div className="panel-heading">
+      <div>
+        <p className="eyebrow">Snake board</p>
+        <h2>League rosters {view === 'team' && <span className="font-normal text-muted">{selectedRoster.length} picks</span>}</h2>
+      </div>
+      <div className="flex gap-1" role="tablist" aria-label="Roster view">
+        {(['board', 'team'] as const).map((item) => <button key={item} role="tab" aria-selected={view === item} data-testid={`roster-view-${item}`} onClick={() => setView(item)} className={`rounded-md px-2.5 py-1 text-[11px] font-bold capitalize ${view === item ? 'bg-mint text-ink' : 'text-muted hover:bg-white/5'}`}>{item}</button>)}
+      </div>
+    </div>
+    {view === 'team' && <div className="flex gap-1 overflow-x-auto border-b border-line px-3 py-2" role="tablist" aria-label="Select team">
+      {Array.from({ length: settings.teamCount }, (_, index) => index + 1).map((team) => {
+        const isUser = team === settings.userTeam
+        return <button key={team} role="tab" aria-selected={selectedTeam === team} data-testid={`roster-team-chip-${team}`} onClick={() => setSelectedTeam(team)} className={`shrink-0 rounded-md px-2.5 py-1 text-[11px] font-bold ${selectedTeam === team ? 'bg-mint text-ink' : isUser ? 'border border-mint/40 text-mint hover:bg-mint/5' : 'text-muted hover:bg-white/5'}`}>
+          {isUser ? 'YOU' : `T${team}`}
+        </button>
+      })}
+    </div>}
+    <div className="max-h-[490px] overflow-auto p-3">
+      {view === 'board' ? <div className="space-y-2">{Array.from({ length: settings.teamCount }, (_, index) => index + 1).map((team) => {
+        const roster = rosterForTeam(picks, team, settings.teamCount)
+        const latest = roster.at(-1)
+        const isUser = team === settings.userTeam
+        return <details key={team} data-testid={`roster-team-${team}`} open={isUser ? true : undefined} className={`rounded-lg border ${isUser ? 'border-mint/40 bg-mint/5' : 'border-line bg-ink/30'}`}>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-3">
+            <span className="text-xs font-semibold">Team {team} {isUser && <span className="ml-1 text-mint">YOU</span>}</span>
+            <span className="flex min-w-0 items-center gap-2">
+              <button type="button" data-testid={`view-team-${team}`} className="shrink-0 text-[10px] font-semibold text-mint hover:underline" onClick={(event) => { event.preventDefault(); openTeamView(team) }}>View roster</button>
+              <span className="min-w-0 truncate text-right text-[10px] text-muted">
+                {latest
+                  ? <span className="inline-flex max-w-full items-center gap-1.5"><span className="font-mono">R{roundForPick(latest.pickNumber, settings.teamCount)}</span><span className="truncate">{latest.playerName}</span></span>
+                  : `${roster.length} picks`}
+              </span>
+            </span>
+          </summary>
+          <div className="border-t border-line/60 p-2"><RosterPickList roster={roster} teamCount={settings.teamCount} /></div>
+        </details>
+      })}</div> : <div data-testid={`roster-team-detail-${selectedTeam}`}>
+        <p className="mb-2 text-xs font-semibold">Team {selectedTeam} {selectedTeam === settings.userTeam && <span className="text-mint">YOU</span>}</p>
+        <TeamLineup roster={selectedRoster} rosterSlots={settings.rosterSlots} />
+      </div>}
+    </div>
   </section>
 }
 

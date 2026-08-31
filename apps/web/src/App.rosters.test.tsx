@@ -5,11 +5,11 @@ import { Rosters } from './App'
 import { useDraftStore } from './store/draftStore'
 import { defaultLeague, type DraftPick } from './types'
 
-function pick(partial: Pick<DraftPick, 'id' | 'pickNumber' | 'playerName'>): DraftPick {
+function pick(partial: Pick<DraftPick, 'id' | 'pickNumber' | 'playerName'> & Partial<Pick<DraftPick, 'position'>>): DraftPick {
   return {
     teamId: 1,
     playerId: partial.id,
-    position: 'RB',
+    position: partial.position ?? 'RB',
     timestamp: partial.pickNumber,
     ...partial
   }
@@ -49,5 +49,60 @@ describe('snake board rosters', () => {
     expect(team2).toHaveAttribute('open')
     expect(team2).toHaveTextContent('R1')
     expect(team2).toHaveTextContent('Bravo Receiver')
+  })
+
+  it('shows only the selected team picks in team view', async () => {
+    const user = userEvent.setup()
+    render(<Rosters />)
+    await user.click(screen.getByTestId('roster-view-team'))
+    const detail = screen.getByTestId('roster-team-detail-1')
+    expect(detail).toHaveTextContent('Alpha Runner')
+    expect(detail).not.toHaveTextContent('Bravo Receiver')
+    expect(detail).not.toHaveTextContent('Echo Back')
+    expect(screen.getByTestId('roster-slot-RB-0')).toHaveTextContent('Alpha Runner')
+    expect(screen.getByTestId('roster-slot-QB-0')).toHaveTextContent('—')
+    expect(screen.getByTestId('team-lineup')).toHaveTextContent('FLEX')
+    expect(screen.getByTestId('team-lineup')).toHaveTextContent('BN')
+    await user.click(screen.getByTestId('roster-team-chip-4'))
+    expect(screen.getByTestId('roster-team-detail-4')).toHaveTextContent('Echo Back')
+    expect(screen.getByTestId('roster-slot-RB-0')).toHaveTextContent('Echo Back')
+  })
+
+  it('switches team picks when selecting another team chip', async () => {
+    const user = userEvent.setup()
+    render(<Rosters />)
+    await user.click(screen.getByTestId('roster-view-team'))
+    await user.click(screen.getByTestId('roster-team-chip-2'))
+    const detail = screen.getByTestId('roster-team-detail-2')
+    expect(detail).toHaveTextContent('Bravo Receiver')
+    expect(detail).not.toHaveTextContent('Alpha Runner')
+    expect(detail).not.toHaveTextContent('Echo Back')
+  })
+
+  it('puts extra position players into flex then bench', async () => {
+    useDraftStore.setState({
+      settings: { ...defaultLeague, teamCount: 4, userTeam: 1 },
+      picks: [
+        pick({ id: '1', pickNumber: 1, playerName: 'First RB', position: 'RB' }),
+        pick({ id: '8', pickNumber: 8, playerName: 'Second RB', position: 'RB' }),
+        pick({ id: '9', pickNumber: 9, playerName: 'Third RB', position: 'RB' }),
+        pick({ id: '16', pickNumber: 16, playerName: 'Fourth RB', position: 'RB' })
+      ]
+    })
+    const user = userEvent.setup()
+    render(<Rosters />)
+    await user.click(screen.getByTestId('roster-view-team'))
+    expect(screen.getByTestId('roster-slot-RB-0')).toHaveTextContent('First RB')
+    expect(screen.getByTestId('roster-slot-RB-1')).toHaveTextContent('Second RB')
+    expect(screen.getByTestId('roster-slot-FLEX-0')).toHaveTextContent('Third RB')
+    expect(screen.getByTestId('roster-slot-BENCH-0')).toHaveTextContent('Fourth RB')
+  })
+
+  it('opens team view when clicking view roster on a board row', async () => {
+    const user = userEvent.setup()
+    render(<Rosters />)
+    await user.click(screen.getByTestId('view-team-2'))
+    expect(screen.getByTestId('roster-view-team')).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByTestId('roster-team-detail-2')).toHaveTextContent('Bravo Receiver')
   })
 })

@@ -7,9 +7,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "predev": "node scripts/copy-pyodide.mjs",
     "dev": "vite",
-    "prebuild": "node scripts/copy-pyodide.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint src tests vite.config.ts playwright.config.ts",
