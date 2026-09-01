@@ -117,10 +117,12 @@ function RecommendationCard({ recommendation, rank }: { recommendation: Recommen
       <p className="mt-1 text-xs leading-5 text-muted">{recommendation.explanation}</p>
     </div><div className="text-right"><div className="text-xl font-bold text-mint">{recommendation.dvsScore}</div><div className="text-[9px] uppercase tracking-wider text-muted">DVS</div></div></div>
     <details className="mt-3"><summary className="cursor-pointer text-xs font-semibold text-muted">Why this pick?</summary><div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
-      <ScoreBar label="VORP" value={recommendation.breakdown.vorp} title="Points above a replacement starter at this position" />
-      <ScoreBar label="Tier urgency" value={recommendation.breakdown.tierUrgency} max={30} title="How close this talent tier is to running out" />
-      <ScoreBar label="Need multiplier" value={recommendation.breakdown.needMultiplier} max={2} title="How much your roster still needs this position" />
-      <ScoreBar label="Survival chance" value={recommendation.breakdown.survivalProbability * 100} title="Odds this player lasts until your next pick" />
+      <ScoreBar label="Marginal value" value={recommendation.breakdown.marginalValue} title="Immediate roster value from adding this player" />
+      <ScoreBar label="Wait loss" value={recommendation.breakdown.waitLoss} max={30} title="Expected value lost if you pass and wait" />
+      <ScoreBar label="Tier urgency" value={recommendation.breakdown.tierOpportunityCost ?? recommendation.breakdown.tierUrgency} max={10} title="Expert tier cliff combined with exhaustion risk" />
+      <ScoreBar label="Survival chance" value={(recommendation.breakdown.adjustedSurvivalProbability ?? recommendation.breakdown.survivalProbability) * 100} title="Adjusted odds this player lasts until your next pick" />
+      <ScoreBar label="Next-pick value" value={recommendation.breakdown.expectedNextPickValue ?? 0} title="Expected best value available on your next turn after this pick" />
+      <ScoreBar label="Two-pick path" value={recommendation.breakdown.twoPickPathValue ?? recommendation.dvsScore} title="Combined immediate value plus expected next-pick opportunity" />
     </div></details>
     <button className="mt-4 w-full rounded-lg bg-mint/10 py-2 text-xs font-bold text-mint hover:bg-mint/20" onClick={() => void draftPlayer(player)}>Draft {player.name} · {destLabel}</button>
   </article>

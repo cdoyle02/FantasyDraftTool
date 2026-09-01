@@ -248,6 +248,22 @@ def _flex_share(position: Position, settings: LeagueSettings) -> float:
     return share
 
 
+def expected_startable_slots(settings: LeagueSettings) -> dict[Position, float]:
+    """Weighted direct + FLEX + SUPERFLEX slot counts per position."""
+    slots = settings.roster_slots
+    startable = {
+        Position.QB: float(int(slots.get("QB", 0))),
+        Position.RB: float(int(slots.get("RB", 0))),
+        Position.WR: float(int(slots.get("WR", 0))),
+        Position.TE: float(int(slots.get("TE", 0))),
+        Position.K: float(int(slots.get("K", 0))),
+        Position.DST: float(int(slots.get("DST", 0))),
+    }
+    for position in (Position.QB, Position.RB, Position.WR, Position.TE):
+        startable[position] += _flex_share(position, settings)
+    return startable
+
+
 def starter_capacity(position: Position, settings: LeagueSettings) -> float:
     direct = int(settings.roster_slots.get(position.value, 0))
     capacity = direct + _flex_share(position, settings)
@@ -456,7 +472,11 @@ def recommend(
         return _recommend_v1(players, state, settings, adjustments, limit)
     if params.formula_version == 2:
         return _recommend_v2(players, state, settings, adjustments, limit)
-    return _recommend_v3(players, state, settings, adjustments, limit)
+    if params.formula_version == 3:
+        return _recommend_v3(players, state, settings, adjustments, limit)
+    from .v4 import recommend_v4
+
+    return recommend_v4(players, state, settings, adjustments, limit)
 
 
 def _recommend_v1(
@@ -468,7 +488,7 @@ def _recommend_v1(
 ) -> list[RecommendationResult]:
     params = settings.formula_params
     adjustments = adjustments or {}
-    drafted_ids = {pick.player_id for pick in state.pick_history}
+    drafted_ids = state.drafted_ids
     adjusted_all = [effective_player(player, adjustments.get(player.id)) for player in players]
     available = [player for player in adjusted_all if player.id not in drafted_ids]
     player_map = {player.id: player for player in adjusted_all}
@@ -558,7 +578,7 @@ def _recommend_v2(
 ) -> list[RecommendationResult]:
     params = settings.formula_params
     adjustments = adjustments or {}
-    drafted_ids = {pick.player_id for pick in state.pick_history}
+    drafted_ids = state.drafted_ids
     adjusted_all = [effective_player(player, adjustments.get(player.id)) for player in players]
     available = [player for player in adjusted_all if player.id not in drafted_ids]
     if params.exclude_avoid_tag:
@@ -654,7 +674,7 @@ def _recommend_v3(
 ) -> list[RecommendationResult]:
     params = settings.formula_params
     adjustments = adjustments or {}
-    drafted_ids = {pick.player_id for pick in state.pick_history}
+    drafted_ids = state.drafted_ids
     adjusted_all = [effective_player(player, adjustments.get(player.id)) for player in players]
     available = [player for player in adjusted_all if player.id not in drafted_ids]
     if params.exclude_avoid_tag:

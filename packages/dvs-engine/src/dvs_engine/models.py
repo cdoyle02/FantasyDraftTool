@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from enum import StrEnum
 from typing import Any
 
@@ -93,7 +93,7 @@ def default_depth_bench_weights() -> dict[str, float]:
 class FormulaParams:
     """Tunable DVS coefficients."""
 
-    formula_version: int = 3
+    formula_version: int = 4
     replacement_index_offset: int = 1
     flex_weights: Mapping[str, float] = field(default_factory=default_flex_weights)
     superflex_weights: Mapping[str, float] = field(default_factory=default_superflex_weights)
@@ -142,10 +142,34 @@ class FormulaParams:
     value_min: float = 5.0
     urgent_wait_loss: float = 8.0
     safe_wait_loss: float = 3.0
+    # v4 decision engine
+    lookahead_weight: float = 0.85
+    lookahead_candidates: int = 12
+    lookahead_pool_per_position: int = 6
+    wait_loss_weight_v4: float = 0.35
+    tier_weight: float = 0.30
+    tier_cliff_scale: float = 25.0
+    opponent_demand_weight_v4: float = 0.6
+    opponent_demand_min: float = 0.5
+    opponent_demand_max: float = 2.0
+    survival_calibrate: bool = True
+    run_weight: float = 0.6
+    run_prior_strength: float = 8.0
+    run_window_picks: int = 12
+    need_points_scale: float = 12.0
+    need_points_cap: float = 18.0
+    # v4 labels
+    cant_pass_value_min: float = 5.0
+    cant_pass_wait_loss_min: float = 6.0
+    safe_wait_loss_v4: float = 2.5
+    safe_survival_min_v4: float = 0.70
+    one_turn_sims: int = 48
+    sim_seed: int = 2026
+    sim_pick_pool: int = 40
 
     def __post_init__(self) -> None:
-        if self.formula_version not in (1, 2, 3):
-            raise ValueError("formula_version must be 1, 2, or 3")
+        if self.formula_version not in (1, 2, 3, 4):
+            raise ValueError("formula_version must be 1, 2, 3, or 4")
 
 
 @dataclass(frozen=True, slots=True)
@@ -214,6 +238,10 @@ class DraftState:
             result.setdefault(pick.team_id, []).append(pick.player_id)
         return {team: tuple(players) for team, players in result.items()}
 
+    @property
+    def drafted_ids(self) -> frozenset[str]:
+        return frozenset(pick.player_id for pick in self.pick_history)
+
 
 @dataclass(frozen=True, slots=True)
 class RecommendationBreakdown:
@@ -226,6 +254,20 @@ class RecommendationBreakdown:
     user_adjustment: float
     marginal_value: float = 0.0
     wait_loss: float = 0.0
+    projected_points: float = 0.0
+    immediate_value: float = 0.0
+    adjusted_survival_probability: float = 0.0
+    expected_fallback_value: float = 0.0
+    tier_cliff: float = 0.0
+    players_remaining_in_tier: int = 0
+    tier_exhaustion: float = 0.0
+    tier_opportunity_cost: float = 0.0
+    opponent_need_factor: float = 1.0
+    run_pressure: float = 1.0
+    expected_next_pick_value: float = 0.0
+    two_pick_path_value: float = 0.0
+    shape_adjustment: float = 0.0
+    decision_score: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -284,7 +326,24 @@ def adjustment_from_dict(data: Mapping[str, Any]) -> UserAdjustment:
     )
 
 
+def formula_params_from_dict(data: Mapping[str, Any] | None) -> FormulaParams:
+    if not data:
+        return FormulaParams()
+    allowed = {item.name for item in fields(FormulaParams)}
+    filtered = {key: value for key, value in data.items() if key in allowed}
+    if "formulaVersion" in filtered and "formula_version" not in filtered:
+        filtered["formula_version"] = filtered.pop("formulaVersion")
+    return FormulaParams(**filtered)
+
+
 def settings_from_dict(data: Mapping[str, Any]) -> LeagueSettings:
+    formula_payload = data.get("formula_params", data.get("formulaParams"))
+    formula_version = data.get("formula_version", data.get("formulaVersion"))
+    if formula_version is not None and formula_payload is None:
+        formula_payload = {"formula_version": formula_version}
+    elif formula_version is not None and formula_payload is not None:
+        formula_payload = dict(formula_payload)
+        formula_payload.setdefault("formula_version", formula_version)
     return LeagueSettings(
         team_count=int(data.get("team_count", data.get("teamCount", 12))),
         roster_slots=dict(
@@ -294,8 +353,11 @@ def settings_from_dict(data: Mapping[str, Any]) -> LeagueSettings:
         draft_type=str(data.get("draft_type", data.get("draftType", "snake"))),
         league_type=str(data.get("league_type", data.get("leagueType", "redraft"))),
         user_team_id=str(data.get("user_team_id", data.get("userTeamId", "1"))),
-        qb_te_vorp_threshold=float(data.get("qb_te_vorp_threshold", 45)),
-        guardrail_weight=float(data.get("guardrail_weight", 12)),
+        qb_te_vorp_threshold=float(
+            data.get("qb_te_vorp_threshold", data.get("qbTeVorpThreshold", 45))
+        ),
+        guardrail_weight=float(data.get("guardrail_weight", data.get("guardrailWeight", 12))),
+        formula_params=formula_params_from_dict(formula_payload),
     )
 
 

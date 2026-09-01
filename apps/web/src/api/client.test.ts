@@ -30,6 +30,7 @@ describe('DVS API contract adapter', () => {
     expect(payload.players[0]).not.toHaveProperty('pointsDelta')
     expect(payload.adjustments).toEqual([adjustment])
     expect(payload.settings.userTeamId).toBe(String(defaultLeague.userTeam))
+    expect(payload.settings.formulaVersion).toBe(4)
   })
 
   it('normalizes Python snake-case results for the React UI', () => {
@@ -47,7 +48,12 @@ describe('DVS API contract adapter', () => {
         survival_probability: 0.3,
         need_multiplier: 1.1,
         opponent_demand_factor: 1,
-        guardrail_adjustment: 0
+        guardrail_adjustment: 0,
+        adjusted_survival_probability: 0.25,
+        expected_next_pick_value: 18,
+        two_pick_path_value: 46,
+        tier_opportunity_cost: 4,
+        shape_adjustment: 2
       },
       reasons: ['30.0 points above replacement']
     }])
@@ -56,6 +62,9 @@ describe('DVS API contract adapter', () => {
     expect(result.breakdown.survivalProbability).toBe(0.3)
     expect(result.breakdown.marginalValue).toBe(28)
     expect(result.breakdown.waitLoss).toBe(6)
+    expect(result.breakdown.adjustedSurvivalProbability).toBe(0.25)
+    expect(result.breakdown.expectedNextPickValue).toBe(18)
+    expect(result.breakdown.twoPickPathValue).toBe(46)
     expect(result.explanation).toContain('above replacement')
   })
 })

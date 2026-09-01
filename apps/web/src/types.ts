@@ -29,6 +29,7 @@ export interface LeagueSettings {
   rosterSlots: Record<Position | 'BENCH', number>
   scoring: ScoringFormat
   draftType: 'SNAKE'
+  formulaVersion?: number
 }
 
 export interface DraftPick {
@@ -50,6 +51,20 @@ export interface ScoreBreakdown {
   needMultiplier: number
   opponentDemandFactor: number
   guardrailAdjustment: number
+  projectedPoints?: number
+  immediateValue?: number
+  adjustedSurvivalProbability?: number
+  expectedFallbackValue?: number
+  tierCliff?: number
+  playersRemainingInTier?: number
+  tierExhaustion?: number
+  tierOpportunityCost?: number
+  opponentNeedFactor?: number
+  runPressure?: number
+  expectedNextPickValue?: number
+  twoPickPathValue?: number
+  shapeAdjustment?: number
+  decisionScore?: number
 }
 
 export interface Recommendation {
@@ -69,5 +84,6 @@ export const defaultLeague: LeagueSettings = {
   userTeam: 6,
   rosterSlots: { QB: 1, RB: 2, WR: 2, TE: 1, FLEX: 1, SUPERFLEX: 0, BENCH: 6, K: 1, DST: 1 },
   scoring: 'PPR',
-  draftType: 'SNAKE'
+  draftType: 'SNAKE',
+  formulaVersion: 4
 }

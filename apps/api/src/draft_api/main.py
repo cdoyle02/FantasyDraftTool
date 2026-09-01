@@ -72,6 +72,8 @@ class LeagueSettingsPayload(ApiModel):
     draft_type: Literal["snake"] = Field(default="snake", alias="draftType")
     league_type: str = Field(default="redraft", alias="leagueType")
     user_team_id: str = Field(default="1", alias="userTeamId")
+    formula_version: int | None = Field(default=None, alias="formulaVersion", ge=1, le=4)
+    formula_params: dict[str, Any] | None = Field(default=None, alias="formulaParams")
 
 
 class PickPayload(ApiModel):

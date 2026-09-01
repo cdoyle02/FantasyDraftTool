@@ -33,6 +33,20 @@ interface EngineRecommendation {
     need_multiplier: number
     opponent_demand_factor: number
     guardrail_adjustment: number
+    projected_points?: number
+    immediate_value?: number
+    adjusted_survival_probability?: number
+    expected_fallback_value?: number
+    tier_cliff?: number
+    players_remaining_in_tier?: number
+    tier_exhaustion?: number
+    tier_opportunity_cost?: number
+    opponent_need_factor?: number
+    run_pressure?: number
+    expected_next_pick_value?: number
+    two_pick_path_value?: number
+    shape_adjustment?: number
+    decision_score?: number
   }
   reasons: string[]
 }
@@ -48,7 +62,8 @@ export function serializeRecommendationRequest(request: RecommendationRequest) {
         : request.settings.scoring === 'STANDARD' ? 'standard' : 'PPR',
       draftType: 'snake',
       leagueType: 'redraft',
-      userTeamId: String(request.settings.userTeam)
+      userTeamId: String(request.settings.userTeam),
+      formulaVersion: request.settings.formulaVersion ?? 4
     },
     draftState: {
       teamCount: request.settings.teamCount,
@@ -80,7 +95,21 @@ export function normalizeRecommendations(results: EngineRecommendation[]): Recom
       survivalProbability: result.breakdown.survival_probability,
       needMultiplier: result.breakdown.need_multiplier,
       opponentDemandFactor: result.breakdown.opponent_demand_factor,
-      guardrailAdjustment: result.breakdown.guardrail_adjustment
+      guardrailAdjustment: result.breakdown.guardrail_adjustment,
+      projectedPoints: result.breakdown.projected_points,
+      immediateValue: result.breakdown.immediate_value ?? result.breakdown.marginal_value ?? 0,
+      adjustedSurvivalProbability: result.breakdown.adjusted_survival_probability ?? result.breakdown.survival_probability,
+      expectedFallbackValue: result.breakdown.expected_fallback_value,
+      tierCliff: result.breakdown.tier_cliff,
+      playersRemainingInTier: result.breakdown.players_remaining_in_tier,
+      tierExhaustion: result.breakdown.tier_exhaustion,
+      tierOpportunityCost: result.breakdown.tier_opportunity_cost ?? result.breakdown.tier_urgency,
+      opponentNeedFactor: result.breakdown.opponent_need_factor ?? result.breakdown.opponent_demand_factor,
+      runPressure: result.breakdown.run_pressure,
+      expectedNextPickValue: result.breakdown.expected_next_pick_value,
+      twoPickPathValue: result.breakdown.two_pick_path_value,
+      shapeAdjustment: result.breakdown.shape_adjustment,
+      decisionScore: result.breakdown.decision_score ?? result.dvs_score
     },
     reasons: result.reasons,
     explanation: result.reasons.join(' · ') || 'Best available value for the current draft state.'

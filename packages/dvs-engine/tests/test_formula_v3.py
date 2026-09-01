@@ -16,14 +16,14 @@ def _v3_league() -> LeagueSettings:
         team_count=4,
         roster_slots={"QB": 1, "RB": 1, "WR": 1, "TE": 1, "FLEX": 1, "BENCH": 2},
         user_team_id="1",
-        formula_params=FormulaParams(),
+        formula_params=FormulaParams(formula_version=3),
     )
 
 
-def test_formula_params_default_to_version_3():
-    assert FormulaParams().formula_version == 3
-    with pytest.raises(ValueError, match="1, 2, or 3"):
-        FormulaParams(formula_version=4)
+def test_formula_params_default_to_version_4():
+    assert FormulaParams().formula_version == 4
+    with pytest.raises(ValueError, match="1, 2, 3, or 4"):
+        FormulaParams(formula_version=5)
 
 
 def test_v3_score_matches_need_weighted_decomposition(players, empty_state):

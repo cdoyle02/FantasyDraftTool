@@ -33,7 +33,7 @@ def _twelve_team(params: FormulaParams | None = None) -> LeagueSettings:
         team_count=12,
         roster_slots=TWELVE_SLOTS,
         user_team_id="1",
-        formula_params=params or FormulaParams(),
+        formula_params=params or FormulaParams(formula_version=3),
     )
 
 

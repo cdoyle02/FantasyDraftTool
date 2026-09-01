@@ -144,7 +144,7 @@ def test_formula_params_override_label_thresholds(players, settings, empty_state
         team_count=settings.team_count,
         roster_slots=settings.roster_slots,
         user_team_id=settings.user_team_id,
-        formula_params=FormulaParams(value_min=999.0, urgent_wait_loss=999.0),
+        formula_params=FormulaParams(formula_version=2, value_min=999.0, urgent_wait_loss=999.0),
     )
     baseline = recommend(players, empty_state, tuned, limit=10)
     assert all(item.tier_label != RecommendationLabel.CANT_PASS for item in baseline)
@@ -255,7 +255,7 @@ def test_recommend_score_matches_formula_decomposition(players, settings, empty_
 
 
 def test_my_guy_tag_adds_configurable_bonus(players, settings, empty_state):
-    params = FormulaParams(my_guy_bonus=12.0)
+    params = FormulaParams(formula_version=2, my_guy_bonus=12.0)
     tuned = LeagueSettings(
         team_count=settings.team_count,
         roster_slots=settings.roster_slots,
@@ -299,7 +299,7 @@ def test_label_cant_pass_when_high_vorp_and_low_survival():
         team_count=2,
         roster_slots={"QB": 0, "RB": 1, "WR": 0, "TE": 0, "FLEX": 0, "BENCH": 0, "K": 0, "DST": 0},
         user_team_id="1",
-        formula_params=FormulaParams(value_min=1.0, urgent_wait_loss=0.0),
+        formula_params=FormulaParams(formula_version=2, value_min=1.0, urgent_wait_loss=0.0),
     )
     results = recommend(urgent_pool, state, league, limit=1)
     assert results[0].breakdown.marginal_value > 0
