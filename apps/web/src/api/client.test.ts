@@ -23,6 +23,7 @@ describe('DVS API contract adapter', () => {
     const payload = serializeRecommendationRequest({
       players: [player],
       picks: [],
+      keepers: [],
       settings: defaultLeague,
       adjustments: [adjustment]
     })
@@ -31,6 +32,28 @@ describe('DVS API contract adapter', () => {
     expect(payload.adjustments).toEqual([adjustment])
     expect(payload.settings.userTeamId).toBe(String(defaultLeague.userTeam))
     expect(payload.settings.formulaVersion).toBe(4)
+    expect(payload.draftState.reservedRosters).toEqual({})
+  })
+
+  it('serializes keeper assignments as reserved rosters without pick history', () => {
+    const payload = serializeRecommendationRequest({
+      players: [player],
+      picks: [],
+      keepers: [{
+        id: 'keeper-1',
+        teamId: 6,
+        playerId: player.id,
+        playerName: player.name,
+        position: player.position,
+        roundCost: 1,
+        timestamp: 1
+      }],
+      settings: defaultLeague,
+      adjustments: []
+    })
+
+    expect(payload.draftState.pickHistory).toEqual([])
+    expect(payload.draftState.reservedRosters).toEqual({ '6': [player.id] })
   })
 
   it('normalizes Python snake-case results for the React UI', () => {

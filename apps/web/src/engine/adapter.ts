@@ -77,7 +77,7 @@ export async function getRecommendations(request: RecommendationRequest): Promis
     return { recommendations: await pythonRecommendations(request), mode: 'offline-python' }
   } catch (error) {
     return {
-      recommendations: developmentFallbackScore(request.players, request.picks, request.settings, request.adjustments),
+      recommendations: developmentFallbackScore(request.players, request.picks, request.settings, request.adjustments, request.keepers),
       mode: 'development-fallback',
       warning: `Non-production TypeScript scorer active: ${error instanceof Error ? error.message : 'Python engine unavailable'}`
     }

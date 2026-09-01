@@ -40,6 +40,17 @@ export interface DraftPick {
   playerName: string
   position: Player['position']
   timestamp: number
+  isKeeper?: boolean
+}
+
+export interface KeeperAssignment {
+  id: string
+  teamId: number
+  playerId: string
+  playerName: string
+  position: Player['position']
+  roundCost: 1
+  timestamp: number
 }
 
 export interface ScoreBreakdown {

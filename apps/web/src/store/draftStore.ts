@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { db, queueEvent } from '../data/db'
 import { SEED_VERSION, isCsvImportPool, isLegacyDemoPool, seedPlayers, shouldRefreshBundledAdp } from '../data/seed'
-import type { DraftPick, LeagueSettings, Player, Recommendation, UserAdjustment } from '../types'
+import type { DraftPick, KeeperAssignment, LeagueSettings, Player, Recommendation, UserAdjustment } from '../types'
 import { defaultLeague } from '../types'
 import { getRecommendations, prepareOfflineEngine, type EngineMode } from '../engine/adapter'
 
@@ -9,6 +9,7 @@ interface DraftStore {
   players: Player[]
   adjustments: Record<string, UserAdjustment>
   picks: DraftPick[]
+  keepers: KeeperAssignment[]
   settings: LeagueSettings
   recommendations: Recommendation[]
   engineMode: EngineMode
@@ -19,6 +20,8 @@ interface DraftStore {
   importPlayers: (players: Player[]) => Promise<void>
   loadBundledRankings: () => Promise<void>
   draftPlayer: (player: Player) => Promise<void>
+  assignKeeper: (player: Player, teamId: number) => Promise<void>
+  removeKeeper: (id: string) => Promise<void>
   correctPick: (id: string, player: Player) => Promise<void>
   undoLastPick: () => Promise<void>
   removePick: (id: string) => Promise<void>
@@ -44,6 +47,39 @@ export function rosterForTeam(picks: DraftPick[], team: number, teamCount: numbe
     .sort((a, b) => a.pickNumber - b.pickNumber)
 }
 
+export function keeperToPick(keeper: KeeperAssignment): DraftPick {
+  return {
+    id: keeper.id,
+    pickNumber: 0,
+    teamId: keeper.teamId,
+    playerId: keeper.playerId,
+    playerName: keeper.playerName,
+    position: keeper.position,
+    timestamp: keeper.timestamp,
+    isKeeper: true
+  }
+}
+
+export function rosterEntriesForTeam(
+  picks: DraftPick[],
+  keepers: KeeperAssignment[],
+  team: number,
+  teamCount: number
+) {
+  const teamKeepers = keepers.filter((keeper) => keeper.teamId === team).map(keeperToPick)
+  return [...teamKeepers, ...rosterForTeam(picks, team, teamCount)]
+}
+
+export function keptPlayerIds(keepers: KeeperAssignment[]) {
+  return new Set(keepers.map((keeper) => keeper.playerId))
+}
+
+export function unavailablePlayerIds(picks: DraftPick[], keepers: KeeperAssignment[]) {
+  const ids = keptPlayerIds(keepers)
+  for (const pick of picks) ids.add(pick.playerId)
+  return ids
+}
+
 let draftWriteChain = Promise.resolve()
 
 function enqueueDraftWrite<T>(work: () => Promise<T>): Promise<T> {
@@ -58,16 +94,18 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
   players: [],
   adjustments: {},
   picks: [],
+  keepers: [],
   settings: defaultLeague,
   recommendations: [],
   engineMode: 'development-fallback',
   offlineReady: false,
   hydrated: false,
   hydrate: async () => {
-    const [storedPlayers, storedAdjustments, picks, storedSettings, storedMeta] = await Promise.all([
+    const [storedPlayers, storedAdjustments, picks, keepers, storedSettings, storedMeta] = await Promise.all([
       db.players.toArray(),
       db.adjustments.toArray(),
       db.picks.orderBy('pickNumber').toArray(),
+      db.keepers.toArray(),
       db.settings.get('active'),
       db.meta.get('seed')
     ])
@@ -88,6 +126,7 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       players,
       adjustments: Object.fromEntries(storedAdjustments.map((item) => [item.playerId, item])),
       picks,
+      keepers,
       settings: storedSettings ? { ...storedSettings, id: undefined } as unknown as LeagueSettings : defaultLeague,
       hydrated: true
     })
@@ -118,6 +157,7 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
   },
   draftPlayer: async (player) => enqueueDraftWrite(async () => {
     if (get().picks.some((pick) => pick.playerId === player.id)) return
+    if (get().keepers.some((keeper) => keeper.playerId === player.id)) return
     const totalRounds = Object.values(get().settings.rosterSlots).reduce((sum, count) => sum + count, 0)
     if (get().picks.length >= get().settings.teamCount * totalRounds) return
     const pickNumber = get().picks.length + 1
@@ -135,9 +175,37 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
     set((state) => ({ picks: [...state.picks, pick] }))
     await get().refreshRecommendations()
   }),
+  assignKeeper: async (player, teamId) => enqueueDraftWrite(async () => {
+    const { settings, picks, keepers } = get()
+    if (teamId < 1 || teamId > settings.teamCount) return
+    if (picks.some((pick) => pick.playerId === player.id)) return
+    if (keepers.some((keeper) => keeper.playerId === player.id)) return
+    const keeper: KeeperAssignment = {
+      id: crypto.randomUUID(),
+      teamId,
+      playerId: player.id,
+      playerName: player.name,
+      position: player.position,
+      roundCost: 1,
+      timestamp: Date.now()
+    }
+    await db.keepers.put(keeper)
+    await queueEvent('KEEPER_ASSIGNED', keeper)
+    set((state) => ({ keepers: [...state.keepers, keeper] }))
+    await get().refreshRecommendations()
+  }),
+  removeKeeper: async (id) => enqueueDraftWrite(async () => {
+    const removed = get().keepers.find((keeper) => keeper.id === id)
+    if (!removed) return
+    await db.keepers.delete(id)
+    await queueEvent('KEEPER_REMOVED', removed)
+    set((state) => ({ keepers: state.keepers.filter((keeper) => keeper.id !== id) }))
+    await get().refreshRecommendations()
+  }),
   correctPick: async (id, player) => {
     const current = get().picks.find((pick) => pick.id === id)
-    if (!current || get().picks.some((pick) => pick.id !== id && pick.playerId === player.id)) return
+    if (!current || get().keepers.some((keeper) => keeper.playerId === player.id)) return
+    if (get().picks.some((pick) => pick.id !== id && pick.playerId === player.id)) return
     const corrected: DraftPick = {
       ...current,
       playerId: player.id,
@@ -194,17 +262,26 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       teamCount: Math.max(4, Math.min(20, next.teamCount)),
       userTeam: Math.max(1, Math.min(next.teamCount, next.userTeam))
     }
+    const validKeepers = get().keepers.filter((keeper) => keeper.teamId >= 1 && keeper.teamId <= settings.teamCount)
+    if (validKeepers.length !== get().keepers.length) {
+      await db.transaction('rw', db.keepers, async () => {
+        await db.keepers.clear()
+        await db.keepers.bulkPut(validKeepers)
+      })
+    }
     await db.settings.put({ ...settings, id: 'active' })
     await queueEvent('SETTINGS_UPDATED', patch)
-    set({ settings })
+    set({ settings, keepers: validKeepers })
     await get().refreshRecommendations()
   },
   refreshRecommendations: async () => {
-    const { players, adjustments, picks, settings } = get()
+    const { players, adjustments, picks, keepers, settings } = get()
     if (!players.length) return
     const requestId = ++recommendationRequestId
-    const result = await getRecommendations({ players, adjustments: Object.values(adjustments), picks, settings })
+    const unavailable = unavailablePlayerIds(picks, keepers)
+    const result = await getRecommendations({ players, adjustments: Object.values(adjustments), picks, keepers, settings })
     if (requestId !== recommendationRequestId) return
-    set({ recommendations: result.recommendations, engineMode: result.mode, engineWarning: result.warning })
+    const recommendations = result.recommendations.filter((item) => !unavailable.has(item.playerId))
+    set({ recommendations, engineMode: result.mode, engineWarning: result.warning })
   }
 }))

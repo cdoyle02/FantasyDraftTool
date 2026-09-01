@@ -23,6 +23,7 @@ describe('snake board rosters', () => {
   beforeEach(() => {
     useDraftStore.setState({
       settings: { ...defaultLeague, teamCount: 4, userTeam: 1 },
+      keepers: [],
       picks: [
         pick({ id: '1', pickNumber: 1, playerName: 'Alpha Runner' }),
         pick({ id: '2', pickNumber: 2, playerName: 'Bravo Receiver' }),
@@ -133,12 +134,34 @@ describe('snake board rosters', () => {
   it('shows both YOU and ON CLOCK when user team is on the clock', () => {
     useDraftStore.setState({
       settings: { ...defaultLeague, teamCount: 4, userTeam: 1 },
-      picks: []
+      picks: [],
+      keepers: []
     })
     render(<Rosters />)
     const team1 = screen.getByTestId('roster-team-1')
     expect(team1).toHaveAttribute('data-on-clock', 'true')
     expect(team1).toHaveTextContent('YOU')
     expect(team1).toHaveTextContent('ON CLOCK')
+  })
+
+  it('shows a keeper on the chosen team with K and R1 while pick 1 stays on clock', () => {
+    useDraftStore.setState({
+      settings: { ...defaultLeague, teamCount: 12, userTeam: 6 },
+      picks: [],
+      keepers: [{
+        id: 'keeper-1',
+        teamId: 6,
+        playerId: 'gibbs',
+        playerName: 'Jahmyr Gibbs',
+        position: 'RB',
+        roundCost: 1,
+        timestamp: 1
+      }]
+    })
+    render(<Rosters />)
+    expect(screen.getByTestId('roster-team-1')).toHaveAttribute('data-on-clock', 'true')
+    expect(screen.getByTestId('roster-team-6')).toHaveTextContent('Jahmyr Gibbs')
+    expect(screen.getByTestId('roster-team-6')).toHaveTextContent('K')
+    expect(screen.getByTestId('roster-team-6')).toHaveTextContent('R1')
   })
 })

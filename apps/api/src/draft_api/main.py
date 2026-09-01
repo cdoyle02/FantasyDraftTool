@@ -87,6 +87,7 @@ class PickPayload(ApiModel):
 class DraftStatePayload(ApiModel):
     team_count: int = Field(default=12, alias="teamCount", ge=2, le=32)
     pick_history: list[PickPayload] = Field(default_factory=list, alias="pickHistory")
+    reserved_rosters: dict[str, list[str]] = Field(default_factory=dict, alias="reservedRosters")
 
 
 class RecommendationRequest(ApiModel):

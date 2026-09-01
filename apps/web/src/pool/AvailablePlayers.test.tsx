@@ -14,6 +14,13 @@ vi.mock('../data/db', () => ({
       bulkPut: vi.fn(),
       orderBy: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) }))
     },
+    keepers: {
+      put: vi.fn().mockResolvedValue(undefined),
+      delete: vi.fn(),
+      clear: vi.fn(),
+      bulkPut: vi.fn(),
+      toArray: vi.fn().mockResolvedValue([])
+    },
     transaction: async (...args: unknown[]) => {
       const work = args.at(-1)
       if (typeof work === 'function') return work()
@@ -53,6 +60,7 @@ describe('available players ADP source', () => {
       players: pool,
       adjustments: {},
       picks: [],
+      keepers: [],
       settings: defaultLeague
     })
   })
@@ -114,6 +122,7 @@ describe('player pool draft button', () => {
       players: pool,
       adjustments: {},
       picks: [],
+      keepers: [],
       settings: { ...defaultLeague, teamCount: 4, userTeam: 6 }
     })
   })
@@ -142,5 +151,22 @@ describe('player pool draft button', () => {
     expect(useDraftStore.getState().picks[0].playerId).toBe('chase')
     expect(useDraftStore.getState().picks[0].teamId).toBe(1)
     expect(screen.getAllByRole('button', { name: /Draft .* to Team 2/ })).toHaveLength(2)
+  })
+
+  it('places a keeper on the chosen team and leaves the draft clock at pick 1', async () => {
+    useDraftStore.setState({
+      settings: { ...defaultLeague, teamCount: 4, userTeam: 4 }
+    })
+    const user = userEvent.setup()
+    render(<AvailablePlayers />)
+    await user.click(screen.getByRole('button', { name: "Keep Ja'Marr Chase" }))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'YOU' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Place keeper' }))
+    expect(screen.queryByText("Ja'Marr Chase")).not.toBeInTheDocument()
+    expect(useDraftStore.getState().keepers).toHaveLength(1)
+    expect(useDraftStore.getState().keepers[0].teamId).toBe(4)
+    expect(useDraftStore.getState().picks).toHaveLength(0)
+    expect(screen.getAllByRole('button', { name: /Draft .* to Team 1/ })).toHaveLength(2)
   })
 })

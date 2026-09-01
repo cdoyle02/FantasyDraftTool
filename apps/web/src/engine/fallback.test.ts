@@ -33,4 +33,17 @@ describe('development fallback scorer', () => {
     const result = developmentFallbackScore(fallbackFixturePlayers, [], defaultLeague)
     expect(result.map((recommendation) => recommendation.playerId)).not.toContain('seed-24')
   })
+
+  it('excludes kept players from recommendations', () => {
+    const result = developmentFallbackScore(fallbackFixturePlayers, [], defaultLeague, [], [{
+      id: 'keeper-1',
+      teamId: defaultLeague.userTeam,
+      playerId: 'seed-1',
+      playerName: 'Top RB',
+      position: 'RB',
+      roundCost: 1,
+      timestamp: 1
+    }])
+    expect(result.map((recommendation) => recommendation.playerId)).not.toContain('seed-1')
+  })
 })

@@ -1,8 +1,9 @@
-import type { DraftPick, LeagueSettings, Player, Recommendation, UserAdjustment } from '../types'
+import type { DraftPick, KeeperAssignment, LeagueSettings, Player, Recommendation, UserAdjustment } from '../types'
 
 export interface RecommendationRequest {
   players: Player[]
   picks: DraftPick[]
+  keepers: KeeperAssignment[]
   settings: LeagueSettings
   adjustments: UserAdjustment[]
 }
@@ -51,7 +52,18 @@ interface EngineRecommendation {
   reasons: string[]
 }
 
+export function buildReservedRosters(keepers: KeeperAssignment[] = []): Record<string, string[]> {
+  const result: Record<string, string[]> = {}
+  for (const keeper of keepers) {
+    const key = String(keeper.teamId)
+    result[key] ??= []
+    result[key].push(keeper.playerId)
+  }
+  return result
+}
+
 export function serializeRecommendationRequest(request: RecommendationRequest) {
+  const reservedRosters = buildReservedRosters(request.keepers ?? [])
   return {
     players: request.players,
     settings: {
@@ -73,7 +85,8 @@ export function serializeRecommendationRequest(request: RecommendationRequest) {
         teamId: String(pick.teamId),
         playerId: pick.playerId,
         timestamp: new Date(pick.timestamp).toISOString()
-      }))
+      })),
+      reservedRosters
     },
     adjustments: request.adjustments,
     limit: 20

@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie'
-import type { DraftPick, LeagueSettings, Player, UserAdjustment } from '../types'
+import type { DraftPick, KeeperAssignment, LeagueSettings, Player, UserAdjustment } from '../types'
 
 export interface SeedMeta {
   id: 'seed'
@@ -8,7 +8,7 @@ export interface SeedMeta {
 
 export interface QueueEvent {
   id: string
-  type: 'PICK_CREATED' | 'PICK_UNDONE' | 'PICK_REMOVED' | 'PICK_CORRECTED' | 'PLAYER_ADJUSTED' | 'CSV_IMPORTED' | 'SETTINGS_UPDATED'
+  type: 'PICK_CREATED' | 'PICK_UNDONE' | 'PICK_REMOVED' | 'PICK_CORRECTED' | 'KEEPER_ASSIGNED' | 'KEEPER_REMOVED' | 'PLAYER_ADJUSTED' | 'CSV_IMPORTED' | 'SETTINGS_UPDATED'
   payload: unknown
   createdAt: number
   status: 'pending' | 'synced'
@@ -17,6 +17,7 @@ export interface QueueEvent {
 class DraftDatabase extends Dexie {
   players!: EntityTable<Player, 'id'>
   picks!: EntityTable<DraftPick, 'id'>
+  keepers!: EntityTable<KeeperAssignment, 'id'>
   settings!: EntityTable<LeagueSettings & { id: string }, 'id'>
   adjustments!: EntityTable<UserAdjustment, 'playerId'>
   events!: EntityTable<QueueEvent, 'id'>
@@ -40,6 +41,15 @@ class DraftDatabase extends Dexie {
     this.version(3).stores({
       players: 'id, name, position, adp',
       picks: 'id, pickNumber, teamId, playerId',
+      settings: 'id',
+      adjustments: 'playerId, tag',
+      events: 'id, status, createdAt',
+      meta: 'id'
+    })
+    this.version(4).stores({
+      players: 'id, name, position, adp',
+      picks: 'id, pickNumber, teamId, playerId',
+      keepers: 'id, teamId, playerId',
       settings: 'id',
       adjustments: 'playerId, tag',
       events: 'id, status, createdAt',

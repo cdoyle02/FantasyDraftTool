@@ -1,4 +1,4 @@
-import type { DraftPick, LeagueSettings, Player, Recommendation, UserAdjustment } from '../types'
+import type { DraftPick, KeeperAssignment, LeagueSettings, Player, Recommendation, UserAdjustment } from '../types'
 
 const replacements: Record<Player['position'], number> = {
   QB: 285, RB: 155, WR: 165, TE: 125, K: 120, DST: 110
@@ -12,11 +12,26 @@ export function developmentFallbackScore(
   players: Player[],
   picks: DraftPick[],
   settings: LeagueSettings,
-  adjustments: UserAdjustment[] = []
+  adjustments: UserAdjustment[] = [],
+  keepers: KeeperAssignment[] = []
 ): Recommendation[] {
   const drafted = new Set(picks.map((pick) => pick.playerId))
+  for (const keeper of keepers) drafted.add(keeper.playerId)
   const round = Math.floor(picks.length / settings.teamCount) + 1
-  const roster = picks.filter((pick) => pick.teamId === settings.userTeam)
+  const userTeamKeepers = keepers.filter((keeper) => keeper.teamId === settings.userTeam).map((keeper) => ({
+    id: keeper.id,
+    pickNumber: 0,
+    teamId: keeper.teamId,
+    playerId: keeper.playerId,
+    playerName: keeper.playerName,
+    position: keeper.position,
+    timestamp: keeper.timestamp,
+    isKeeper: true as const
+  }))
+  const roster = [
+    ...userTeamKeepers,
+    ...picks.filter((pick) => pick.teamId === settings.userTeam)
+  ]
   const opinions = new Map(adjustments.map((item) => [item.playerId, item]))
   const counts = roster.reduce<Partial<Record<Player['position'], number>>>((all, pick) => {
     all[pick.position] = (all[pick.position] ?? 0) + 1

@@ -222,6 +222,7 @@ class Pick:
 class DraftState:
     team_count: int
     pick_history: tuple[Pick, ...] = ()
+    reserved_rosters: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
 
     @property
     def current_pick(self) -> int:
@@ -234,13 +235,21 @@ class DraftState:
     @property
     def rosters(self) -> dict[str, tuple[str, ...]]:
         result: dict[str, list[str]] = {str(index): [] for index in range(1, self.team_count + 1)}
+        for team_id, player_ids in self.reserved_rosters.items():
+            result.setdefault(team_id, []).extend(player_ids)
         for pick in self.pick_history:
             result.setdefault(pick.team_id, []).append(pick.player_id)
         return {team: tuple(players) for team, players in result.items()}
 
     @property
     def drafted_ids(self) -> frozenset[str]:
-        return frozenset(pick.player_id for pick in self.pick_history)
+        reserved = {
+            player_id
+            for player_ids in self.reserved_rosters.values()
+            for player_id in player_ids
+        }
+        picked = {pick.player_id for pick in self.pick_history}
+        return frozenset(reserved | picked)
 
 
 @dataclass(frozen=True, slots=True)
@@ -363,6 +372,11 @@ def settings_from_dict(data: Mapping[str, Any]) -> LeagueSettings:
 
 def state_from_dict(data: Mapping[str, Any], team_count: int | None = None) -> DraftState:
     picks: Sequence[Mapping[str, Any]] = data.get("pick_history", data.get("pickHistory", ()))
+    reserved_raw = data.get("reserved_rosters", data.get("reservedRosters", {}))
+    reserved_rosters = {
+        str(team_id): tuple(str(player_id) for player_id in player_ids)
+        for team_id, player_ids in reserved_raw.items()
+    }
     return DraftState(
         team_count=int(data.get("team_count", data.get("teamCount", team_count or 12))),
         pick_history=tuple(
@@ -375,6 +389,7 @@ def state_from_dict(data: Mapping[str, Any], team_count: int | None = None) -> D
             )
             for item in picks
         ),
+        reserved_rosters=reserved_rosters,
     )
 
 

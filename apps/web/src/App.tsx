@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { PositionPill } from './components/PositionPill'
 import { parsePlayerCsv } from './data/csv'
 import { AvailablePlayers } from './pool/AvailablePlayers'
-import { rosterForTeam, roundForPick, teamForPick, useDraftStore } from './store/draftStore'
+import { rosterEntriesForTeam, keptPlayerIds, roundForPick, teamForPick, useDraftStore } from './store/draftStore'
 import { assignRosterSlots, SLOT_LABELS } from './store/rosterSlots'
 import type { DraftPick, LeagueSettings, Player, Recommendation } from './types'
 
@@ -66,12 +66,17 @@ function ImportDialog({ close }: { close: () => void }) {
 function PickSearch({ correctionId, onCorrectionDone }: { correctionId?: string; onCorrectionDone: () => void }) {
   const players = useDraftStore((state) => state.players)
   const picks = useDraftStore((state) => state.picks)
+  const keepers = useDraftStore((state) => state.keepers)
   const draftPlayer = useDraftStore((state) => state.draftPlayer)
   const correctPick = useDraftStore((state) => state.correctPick)
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
-  const drafted = useMemo(() => new Set(picks.map((pick) => pick.playerId)), [picks])
-  const results = useMemo(() => players.filter((player) => !drafted.has(player.id) && `${player.name} ${player.team} ${player.position}`.toLowerCase().includes(query.toLowerCase())).slice(0, 7), [players, drafted, query])
+  const unavailable = useMemo(() => {
+    const ids = keptPlayerIds(keepers)
+    for (const pick of picks) ids.add(pick.playerId)
+    return ids
+  }, [picks, keepers])
+  const results = useMemo(() => players.filter((player) => !unavailable.has(player.id) && `${player.name} ${player.team} ${player.position}`.toLowerCase().includes(query.toLowerCase())).slice(0, 7), [players, unavailable, query])
   const select = (player: Player) => {
     void (correctionId ? correctPick(correctionId, player) : draftPlayer(player))
     setQuery('')
@@ -128,12 +133,19 @@ function RecommendationCard({ recommendation, rank }: { recommendation: Recommen
   </article>
 }
 
-function RosterPickRow({ pick, teamCount }: { pick: DraftPick; teamCount: number }) {
-  return <div className="flex items-center gap-2 rounded bg-black/10 px-2 py-1.5 text-xs"><span className="w-6 shrink-0 font-mono text-[10px] text-muted">R{roundForPick(pick.pickNumber, teamCount)}</span><PositionPill position={pick.position} /><span className="truncate">{pick.playerName}</span></div>
+function RosterPickRow({ pick, teamCount, onRemoveKeeper }: { pick: DraftPick; teamCount: number; onRemoveKeeper?: (id: string) => void }) {
+  const roundLabel = pick.isKeeper ? 'R1' : `R${roundForPick(pick.pickNumber, teamCount)}`
+  return <div className="group flex items-center gap-2 rounded bg-black/10 px-2 py-1.5 text-xs">
+    <span className="w-6 shrink-0 font-mono text-[10px] text-muted">{roundLabel}</span>
+    {pick.isKeeper && <span className="rounded bg-amber-300/20 px-1 text-[9px] font-bold text-amber-200" title="Keeper">K</span>}
+    <PositionPill position={pick.position} />
+    <span className="min-w-0 flex-1 truncate">{pick.playerName}</span>
+    {pick.isKeeper && onRemoveKeeper && <button aria-label={`Remove keeper ${pick.playerName}`} title="Remove keeper" className="invisible shrink-0 text-xs text-rose-300 group-hover:visible focus:visible" onClick={() => void onRemoveKeeper(pick.id)}>×</button>}
+  </div>
 }
 
-function RosterPickList({ roster, teamCount }: { roster: DraftPick[]; teamCount: number }) {
-  return <div className="space-y-1">{roster.map((pick) => <RosterPickRow key={pick.id} pick={pick} teamCount={teamCount} />)}{!roster.length && <p className="p-2 text-xs text-muted">No picks yet.</p>}</div>
+function RosterPickList({ roster, teamCount, onRemoveKeeper }: { roster: DraftPick[]; teamCount: number; onRemoveKeeper?: (id: string) => void }) {
+  return <div className="space-y-1">{roster.map((pick) => <RosterPickRow key={pick.id} pick={pick} teamCount={teamCount} onRemoveKeeper={onRemoveKeeper} />)}{!roster.length && <p className="p-2 text-xs text-muted">No picks yet.</p>}</div>
 }
 
 function TeamLineup({ roster, rosterSlots }: { roster: DraftPick[]; rosterSlots: LeagueSettings['rosterSlots'] }) {
@@ -144,7 +156,7 @@ function TeamLineup({ roster, rosterSlots }: { roster: DraftPick[]; rosterSlots:
       return <div key={`${fill.slot}-${index}`} data-testid={`roster-slot-${fill.slot}-${kindIndex}`} className="flex items-center gap-2 rounded bg-black/10 px-2 py-1.5 text-xs">
         <span className="w-9 shrink-0 font-mono text-[10px] font-bold text-muted">{SLOT_LABELS[fill.slot]}</span>
         {fill.pick
-          ? <><PositionPill position={fill.pick.position} /><span className="truncate">{fill.pick.playerName}</span></>
+          ? <><PositionPill position={fill.pick.position} /><span className="truncate">{fill.pick.playerName}</span>{fill.pick.isKeeper && <span className="rounded bg-amber-300/20 px-1 text-[9px] font-bold text-amber-200">K</span>}</>
           : <span className="text-muted">—</span>}
       </div>
     })}
@@ -159,7 +171,7 @@ function rosterBoardRowClass(isUser: boolean, isOnClock: boolean) {
 }
 
 export function Rosters() {
-  const { picks, settings } = useDraftStore()
+  const { picks, keepers, settings, removeKeeper } = useDraftStore()
   const [view, setView] = useState<'board' | 'team'>('board')
   const [selectedTeam, setSelectedTeam] = useState(settings.userTeam)
 
@@ -173,7 +185,7 @@ export function Rosters() {
   }
 
   const onClockTeam = teamForPick(picks.length + 1, settings.teamCount)
-  const selectedRoster = rosterForTeam(picks, selectedTeam, settings.teamCount)
+  const selectedRoster = rosterEntriesForTeam(picks, keepers, selectedTeam, settings.teamCount)
 
   return <section className="panel lg:col-span-3" data-testid="snake-board">
     <div className="panel-heading">
@@ -195,7 +207,7 @@ export function Rosters() {
     </div>}
     <div className="max-h-[490px] overflow-auto p-3">
       {view === 'board' ? <div className="space-y-2">{Array.from({ length: settings.teamCount }, (_, index) => index + 1).map((team) => {
-        const roster = rosterForTeam(picks, team, settings.teamCount)
+        const roster = rosterEntriesForTeam(picks, keepers, team, settings.teamCount)
         const latest = roster.at(-1)
         const isUser = team === settings.userTeam
         const isOnClock = team === onClockTeam
@@ -206,12 +218,12 @@ export function Rosters() {
               <button type="button" data-testid={`view-team-${team}`} className="shrink-0 text-[10px] font-semibold text-mint hover:underline" onClick={(event) => { event.preventDefault(); openTeamView(team) }}>View roster</button>
               <span className="min-w-0 truncate text-right text-[10px] text-muted">
                 {latest
-                  ? <span className="inline-flex max-w-full items-center gap-1.5"><span className="font-mono">R{roundForPick(latest.pickNumber, settings.teamCount)}</span><span className="truncate">{latest.playerName}</span></span>
+                  ? <span className="inline-flex max-w-full items-center gap-1.5"><span className="font-mono">{latest.isKeeper ? 'R1' : `R${roundForPick(latest.pickNumber, settings.teamCount)}`}</span>{latest.isKeeper && <span className="font-bold text-amber-200">K</span>}<span className="truncate">{latest.playerName}</span></span>
                   : `${roster.length} picks`}
               </span>
             </span>
           </summary>
-          <div className="border-t border-line/60 p-2"><RosterPickList roster={roster} teamCount={settings.teamCount} /></div>
+          <div className="border-t border-line/60 p-2"><RosterPickList roster={roster} teamCount={settings.teamCount} onRemoveKeeper={(id) => void removeKeeper(id)} /></div>
         </details>
       })}</div> : <div data-testid={`roster-team-detail-${selectedTeam}`}>
         <p className="mb-2 text-xs font-semibold">Team {selectedTeam} {selectedTeam === settings.userTeam && <span className="text-mint">YOU</span>}</p>
@@ -229,7 +241,7 @@ function PickHistory({ onCorrect }: { onCorrect: (id: string) => void }) {
 }
 
 export default function App() {
-  const { hydrate, hydrated, refreshRecommendations, loadBundledRankings, settings, players, adjustments, picks, recommendations, engineMode, engineWarning, offlineReady } = useDraftStore()
+  const { hydrate, hydrated, refreshRecommendations, loadBundledRankings, settings, players, adjustments, picks, keepers, recommendations, engineMode, engineWarning, offlineReady } = useDraftStore()
   const [modal, setModal] = useState<'setup' | 'import' | null>(null)
   const [correctionId, setCorrectionId] = useState<string>()
   const [online, setOnline] = useState(navigator.onLine)
@@ -250,7 +262,7 @@ export default function App() {
   ).find((offset) => teamForPick(currentPick + offset, settings.teamCount) === settings.userTeam) ?? settings.teamCount
   const exportBackup = () => {
     const blob = new Blob(
-      [JSON.stringify({ schemaVersion: 1, exportedAt: new Date().toISOString(), settings, players, adjustments, picks }, null, 2)],
+      [JSON.stringify({ schemaVersion: 1, exportedAt: new Date().toISOString(), settings, players, adjustments, picks, keepers }, null, 2)],
       { type: 'application/json' }
     )
     const url = URL.createObjectURL(blob)

@@ -37,3 +37,35 @@ def test_browser_json_entrypoint(players, settings):
 
     assert len(output) == 3
     assert {"player_id", "dvs_score", "breakdown", "tier_label"} <= output[0].keys()
+
+
+def test_browser_json_excludes_reserved_rosters_without_advancing_pick(players, settings):
+    reserved_id = players[0].id
+    payload = {
+        "players": [
+            {
+                "id": player.id,
+                "name": player.name,
+                "position": player.position,
+                "projectedPoints": player.projected_points,
+                "adp": player.adp,
+                "tier": player.tier,
+            }
+            for player in players
+        ],
+        "settings": {
+            "teamCount": settings.team_count,
+            "rosterSlots": settings.roster_slots,
+            "userTeamId": "1",
+            "formulaVersion": 4,
+        },
+        "draftState": {
+            "teamCount": settings.team_count,
+            "pickHistory": [],
+            "reservedRosters": {"6": [reserved_id]},
+        },
+        "adjustments": [],
+        "limit": 20,
+    }
+    output = json.loads(recommendation_json(json.dumps(payload)))
+    assert all(item["player_id"] != reserved_id for item in output)

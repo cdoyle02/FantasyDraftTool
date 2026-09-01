@@ -14,6 +14,13 @@ const picksTable = {
   clear: vi.fn(),
   bulkPut: vi.fn()
 }
+const keepersTable = {
+  toArray: vi.fn().mockResolvedValue([]),
+  put: vi.fn(),
+  delete: vi.fn(),
+  clear: vi.fn(),
+  bulkPut: vi.fn()
+}
 const settingsTable = { get: vi.fn() }
 const metaTable = { get: vi.fn(), put: vi.fn() }
 
@@ -22,6 +29,7 @@ vi.mock('../data/db', () => ({
     players: playersTable,
     adjustments: adjustmentsTable,
     picks: picksTable,
+    keepers: keepersTable,
     settings: settingsTable,
     meta: metaTable,
     transaction: async (...args: unknown[]) => {
@@ -37,6 +45,8 @@ vi.mock('../engine/adapter', () => ({
   getRecommendations: vi.fn().mockResolvedValue({ recommendations: [], mode: 'development-fallback' }),
   prepareOfflineEngine: vi.fn().mockRejectedValue(new Error('offline skipped in unit test'))
 }))
+
+import { getRecommendations } from '../engine/adapter'
 
 const demoPlayers: Player[] = Array.from({ length: 25 }, (_, index) => ({
   id: `seed-${index + 1}`,
@@ -86,6 +96,7 @@ describe('hydrate seed versioning', () => {
       players: [],
       adjustments: {},
       picks: [],
+      keepers: [],
       recommendations: [],
       hydrated: false,
       offlineReady: false
@@ -174,6 +185,88 @@ describe('hydrate seed versioning', () => {
     await useDraftStore.getState().draftPlayer(demoPlayers[2])
 
     expect(useDraftStore.getState().picks.map((pick) => pick.teamId)).toEqual([1, 2, 3])
+  })
+
+  it('assigns a keeper to a chosen team without advancing the draft clock', async () => {
+    const { defaultLeague } = await import('../types')
+    const { useDraftStore, rosterEntriesForTeam } = await import('./draftStore')
+    keepersTable.put.mockResolvedValue(undefined)
+    useDraftStore.setState({
+      players: demoPlayers,
+      picks: [],
+      keepers: [],
+      settings: { ...defaultLeague, teamCount: 12, userTeam: 6 }
+    })
+
+    await useDraftStore.getState().assignKeeper(demoPlayers[0], 6)
+
+    expect(useDraftStore.getState().keepers).toHaveLength(1)
+    expect(useDraftStore.getState().keepers[0].teamId).toBe(6)
+    expect(useDraftStore.getState().picks).toHaveLength(0)
+    expect(rosterEntriesForTeam([], useDraftStore.getState().keepers, 6, 12)[0].isKeeper).toBe(true)
+  })
+
+  it('rejects duplicate keeper assignments and returns the player after removal', async () => {
+    const { defaultLeague } = await import('../types')
+    const { useDraftStore } = await import('./draftStore')
+    keepersTable.put.mockResolvedValue(undefined)
+    keepersTable.delete.mockResolvedValue(undefined)
+    useDraftStore.setState({
+      players: demoPlayers,
+      picks: [],
+      keepers: [],
+      settings: { ...defaultLeague, teamCount: 12, userTeam: 6 }
+    })
+
+    await useDraftStore.getState().assignKeeper(demoPlayers[0], 6)
+    await useDraftStore.getState().assignKeeper(demoPlayers[0], 4)
+    expect(useDraftStore.getState().keepers).toHaveLength(1)
+
+    const keeperId = useDraftStore.getState().keepers[0].id
+    await useDraftStore.getState().removeKeeper(keeperId)
+    expect(useDraftStore.getState().keepers).toHaveLength(0)
+  })
+
+  it('filters kept players out of recommendation results', async () => {
+    const { defaultLeague } = await import('../types')
+    const { useDraftStore } = await import('./draftStore')
+    vi.mocked(getRecommendations).mockResolvedValueOnce({
+      recommendations: [{
+        playerId: demoPlayers[0].id,
+        dvsScore: 99,
+        tierLabel: 'BEST PICK',
+        breakdown: {
+          vorp: 1,
+          marginalValue: 1,
+          waitLoss: 0,
+          tierUrgency: 1,
+          survivalProbability: 0.5,
+          needMultiplier: 1,
+          opponentDemandFactor: 1,
+          guardrailAdjustment: 0
+        },
+        explanation: 'test'
+      }],
+      mode: 'development-fallback'
+    })
+    useDraftStore.setState({
+      players: demoPlayers,
+      picks: [],
+      keepers: [{
+        id: 'keeper-1',
+        teamId: 6,
+        playerId: demoPlayers[0].id,
+        playerName: demoPlayers[0].name,
+        position: demoPlayers[0].position,
+        roundCost: 1,
+        timestamp: 1
+      }],
+      settings: defaultLeague
+    })
+
+    await useDraftStore.getState().refreshRecommendations()
+
+    expect(useDraftStore.getState().recommendations).toHaveLength(0)
   })
 
   it('reloads the bundled seed when stored players are missing ESPN ADP', async () => {
