@@ -723,3 +723,116 @@ describe('Footballers CSV import store flow', () => {
     expect(result.errors.some((error) => error.message.includes('Keeper Missing'))).toBe(true)
   })
 })
+
+describe('active rankings badge invariant', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    adjustmentsTable.toArray.mockResolvedValue([])
+    settingsTable.get.mockResolvedValue(undefined)
+    metaTable.get.mockImplementation(async (id: string) => (id === 'seed' ? { id: 'seed', version: '2026.6' } : undefined))
+    importMetaTable.get.mockResolvedValue(undefined)
+    evaluationRecordsTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
+    picksTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
+    const { defaultLeague } = await import('../types')
+    const { useDraftStore } = await import('./draftStore')
+    useDraftStore.setState({
+      players: [],
+      adjustments: {},
+      picks: [],
+      keepers: [],
+      settings: {
+        ...defaultLeague,
+        teamCount: 8,
+        rosterSlots: { QB: 1, RB: 2, WR: 2, TE: 1, FLEX: 2, SUPERFLEX: 0, BENCH: 6, K: 0, DST: 1 }
+      },
+      recommendations: [],
+      recommendationContext: undefined,
+      evaluationRecords: [],
+      hydrated: true,
+      importIdentity: undefined
+    })
+  })
+
+  it('keeps importIdentity aligned with the active imported player pool after commit', async () => {
+    const { buildFootballersCsv, leagueARows } = await import('../data/footballersImport.fixtures')
+    const { useDraftStore } = await import('./draftStore')
+    const prepared = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    expect(prepared.ok).toBe(true)
+    if (!prepared.ok) return
+    await useDraftStore.getState().commitFootballersImport(prepared)
+
+    const { importIdentity, players } = useDraftStore.getState()
+    expect(importIdentity?.scoringProfile).toBe('Two Flex Too Furious')
+    expect(importIdentity?.fingerprint).toBe(prepared.identity.fingerprint)
+    expect(players.every((player) => player.importSource?.fingerprint === importIdentity?.fingerprint)).toBe(true)
+    expect(importMetaTable.put).toHaveBeenCalledWith(expect.objectContaining({
+      id: 'import',
+      fingerprint: prepared.identity.fingerprint,
+      scoringProfile: 'Two Flex Too Furious'
+    }))
+  })
+
+  it('restores importIdentity and imported pool association on hydrate', async () => {
+    const { buildFootballersCsv, leagueARows } = await import('../data/footballersImport.fixtures')
+    const { useDraftStore } = await import('./draftStore')
+    const prepared = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    if (!prepared.ok) throw new Error('league A failed')
+
+    playersTable.toArray.mockResolvedValue(prepared.players)
+    importMetaTable.get.mockResolvedValue({
+      id: 'import',
+      fingerprint: prepared.identity.fingerprint,
+      season: prepared.identity.season,
+      asOfDate: prepared.identity.asOfDate,
+      rankingType: prepared.identity.rankingType,
+      scoringProfile: prepared.identity.scoringProfile,
+      leagueSize: prepared.identity.leagueSize,
+      sourceCheatsheetId: prepared.identity.sourceCheatsheetId,
+      sourceUrl: prepared.identity.sourceUrl,
+      importedAt: Date.now(),
+      playerCount: prepared.players.length,
+      positionCounts: prepared.identity.positionCounts
+    })
+
+    useDraftStore.setState({ importIdentity: undefined, players: [], hydrated: false })
+    await useDraftStore.getState().hydrate()
+
+    const { importIdentity, players } = useDraftStore.getState()
+    expect(importIdentity?.scoringProfile).toBe('Two Flex Too Furious')
+    expect(importIdentity?.fingerprint).toBe(prepared.identity.fingerprint)
+    expect(players).toEqual(prepared.players)
+    expect(players.every((player) => player.importSource?.fingerprint === importIdentity?.fingerprint)).toBe(true)
+  })
+
+  it('clears importIdentity after loadBundledRankings restores bundled pool', async () => {
+    const { buildFootballersCsv, leagueARows } = await import('../data/footballersImport.fixtures')
+    const { seedPlayers } = await import('../data/seed')
+    const { useDraftStore } = await import('./draftStore')
+    const prepared = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    if (!prepared.ok) throw new Error('league A failed')
+    await useDraftStore.getState().commitFootballersImport(prepared)
+    expect(useDraftStore.getState().importIdentity?.scoringProfile).toBe('Two Flex Too Furious')
+
+    await useDraftStore.getState().loadBundledRankings()
+
+    expect(useDraftStore.getState().importIdentity).toBeUndefined()
+    expect(useDraftStore.getState().players).toEqual(seedPlayers)
+    expect(importMetaTable.delete).toHaveBeenCalledWith('import')
+  })
+
+  it('clears importIdentity after resetDraft restores bundled pool', async () => {
+    const { buildFootballersCsv, leagueARows } = await import('../data/footballersImport.fixtures')
+    const { seedPlayers } = await import('../data/seed')
+    const { useDraftStore } = await import('./draftStore')
+    const prepared = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    if (!prepared.ok) throw new Error('league A failed')
+    await useDraftStore.getState().commitFootballersImport(prepared)
+    expect(useDraftStore.getState().importIdentity?.scoringProfile).toBe('Two Flex Too Furious')
+
+    await useDraftStore.getState().resetDraft()
+
+    expect(useDraftStore.getState().importIdentity).toBeUndefined()
+    expect(useDraftStore.getState().players).toEqual(seedPlayers)
+    expect(importMetaTable.delete).toHaveBeenCalledWith('import')
+  })
+})

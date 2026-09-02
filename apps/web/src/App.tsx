@@ -352,6 +352,26 @@ function PickHistory({ onCorrect, onReset }: { onCorrect: (id: string) => void; 
   </>
 }
 
+function DvsRecommendationsHeading() {
+  const importIdentity = useDraftStore((state) => state.importIdentity)
+  if (importIdentity) {
+    return (
+      <span
+        data-testid="active-rankings-badge"
+        className="rounded-full border border-mint/30 bg-mint/10 px-2.5 py-1 text-[10px] font-semibold text-mint"
+        title={`League size ${importIdentity.leagueSize} · As of ${importIdentity.asOfDate}`}
+      >
+        Active rankings: {importIdentity.scoringProfile}
+      </span>
+    )
+  }
+  return (
+    <span className="text-xs text-muted">Top 10 for your roster · pick goes to on-clock team</span>
+  )
+}
+
+export { DvsRecommendationsHeading }
+
 export default function App() {
   const { hydrate, hydrated, refreshRecommendations, loadBundledRankings, settings, players, adjustments, picks, keepers, recommendations, evaluationRecords, engineMode, engineWarning, offlineReady } = useDraftStore()
   const [modal, setModal] = useState<'setup' | 'import' | null>(null)
@@ -412,7 +432,7 @@ export default function App() {
       </section>
       {engineWarning && <div role="status" className="mb-4 rounded-lg border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-xs text-amber-100">{engineWarning}</div>}
       <div className="grid gap-4 lg:grid-cols-12">
-        <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><span className="text-xs text-muted">Top 10 for your roster · pick goes to on-clock team</span></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 10).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
+        <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><DvsRecommendationsHeading /></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 10).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
         <AvailablePlayers /><Rosters /><div className="lg:col-span-8"><PickHistory onCorrect={setCorrectionId} onReset={() => setCorrectionId(undefined)} /></div>
       </div>
     </main>
