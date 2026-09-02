@@ -1,6 +1,12 @@
 import { create } from 'zustand'
-import { db, queueEvent } from '../data/db'
+import { db, queueEvent, type ImportMeta } from '../data/db'
 import { SEED_VERSION, isCsvImportPool, isLegacyDemoPool, seedPlayers, shouldRefreshBundledAdp } from '../data/seed'
+import {
+  prepareFootballersImport,
+  type ImportPrepareResult,
+  type ImportPrepareSuccess,
+  type ImportSourceIdentity
+} from '../data/footballersImport'
 import type {
   DraftEvaluationRecord,
   DraftPick,
@@ -30,7 +36,10 @@ interface DraftStore {
   engineWarning?: string
   offlineReady: boolean
   hydrated: boolean
+  importIdentity?: ImportSourceIdentity
   hydrate: () => Promise<void>
+  prepareFootballersImport: (content: string) => ImportPrepareResult
+  commitFootballersImport: (prepared: ImportPrepareSuccess) => Promise<void>
   importPlayers: (players: Player[]) => Promise<void>
   loadBundledRankings: () => Promise<void>
   draftPlayer: (player: Player) => Promise<void>
@@ -38,6 +47,7 @@ interface DraftStore {
   removeKeeper: (id: string) => Promise<void>
   correctPick: (id: string, player: Player) => Promise<void>
   undoLastPick: () => Promise<void>
+  resetDraft: () => Promise<void>
   removePick: (id: string) => Promise<void>
   adjustPlayer: (id: string, patch: Partial<Omit<UserAdjustment, 'playerId'>>) => Promise<void>
   updateSettings: (patch: Partial<LeagueSettings>) => Promise<void>
@@ -92,6 +102,11 @@ export function unavailablePlayerIds(picks: DraftPick[], keepers: KeeperAssignme
   const ids = keptPlayerIds(keepers)
   for (const pick of picks) ids.add(pick.playerId)
   return ids
+}
+
+function isBundledSeedPool(players: Player[]) {
+  return players.length === seedPlayers.length
+    && players.every((player, index) => player.id === seedPlayers[index].id)
 }
 
 function copyPlayer(player: Player): Player {
@@ -232,26 +247,28 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
   offlineReady: false,
   hydrated: false,
   hydrate: async () => {
-    const [storedPlayers, storedAdjustments, picks, keepers, storedSettings, storedMeta, evaluationRecords] = await Promise.all([
+    const [storedPlayers, storedAdjustments, picks, keepers, storedSettings, storedSeed, storedImport, evaluationRecords] = await Promise.all([
       db.players.toArray(),
       db.adjustments.toArray(),
       db.picks.orderBy('pickNumber').toArray(),
       db.keepers.toArray(),
       db.settings.get('active'),
       db.meta.get('seed'),
+      db.importMeta.get('import'),
       db.evaluationRecords.orderBy('capturedAt').toArray()
     ])
-    const seedChanged = storedMeta?.version !== SEED_VERSION
+    const seedChanged = storedSeed?.version !== SEED_VERSION
     const shouldLoadBundle = !storedPlayers.length
       || isLegacyDemoPool(storedPlayers)
       || shouldRefreshBundledAdp(storedPlayers)
-      || (seedChanged && !isCsvImportPool(storedPlayers))
+      || (seedChanged && !isCsvImportPool(storedPlayers, storedImport))
     const players = shouldLoadBundle ? seedPlayers : storedPlayers
     if (shouldLoadBundle) {
       await db.transaction('rw', db.players, db.meta, async () => {
         if (storedPlayers.length) await db.players.clear()
         await db.players.bulkPut(players)
         await db.meta.put({ id: 'seed', version: SEED_VERSION })
+        if (storedImport) await db.importMeta.delete('import')
       })
     }
     set({
@@ -261,6 +278,17 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       keepers,
       settings: storedSettings ? { ...storedSettings, id: undefined } as unknown as LeagueSettings : defaultLeague,
       evaluationRecords,
+      importIdentity: storedImport ? {
+        fingerprint: storedImport.fingerprint,
+        season: storedImport.season,
+        asOfDate: storedImport.asOfDate,
+        rankingType: storedImport.rankingType,
+        scoringProfile: storedImport.scoringProfile,
+        leagueSize: storedImport.leagueSize,
+        sourceCheatsheetId: storedImport.sourceCheatsheetId,
+        sourceUrl: storedImport.sourceUrl,
+        positionCounts: storedImport.positionCounts
+      } : undefined,
       hydrated: true
     })
     await get().refreshRecommendations()
@@ -275,6 +303,60 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       })
     }
   },
+  prepareFootballersImport: (content) => {
+    const state = get()
+    return prepareFootballersImport(content, state.settings, {
+      settings: state.settings,
+      picks: state.picks,
+      keepers: state.keepers,
+      adjustments: state.adjustments
+    })
+  },
+  commitFootballersImport: async (prepared) => {
+    if (get().picks.length > 0) {
+      throw new Error('Cannot import while draft picks exist. Reset the draft first.')
+    }
+    const importMeta: ImportMeta = {
+      id: 'import',
+      fingerprint: prepared.identity.fingerprint,
+      season: prepared.identity.season,
+      asOfDate: prepared.identity.asOfDate,
+      rankingType: prepared.identity.rankingType,
+      scoringProfile: prepared.identity.scoringProfile,
+      leagueSize: prepared.identity.leagueSize,
+      sourceCheatsheetId: prepared.identity.sourceCheatsheetId,
+      sourceUrl: prepared.identity.sourceUrl,
+      importedAt: Date.now(),
+      playerCount: prepared.players.length,
+      positionCounts: prepared.identity.positionCounts
+    }
+    await db.transaction('rw', db.players, db.evaluationRecords, db.importMeta, db.events, async () => {
+      if (get().picks.length > 0) {
+        throw new Error('Cannot import while draft picks exist. Reset the draft first.')
+      }
+      await db.players.clear()
+      await db.players.bulkPut(prepared.players)
+      await db.evaluationRecords.clear()
+      await db.importMeta.put(importMeta)
+      await queueEvent('CSV_IMPORTED', {
+        count: prepared.players.length,
+        fingerprint: prepared.identity.fingerprint,
+        sourceCheatsheetId: prepared.identity.sourceCheatsheetId
+      })
+    })
+    set({
+      players: prepared.players,
+      importIdentity: prepared.identity,
+      evaluationRecords: [],
+      recommendations: [],
+      recommendationContext: undefined
+    })
+    try {
+      await get().refreshRecommendations()
+    } catch {
+      set({ recommendations: [], recommendationContext: undefined })
+    }
+  },
   importPlayers: async (players) => {
     await db.transaction('rw', db.players, db.events, async () => {
       await db.players.clear()
@@ -285,8 +367,15 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
     await get().refreshRecommendations()
   },
   loadBundledRankings: async () => {
-    await get().importPlayers(seedPlayers)
-    await db.meta.put({ id: 'seed', version: SEED_VERSION })
+    await db.transaction('rw', db.players, db.meta, db.importMeta, db.events, async () => {
+      await db.players.clear()
+      await db.players.bulkPut(seedPlayers)
+      await db.meta.put({ id: 'seed', version: SEED_VERSION })
+      await db.importMeta.delete('import')
+      await queueEvent('CSV_IMPORTED', { count: seedPlayers.length, bundled: true })
+    })
+    set({ players: seedPlayers, importIdentity: undefined })
+    await get().refreshRecommendations()
   },
   draftPlayer: async (player) => enqueueDraftWrite(async () => {
     const state = get()
@@ -427,6 +516,34 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
         ? state.evaluationRecords.map((record) => record.id === evaluation.id ? evaluation : record)
         : state.evaluationRecords
     }))
+    await get().refreshRecommendations()
+  }),
+  resetDraft: async () => enqueueDraftWrite(async () => {
+    const state = get()
+    if (!state.picks.length && !state.keepers.length && !state.evaluationRecords.length && isBundledSeedPool(state.players)) {
+      return
+    }
+    const pickCount = state.picks.length
+    const keeperCount = state.keepers.length
+    const evaluationCount = state.evaluationRecords.length
+    await db.transaction('rw', db.picks, db.keepers, db.evaluationRecords, db.players, async () => {
+      await db.picks.clear()
+      await db.keepers.clear()
+      await db.evaluationRecords.clear()
+      await db.players.clear()
+      await db.players.bulkPut(seedPlayers)
+    })
+    await db.transaction('rw', db.meta, db.importMeta, async () => {
+      await db.meta.put({ id: 'seed', version: SEED_VERSION })
+      await db.importMeta.delete('import')
+    })
+    await queueEvent('DRAFT_RESET', {
+      pickCount,
+      keeperCount,
+      evaluationCount,
+      playerCount: seedPlayers.length
+    })
+    set({ picks: [], keepers: [], evaluationRecords: [], players: seedPlayers, importIdentity: undefined })
     await get().refreshRecommendations()
   }),
   removePick: async (id) => enqueueDraftWrite(async () => {

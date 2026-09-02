@@ -1,3 +1,4 @@
+import type { ImportMeta } from './db'
 import type { Player } from '../types'
 import bundle from './expertRankings.json'
 
@@ -43,8 +44,14 @@ export function isLegacyDemoPool(players: Player[]): boolean {
   return players.length > 0 && players.length <= 30 && players.every((player) => player.id.startsWith('seed-'))
 }
 
-export function isCsvImportPool(players: Player[]): boolean {
-  return players.some((player) => player.id.startsWith('csv-'))
+export function isImportedPool(importMeta?: Pick<ImportMeta, 'fingerprint'> | null): boolean {
+  return Boolean(importMeta?.fingerprint)
+}
+
+export function isCsvImportPool(players: Player[], importMeta?: Pick<ImportMeta, 'fingerprint'> | null): boolean {
+  return isImportedPool(importMeta)
+    || players.some((player) => Boolean(player.importSource?.fingerprint))
+    || players.some((player) => player.id.startsWith('csv-'))
 }
 
 export function shouldRefreshBundledAdp(stored: Player[]): boolean {

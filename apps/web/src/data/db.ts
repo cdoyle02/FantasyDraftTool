@@ -6,9 +6,24 @@ export interface SeedMeta {
   version: string
 }
 
+export interface ImportMeta {
+  id: 'import'
+  fingerprint: string
+  season: number
+  asOfDate: string
+  rankingType: string
+  scoringProfile: string
+  leagueSize: number
+  sourceCheatsheetId: string
+  sourceUrl?: string
+  importedAt: number
+  playerCount: number
+  positionCounts: Record<string, number>
+}
+
 export interface QueueEvent {
   id: string
-  type: 'PICK_CREATED' | 'PICK_UNDONE' | 'PICK_REMOVED' | 'PICK_CORRECTED' | 'KEEPER_ASSIGNED' | 'KEEPER_REMOVED' | 'PLAYER_ADJUSTED' | 'CSV_IMPORTED' | 'SETTINGS_UPDATED'
+  type: 'PICK_CREATED' | 'PICK_UNDONE' | 'PICK_REMOVED' | 'PICK_CORRECTED' | 'KEEPER_ASSIGNED' | 'KEEPER_REMOVED' | 'PLAYER_ADJUSTED' | 'CSV_IMPORTED' | 'SETTINGS_UPDATED' | 'DRAFT_RESET'
   payload: unknown
   createdAt: number
   status: 'pending' | 'synced'
@@ -23,6 +38,7 @@ class DraftDatabase extends Dexie {
   evaluationRecords!: EntityTable<DraftEvaluationRecord, 'id'>
   events!: EntityTable<QueueEvent, 'id'>
   meta!: EntityTable<SeedMeta, 'id'>
+  importMeta!: EntityTable<ImportMeta, 'id'>
 
   constructor() {
     super('fantasy-draft-tool')
@@ -65,6 +81,17 @@ class DraftDatabase extends Dexie {
       evaluationRecords: 'id, pickId, pickNumber, status, capturedAt',
       events: 'id, status, createdAt',
       meta: 'id'
+    })
+    this.version(6).stores({
+      players: 'id, name, position, adp',
+      picks: 'id, pickNumber, teamId, playerId',
+      keepers: 'id, teamId, playerId',
+      settings: 'id',
+      adjustments: 'playerId, tag',
+      evaluationRecords: 'id, pickId, pickNumber, status, capturedAt',
+      events: 'id, status, createdAt',
+      meta: 'id',
+      importMeta: 'id'
     })
   }
 }

@@ -2,13 +2,34 @@ export type PlayerPosition = 'QB' | 'RB' | 'WR' | 'TE' | 'K' | 'DST'
 export type Position = PlayerPosition | 'FLEX' | 'SUPERFLEX'
 export type ScoringFormat = 'PPR' | 'HALF_PPR' | 'STANDARD'
 
+export interface FootballersSourceTags {
+  myGuy?: boolean
+  value?: boolean
+  bust?: boolean
+  sleeper?: boolean
+  rookie?: boolean
+  injured?: boolean
+  breakout?: boolean
+}
+
+export interface PlayerImportSource {
+  season: number
+  asOfDate: string
+  rankingType: string
+  scoringProfile: string
+  leagueSize: number
+  sourceCheatsheetId: string
+  sourceUrl?: string
+  fingerprint: string
+}
+
 export interface Player {
   id: string
   name: string
   position: PlayerPosition
   team: string
   projectedPoints: number
-  adp: number
+  adp?: number
   espnAdp?: number
   sleeperAdp?: number
   tier: number
@@ -22,6 +43,15 @@ export interface Player {
   irEligible?: boolean
   expectedReturnWeek?: number
   byeWeek?: number
+  positionRank?: number
+  tierRank?: number
+  tierSize?: number
+  tierValueMultiplier?: number
+  adpRoundPick?: string
+  playerSlug?: string
+  sourceTags?: FootballersSourceTags
+  sourceTagsRaw?: string
+  importSource?: PlayerImportSource
 }
 
 export interface UserAdjustment {

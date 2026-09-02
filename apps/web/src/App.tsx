@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { PositionPill } from './components/PositionPill'
-import { parsePlayerCsv } from './data/csv'
+import { FOOTBALLERS_CSV_GENERATION_PROMPT } from './data/footballersImportPrompt'
+import type { ImportPrepareSuccess } from './data/footballersImport'
+import { formatAdp } from './pool/adp'
 import { buildDraftEvaluationExport, downloadDraftEvaluationExport } from './data/export'
 import { AvailablePlayers } from './pool/AvailablePlayers'
 import { rosterEntriesForTeam, keptPlayerIds, roundForPick, teamForPick, useDraftStore } from './store/draftStore'
@@ -35,29 +37,103 @@ function SetupDialog({ close }: { close: () => void }) {
 }
 
 function ImportDialog({ close }: { close: () => void }) {
-  const importPlayers = useDraftStore((state) => state.importPlayers)
-  const [status, setStatus] = useState('Drop a FantasyPros-style CSV or choose a file.')
+  const prepareFootballersImport = useDraftStore((state) => state.prepareFootballersImport)
+  const commitFootballersImport = useDraftStore((state) => state.commitFootballersImport)
+  const picks = useDraftStore((state) => state.picks)
+  const [status, setStatus] = useState('Drop a Fantasy Footballers DVS CSV or choose a file.')
+  const [preflight, setPreflight] = useState<ImportPrepareSuccess | null>(null)
+  const [copyStatus, setCopyStatus] = useState('')
   const input = useRef<HTMLInputElement>(null)
-  const load = async (file?: File) => {
+
+  const inspect = async (file?: File) => {
     if (!file) return
+    setPreflight(null)
     try {
-      setStatus('Parsing player projections…')
-      const players = await parsePlayerCsv(file)
-      await importPlayers(players)
-      setStatus(`Imported ${players.length} players. Adjustments remain a separate local layer.`)
+      setStatus('Parsing and validating Footballers sheet…')
+      const content = await file.text()
+      const result = prepareFootballersImport(content)
+      if (!result.ok) {
+        setStatus(result.errors.map((error) => error.message).join(' '))
+        return
+      }
+      setPreflight(result)
+      setStatus(`Ready to import ${result.players.length} players from ${result.identity.scoringProfile}.`)
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Import failed')
     }
   }
+
+  const commit = async () => {
+    if (!preflight) return
+    try {
+      setStatus('Committing league-specific rankings…')
+      await commitFootballersImport(preflight)
+      setStatus(`Imported ${preflight.players.length} players. Bundled season projections were retained.`)
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Import commit failed')
+    }
+  }
+
+  const copyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(FOOTBALLERS_CSV_GENERATION_PROMPT)
+      setCopyStatus('Prompt copied to clipboard.')
+    } catch {
+      setCopyStatus('Could not copy prompt to clipboard.')
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
-      <section className="w-full max-w-xl rounded-2xl border border-line bg-panel p-6" role="dialog" aria-modal="true" aria-labelledby="import-title">
-        <p className="eyebrow">Projection data</p><h2 id="import-title" className="text-2xl font-semibold">Import player CSV</h2>
-        <button className="mt-6 w-full rounded-xl border border-dashed border-mint/50 bg-mint/5 p-10 text-center hover:bg-mint/10" onClick={() => input.current?.click()} onDrop={(event) => { event.preventDefault(); void load(event.dataTransfer.files[0]) }} onDragOver={(event) => event.preventDefault()}>
-          <span className="block text-lg font-semibold text-mint">Choose CSV file</span><span className="mt-2 block text-sm text-muted">Player, Position, Team, Projected Points, ADP, Tier</span>
+      <section className="w-full max-w-2xl rounded-2xl border border-line bg-panel p-6" role="dialog" aria-modal="true" aria-labelledby="import-title">
+        <p className="eyebrow">League-specific rankings</p>
+        <h2 id="import-title" className="text-2xl font-semibold">Import Footballers CSV</h2>
+        <p className="mt-2 text-sm text-muted">
+          Replaces tier, ADP, and ranking metadata for this league setup. Bundled season projections and stable player IDs are retained.
+        </p>
+        {picks.length > 0 && (
+          <p className="mt-3 rounded-lg border border-rose-300/30 bg-rose-300/5 px-3 py-2 text-sm text-rose-200">
+            Draft picks already exist. Reset the draft before importing a new sheet.
+          </p>
+        )}
+        <button
+          className="mt-6 w-full rounded-xl border border-dashed border-mint/50 bg-mint/5 p-10 text-center hover:bg-mint/10"
+          onClick={() => input.current?.click()}
+          onDrop={(event) => { event.preventDefault(); void inspect(event.dataTransfer.files[0]) }}
+          onDragOver={(event) => event.preventDefault()}
+        >
+          <span className="block text-lg font-semibold text-mint">Choose Footballers DVS CSV</span>
+          <span className="mt-2 block text-sm text-muted">Header-based Footballers cheat sheet format</span>
         </button>
-        <input ref={input} hidden type="file" accept=".csv,text/csv" onChange={(event) => void load(event.target.files?.[0])} />
+        <input ref={input} hidden type="file" accept=".csv,text/csv" onChange={(event) => void inspect(event.target.files?.[0])} />
+        {preflight && (
+          <div className="mt-4 rounded-xl border border-line bg-ink/40 p-4 text-sm">
+            <p><span className="text-muted">Scoring profile:</span> {preflight.identity.scoringProfile}</p>
+            <p><span className="text-muted">League size:</span> {preflight.identity.leagueSize}</p>
+            <p><span className="text-muted">Season / as-of:</span> {preflight.identity.season} · {preflight.identity.asOfDate}</p>
+            <p><span className="text-muted">Sheet ID:</span> {preflight.identity.sourceCheatsheetId}</p>
+            <p><span className="text-muted">Fingerprint:</span> {preflight.identity.fingerprint}</p>
+            <p className="mt-2 text-muted">Position counts: {Object.entries(preflight.identity.positionCounts).map(([position, count]) => `${position} ${count}`).join(' · ')}</p>
+            {(preflight.matchWarnings.length > 0 || preflight.warnings.length > 0) && (
+              <ul className="mt-3 list-disc pl-5 text-amber-100">
+                {preflight.matchWarnings.map((warning) => (
+                  <li key={`${warning.row}-${warning.message}`}>{warning.message}</li>
+                ))}
+                {preflight.warnings.map((warning) => (
+                  <li key={`${warning.row ?? 'sheet'}-${warning.message}`}>{warning.message}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button className="button-secondary" onClick={() => void copyPrompt()}>Copy CSV-generation prompt</button>
+          {preflight && picks.length === 0 && (
+            <button className="button-primary" onClick={() => void commit()}>Replace active rankings</button>
+          )}
+        </div>
         <p className="mt-4 min-h-6 text-sm text-muted" aria-live="polite">{status}</p>
+        {copyStatus && <p className="text-xs text-mint" aria-live="polite">{copyStatus}</p>}
         <div className="mt-5 flex justify-end"><button className="button-primary" onClick={close}>Done</button></div>
       </section>
     </div>
@@ -97,7 +173,7 @@ function PickSearch({ correctionId, onCorrectionDone }: { correctionId?: string;
     </div>
     {query && <ul id="pick-results" role="listbox" className="absolute z-30 mt-2 max-h-80 w-full overflow-auto rounded-xl border border-line bg-panel p-1 shadow-2xl">
       {results.map((player, index) => <li key={player.id}><button role="option" aria-selected={active === index} onMouseEnter={() => setActive(index)} onClick={() => select(player)} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left ${active === index ? 'bg-mint/10' : ''}`}>
-        <PositionPill position={player.position} /><span className="flex-1 font-medium">{player.name}</span><span className="text-xs text-muted">{player.team} · ADP {player.adp}</span>
+        <PositionPill position={player.position} /><span className="flex-1 font-medium">{player.name}</span><span className="text-xs text-muted">{player.team} · ADP {formatAdp(player.adp)}</span>
       </button></li>)}
       {!results.length && <li className="p-4 text-center text-sm text-muted">No available players match.</li>}
     </ul>}
@@ -234,11 +310,46 @@ export function Rosters() {
   </section>
 }
 
-function PickHistory({ onCorrect }: { onCorrect: (id: string) => void }) {
-  const { picks, undoLastPick, removePick } = useDraftStore()
-  return <section className="panel"><div className="panel-heading"><div><p className="eyebrow">Audit trail</p><h2>Pick history</h2></div><button disabled={!picks.length} className="button-secondary !px-2 !py-1 text-xs disabled:opacity-40" onClick={() => void undoLastPick()}>↶ Undo last</button></div>
+function ResetDraftDialog({ close, onConfirm }: { close: () => void; onConfirm: () => void }) {
+  const resetDraft = useDraftStore((state) => state.resetDraft)
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4" role="presentation">
+      <section className="w-full max-w-md rounded-2xl border border-rose-300/30 bg-panel p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="reset-draft-title">
+        <div className="mb-4 flex items-start justify-between">
+          <div>
+            <p className="eyebrow text-rose-300">Destructive action</p>
+            <h2 id="reset-draft-title" className="text-2xl font-semibold">Reset the entire draft?</h2>
+          </div>
+          <button className="icon-button" onClick={close} aria-label="Close reset draft confirmation">×</button>
+        </div>
+        <p className="text-sm text-muted">
+          All picks and keepers will be cleared, and the player pool will be restored to the bundled rankings so recommendations start fresh. League settings and boosts stay. Export first if you need a backup.
+        </p>
+        <div className="mt-7 flex justify-end gap-3">
+          <button className="button-secondary" onClick={close}>Cancel</button>
+          <button
+            className="rounded-lg border border-rose-300/40 bg-rose-300/10 px-4 py-2 text-sm font-bold text-rose-300 hover:bg-rose-300/20"
+            onClick={() => { void resetDraft().then(() => { onConfirm(); close() }) }}
+          >
+            Reset draft
+          </button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function PickHistory({ onCorrect, onReset }: { onCorrect: (id: string) => void; onReset: () => void }) {
+  const { picks, keepers, undoLastPick, removePick } = useDraftStore()
+  const [showResetDialog, setShowResetDialog] = useState(false)
+  const canReset = picks.length > 0 || keepers.length > 0
+  return <>
+    <section className="panel"><div className="panel-heading"><div><p className="eyebrow">Audit trail</p><h2>Pick history</h2></div><div className="flex items-center gap-2"><button disabled={!picks.length} className="button-secondary !px-2 !py-1 text-xs disabled:opacity-40" onClick={() => void undoLastPick()}>↶ Undo last</button><button disabled={!canReset} className="button-secondary !px-2 !py-1 text-xs text-rose-300 disabled:opacity-40" onClick={() => setShowResetDialog(true)}>Reset draft</button></div></div>
     <ol className="max-h-56 overflow-auto p-2">{[...picks].reverse().map((pick) => <li key={pick.id} className="group flex items-center gap-2 rounded-lg p-2 hover:bg-white/[.03]"><span className="w-8 text-right font-mono text-[10px] text-muted">{pick.pickNumber}</span><PositionPill position={pick.position} /><span className="min-w-0 flex-1 truncate text-xs">{pick.playerName}</span><span className="text-[10px] text-muted">T{pick.teamId}</span><button aria-label={`Correct ${pick.playerName} pick`} title="Replace player" className="invisible text-xs text-mint group-hover:visible focus:visible" onClick={() => onCorrect(pick.id)}>Edit</button><button aria-label={`Remove ${pick.playerName} pick`} title="Remove pick" className="invisible text-xs text-rose-300 group-hover:visible focus:visible" onClick={() => void removePick(pick.id)}>×</button></li>)}{!picks.length && <li className="p-7 text-center text-xs text-muted">Picks appear here as the draft unfolds.</li>}</ol>
   </section>
+    {showResetDialog && <ResetDraftDialog close={() => setShowResetDialog(false)} onConfirm={onReset} />}
+  </>
 }
 
 export default function App() {
@@ -302,7 +413,7 @@ export default function App() {
       {engineWarning && <div role="status" className="mb-4 rounded-lg border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-xs text-amber-100">{engineWarning}</div>}
       <div className="grid gap-4 lg:grid-cols-12">
         <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><span className="text-xs text-muted">Top 10 for your roster · pick goes to on-clock team</span></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 10).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
-        <AvailablePlayers /><Rosters /><div className="lg:col-span-8"><PickHistory onCorrect={setCorrectionId} /></div>
+        <AvailablePlayers /><Rosters /><div className="lg:col-span-8"><PickHistory onCorrect={setCorrectionId} onReset={() => setCorrectionId(undefined)} /></div>
       </div>
     </main>
     {modal === 'setup' && <SetupDialog close={() => setModal(null)} />}{modal === 'import' && <ImportDialog close={() => setModal(null)} />}

@@ -42,7 +42,7 @@ export function developmentFallbackScore(
     const opinion = opinions.get(player.id)
     const vorp = Math.max(0, player.projectedPoints - replacements[player.position])
     const tierUrgency = Math.max(0, 24 - player.tier * 4)
-    const survivalProbability = Math.max(0.08, Math.min(0.94, 1 - (picks.length + settings.teamCount - player.adp) / 35))
+    const survivalProbability = Math.max(0.08, Math.min(0.94, 1 - (picks.length + settings.teamCount - (player.adp ?? 999)) / 35))
     const target = settings.rosterSlots[player.position] ?? 1
     const needMultiplier = Math.max(0.72, 1.22 - (counts[player.position] ?? 0) / Math.max(1, target) * 0.28)
     const totalRounds = Object.values(settings.rosterSlots).reduce((sum, value) => sum + value, 0)

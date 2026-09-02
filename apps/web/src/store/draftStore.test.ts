@@ -1,33 +1,47 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Player, Recommendation } from '../types'
 
-const playersTable = {
-  toArray: vi.fn(),
-  bulkPut: vi.fn(),
-  clear: vi.fn()
-}
-const adjustmentsTable = { toArray: vi.fn() }
-const picksTable = {
-  orderBy: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) })),
-  put: vi.fn(),
-  delete: vi.fn(),
-  clear: vi.fn(),
-  bulkPut: vi.fn()
-}
-const keepersTable = {
-  toArray: vi.fn().mockResolvedValue([]),
-  put: vi.fn(),
-  delete: vi.fn(),
-  clear: vi.fn(),
-  bulkPut: vi.fn()
-}
-const settingsTable = { get: vi.fn() }
-const metaTable = { get: vi.fn(), put: vi.fn() }
-const evaluationRecordsTable = {
-  orderBy: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) })),
-  put: vi.fn()
-}
-const eventsTable = {}
+const {
+  playersTable,
+  adjustmentsTable,
+  picksTable,
+  keepersTable,
+  settingsTable,
+  metaTable,
+  importMetaTable,
+  evaluationRecordsTable,
+  eventsTable
+} = vi.hoisted(() => ({
+  playersTable: {
+    toArray: vi.fn(),
+    bulkPut: vi.fn(),
+    clear: vi.fn()
+  },
+  adjustmentsTable: { toArray: vi.fn() },
+  picksTable: {
+    orderBy: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) })),
+    put: vi.fn(),
+    delete: vi.fn(),
+    clear: vi.fn(),
+    bulkPut: vi.fn()
+  },
+  keepersTable: {
+    toArray: vi.fn().mockResolvedValue([]),
+    put: vi.fn(),
+    delete: vi.fn(),
+    clear: vi.fn(),
+    bulkPut: vi.fn()
+  },
+  settingsTable: { get: vi.fn() },
+  metaTable: { get: vi.fn(), put: vi.fn(), delete: vi.fn() },
+  importMetaTable: { get: vi.fn(), put: vi.fn(), delete: vi.fn() },
+  evaluationRecordsTable: {
+    orderBy: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) })),
+    put: vi.fn(),
+    clear: vi.fn()
+  },
+  eventsTable: {}
+}))
 
 vi.mock('../data/db', () => ({
   db: {
@@ -37,6 +51,7 @@ vi.mock('../data/db', () => ({
     keepers: keepersTable,
     settings: settingsTable,
     meta: metaTable,
+    importMeta: importMetaTable,
     evaluationRecords: evaluationRecordsTable,
     events: eventsTable,
     transaction: async (...args: unknown[]) => {
@@ -105,7 +120,8 @@ describe('hydrate seed versioning', () => {
     vi.clearAllMocks()
     adjustmentsTable.toArray.mockResolvedValue([])
     settingsTable.get.mockResolvedValue(undefined)
-    metaTable.get.mockResolvedValue(undefined)
+    metaTable.get.mockImplementation(async (id: string) => (id === 'seed' ? undefined : undefined))
+    importMetaTable.get.mockResolvedValue(undefined)
     evaluationRecordsTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     picksTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     const { useDraftStore } = await import('./draftStore')
@@ -463,5 +479,247 @@ describe('draft evaluation capture', () => {
     record = useDraftStore.getState().evaluationRecords[0]
     expect(record.status).toBe('undone')
     expect(record.revisions.at(-1)?.type).toBe('UNDONE')
+  })
+})
+
+describe('resetDraft', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    const { defaultLeague } = await import('../types')
+    const { useDraftStore } = await import('./draftStore')
+    useDraftStore.setState({
+      players: demoPlayers,
+      adjustments: { 'seed-1': { playerId: 'seed-1', pointsDelta: 5 } },
+      picks: [],
+      keepers: [],
+      settings: { ...defaultLeague, teamCount: 4, userTeam: 2 },
+      recommendations: [],
+      recommendationContext: undefined,
+      evaluationRecords: [],
+      engineMode: 'development-fallback'
+    })
+  })
+
+  it('clears draft progress and restores the bundled player pool', async () => {
+    const { seedPlayers } = await import('../data/seed')
+    const { queueEvent } = await import('../data/db')
+    const { useDraftStore } = await import('./draftStore')
+    const csvPlayers: Player[] = [{
+      id: 'csv-1',
+      name: 'CSV Player',
+      position: 'RB',
+      team: 'KC',
+      projectedPoints: 100,
+      adp: 1,
+      tier: 1
+    }]
+    const settings = useDraftStore.getState().settings
+    const adjustments = useDraftStore.getState().adjustments
+
+    await useDraftStore.getState().draftPlayer(demoPlayers[0])
+    await useDraftStore.getState().draftPlayer(demoPlayers[1])
+    await useDraftStore.getState().assignKeeper(demoPlayers[2], 1)
+    useDraftStore.setState({ players: csvPlayers })
+
+    await useDraftStore.getState().resetDraft()
+
+    expect(useDraftStore.getState().picks).toEqual([])
+    expect(useDraftStore.getState().keepers).toEqual([])
+    expect(useDraftStore.getState().evaluationRecords).toEqual([])
+    expect(useDraftStore.getState().players).toEqual(seedPlayers)
+    expect(useDraftStore.getState().settings).toEqual(settings)
+    expect(useDraftStore.getState().adjustments).toEqual(adjustments)
+    expect(picksTable.clear).toHaveBeenCalled()
+    expect(keepersTable.clear).toHaveBeenCalled()
+    expect(evaluationRecordsTable.clear).toHaveBeenCalled()
+    expect(playersTable.clear).toHaveBeenCalled()
+    expect(playersTable.bulkPut).toHaveBeenCalledWith(seedPlayers)
+    expect(queueEvent).toHaveBeenLastCalledWith('DRAFT_RESET', {
+      pickCount: 2,
+      keeperCount: 1,
+      evaluationCount: 1,
+      playerCount: seedPlayers.length
+    })
+    expect(getRecommendations).toHaveBeenCalledWith(expect.objectContaining({
+      picks: [],
+      keepers: [],
+      players: seedPlayers
+    }))
+  })
+
+  it('is a no-op when the draft is already empty and the pool is bundled', async () => {
+    const { seedPlayers } = await import('../data/seed')
+    const { queueEvent } = await import('../data/db')
+    const { useDraftStore } = await import('./draftStore')
+
+    useDraftStore.setState({ players: seedPlayers, picks: [], keepers: [], evaluationRecords: [] })
+    vi.mocked(queueEvent).mockClear()
+
+    await useDraftStore.getState().resetDraft()
+
+    expect(queueEvent).not.toHaveBeenCalled()
+    expect(picksTable.clear).not.toHaveBeenCalled()
+    expect(playersTable.clear).not.toHaveBeenCalled()
+  })
+})
+
+describe('Footballers CSV import store flow', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    adjustmentsTable.toArray.mockResolvedValue([])
+    settingsTable.get.mockResolvedValue(undefined)
+    metaTable.get.mockImplementation(async (id: string) => (id === 'seed' ? { id: 'seed', version: '2026.6' } : undefined))
+    importMetaTable.get.mockResolvedValue(undefined)
+    evaluationRecordsTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
+    picksTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
+    const { defaultLeague } = await import('../types')
+    const { useDraftStore } = await import('./draftStore')
+    useDraftStore.setState({
+      players: [],
+      adjustments: {},
+      picks: [],
+      keepers: [],
+      settings: {
+        ...defaultLeague,
+        teamCount: 8,
+        rosterSlots: { QB: 1, RB: 2, WR: 2, TE: 1, FLEX: 2, SUPERFLEX: 0, BENCH: 6, K: 0, DST: 1 }
+      },
+      recommendations: [{ playerId: 'old', dvsScore: 1, tierLabel: 'BEST PICK', breakdown: { vorp: 0, marginalValue: 0, waitLoss: 0, tierUrgency: 0, survivalProbability: 0, needMultiplier: 1, opponentDemandFactor: 1, guardrailAdjustment: 0 }, explanation: 'old' }],
+      recommendationContext: {
+        formulaVersion: 4,
+        oneTurnSims: null,
+        simulationSeed: null,
+        formulaParams: null,
+        engineMode: 'development-fallback',
+        generatedAt: 1,
+        generatedForPickIds: [],
+        generatedForPickCount: 0
+      },
+      evaluationRecords: [{ id: 'eval-1' } as never],
+      hydrated: true,
+      importIdentity: undefined
+    })
+  })
+
+  it('blocks import preparation when draft picks exist', async () => {
+    const { buildFootballersCsv, leagueARows } = await import('../data/footballersImport.fixtures')
+    const { useDraftStore } = await import('./draftStore')
+    useDraftStore.setState({
+      picks: [{
+        id: 'pick-1',
+        pickNumber: 1,
+        teamId: 1,
+        playerId: 'josh-allen-buf-qb',
+        playerName: 'Josh Allen',
+        position: 'QB',
+        timestamp: 1
+      }]
+    })
+    const result = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.errors[0]?.message).toContain('draft picks exist')
+  })
+
+  it('commits League B atomically and clears derived evaluation state', async () => {
+    const { buildFootballersCsv, leagueARows, leagueBRows } = await import('../data/footballersImport.fixtures')
+    const { queueEvent } = await import('../data/db')
+    const { useDraftStore } = await import('./draftStore')
+    const leagueA = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    expect(leagueA.ok).toBe(true)
+    if (!leagueA.ok) return
+    await useDraftStore.getState().commitFootballersImport(leagueA)
+    const leagueB = useDraftStore.getState().prepareFootballersImport(
+      buildFootballersCsv(leagueBRows(), { sourceCheatsheetId: 'sheet-b' })
+    )
+    expect(leagueB.ok).toBe(true)
+    if (!leagueB.ok) return
+    await useDraftStore.getState().commitFootballersImport(leagueB)
+    const josh = useDraftStore.getState().players.find((player) => player.id === 'josh-allen-buf-qb')
+    expect(josh?.tier).toBe(2)
+    expect(useDraftStore.getState().evaluationRecords).toEqual([])
+    expect(useDraftStore.getState().recommendationContext?.generatedForPickIds).toEqual([])
+    expect(importMetaTable.put).toHaveBeenCalledWith(expect.objectContaining({ id: 'import', fingerprint: leagueB.identity.fingerprint }))
+    expect(queueEvent).toHaveBeenLastCalledWith('CSV_IMPORTED', expect.objectContaining({ fingerprint: leagueB.identity.fingerprint }))
+  })
+
+  it('preserves League A when League B preparation fails', async () => {
+    const { buildFootballersCsv, leagueARows } = await import('../data/footballersImport.fixtures')
+    const { useDraftStore } = await import('./draftStore')
+    const leagueA = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    expect(leagueA.ok).toBe(true)
+    if (!leagueA.ok) return
+    await useDraftStore.getState().commitFootballersImport(leagueA)
+    const before = useDraftStore.getState()
+    const invalid = useDraftStore.getState().prepareFootballersImport(
+      buildFootballersCsv([
+        ...leagueARows(),
+        {
+          position: 'RB',
+          positionRank: 1,
+          playerName: 'Missing Player',
+          playerSlug: 'missing-player',
+          team: 'FA',
+          tierNumber: 1,
+          tierRank: 1,
+          tierSize: 1,
+          tierValueMultiplier: 1
+        }
+      ], { sourceCheatsheetId: 'sheet-c' })
+    )
+    expect(invalid.ok).toBe(false)
+    const after = useDraftStore.getState()
+    expect(after.players).toEqual(before.players)
+    expect(after.importIdentity).toEqual(before.importIdentity)
+    expect(after.evaluationRecords).toEqual(before.evaluationRecords)
+  })
+
+  it('survives keeper and adjustment references when stable IDs rematch', async () => {
+    const { buildFootballersCsv, leagueARows, leagueBRows } = await import('../data/footballersImport.fixtures')
+    const { useDraftStore } = await import('./draftStore')
+    const leagueA = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    if (!leagueA.ok) throw new Error('league A failed')
+    useDraftStore.setState({
+      keepers: [{
+        id: 'keeper-1',
+        teamId: 1,
+        playerId: 'josh-allen-buf-qb',
+        playerName: 'Josh Allen',
+        position: 'QB',
+        roundCost: 1,
+        timestamp: 1
+      }],
+      adjustments: {
+        'josh-allen-buf-qb': { playerId: 'josh-allen-buf-qb', pointsDelta: 4, tag: 'myGuy' }
+      }
+    })
+    const leagueB = useDraftStore.getState().prepareFootballersImport(
+      buildFootballersCsv(leagueBRows(), { sourceCheatsheetId: 'sheet-b' })
+    )
+    expect(leagueB.ok).toBe(true)
+    if (!leagueB.ok) return
+    await useDraftStore.getState().commitFootballersImport(leagueB)
+    expect(useDraftStore.getState().keepers[0]?.playerId).toBe('josh-allen-buf-qb')
+    expect(useDraftStore.getState().adjustments['josh-allen-buf-qb']?.pointsDelta).toBe(4)
+  })
+
+  it('reports keeper conflicts when the imported pool drops a referenced player', async () => {
+    const { buildFootballersCsv, leagueARows } = await import('../data/footballersImport.fixtures')
+    const { useDraftStore } = await import('./draftStore')
+    useDraftStore.setState({
+      keepers: [{
+        id: 'keeper-1',
+        teamId: 1,
+        playerId: 'missing-player-id',
+        playerName: 'Missing',
+        position: 'RB',
+        roundCost: 1,
+        timestamp: 1
+      }]
+    })
+    const result = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.errors.some((error) => error.message.includes('Keeper Missing'))).toBe(true)
   })
 })
