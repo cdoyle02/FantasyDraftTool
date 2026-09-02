@@ -1,6 +1,10 @@
 export {
   prepareFootballersImport,
+  prepareFootballersDataset,
+  datasetFromPlayers,
   readFootballersCsvFile,
+  type FootballersRankingDataset,
+  type FootballersRankingRow,
   type ImportCommitContext,
   type ImportPrepareError,
   type ImportPrepareFailure,

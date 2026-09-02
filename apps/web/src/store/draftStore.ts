@@ -1,12 +1,18 @@
 import { create } from 'zustand'
-import { db, queueEvent, type ImportMeta } from '../data/db'
+import { db, queueEvent } from '../data/db'
 import { SEED_VERSION, isCsvImportPool, isLegacyDemoPool, seedPlayers, shouldRefreshBundledAdp } from '../data/seed'
 import {
+  datasetFromPlayers,
+  prepareFootballersDataset,
   prepareFootballersImport,
   type ImportPrepareResult,
   type ImportPrepareSuccess,
   type ImportSourceIdentity
 } from '../data/footballersImport'
+import {
+  normalizeProfileName,
+  type SavedRankingSummary
+} from '../data/savedRankings'
 import type {
   DraftEvaluationRecord,
   DraftPick,
@@ -22,6 +28,15 @@ import type {
 } from '../types'
 import { defaultLeague } from '../types'
 import { getRecommendations, prepareOfflineEngine } from '../engine/adapter'
+import {
+  buildSavedProfileRecord,
+  commitActiveImportTransaction,
+  identityWithProfile,
+  importIdentityFromMeta,
+  loadSavedRankingSummaries,
+  normalizeLeagueSettings,
+  type ImportCommitOptions
+} from './importActivation'
 
 interface DraftStore {
   players: Player[]
@@ -37,9 +52,14 @@ interface DraftStore {
   offlineReady: boolean
   hydrated: boolean
   importIdentity?: ImportSourceIdentity
+  savedRankings: SavedRankingSummary[]
+  activeSavedProfileId?: string
   hydrate: () => Promise<void>
   prepareFootballersImport: (content: string) => ImportPrepareResult
-  commitFootballersImport: (prepared: ImportPrepareSuccess) => Promise<void>
+  prepareSavedRanking: (profileId: string, settings: LeagueSettings) => Promise<ImportPrepareResult>
+  commitFootballersImport: (prepared: ImportPrepareSuccess, options?: ImportCommitOptions) => Promise<void>
+  saveLeagueSetup: (settings: LeagueSettings, selectedProfileId?: string) => Promise<void>
+  findSavedProfileByName: (name: string) => SavedRankingSummary | undefined
   importPlayers: (players: Player[]) => Promise<void>
   loadBundledRankings: () => Promise<void>
   draftPlayer: (player: Player) => Promise<void>
@@ -50,6 +70,7 @@ interface DraftStore {
   resetDraft: () => Promise<void>
   removePick: (id: string) => Promise<void>
   adjustPlayer: (id: string, patch: Partial<Omit<UserAdjustment, 'playerId'>>) => Promise<void>
+  removeAdjustments: (playerIds: string[]) => Promise<void>
   updateSettings: (patch: Partial<LeagueSettings>) => Promise<void>
   refreshRecommendations: () => Promise<void>
 }
@@ -246,8 +267,9 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
   engineMode: 'development-fallback',
   offlineReady: false,
   hydrated: false,
+  savedRankings: [],
   hydrate: async () => {
-    const [storedPlayers, storedAdjustments, picks, keepers, storedSettings, storedSeed, storedImport, evaluationRecords] = await Promise.all([
+    const [storedPlayers, storedAdjustments, picks, keepers, storedSettings, storedSeed, storedImportRaw, evaluationRecords] = await Promise.all([
       db.players.toArray(),
       db.adjustments.toArray(),
       db.picks.orderBy('pickNumber').toArray(),
@@ -257,6 +279,7 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       db.importMeta.get('import'),
       db.evaluationRecords.orderBy('capturedAt').toArray()
     ])
+    let storedImport = storedImportRaw
     const seedChanged = storedSeed?.version !== SEED_VERSION
     const shouldLoadBundle = !storedPlayers.length
       || isLegacyDemoPool(storedPlayers)
@@ -270,7 +293,30 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
         await db.meta.put({ id: 'seed', version: SEED_VERSION })
         if (storedImport) await db.importMeta.delete('import')
       })
+      storedImport = undefined
+    } else if (storedImport && storedPlayers.length && !storedImport.savedProfileId) {
+      const leagueName = storedSettings?.name ?? defaultLeague.name
+      const identity = importIdentityFromMeta(storedImport)
+      const dataset = datasetFromPlayers(storedPlayers, identity)
+      const profile = {
+        id: crypto.randomUUID(),
+        displayName: leagueName,
+        normalizedName: normalizeProfileName(leagueName),
+        dataset,
+        createdAt: storedImport.importedAt,
+        updatedAt: storedImport.importedAt
+      }
+      await db.transaction('rw', db.savedRankings, db.importMeta, async () => {
+        await db.savedRankings.put(profile)
+        storedImport = {
+          ...storedImport!,
+          savedProfileId: profile.id,
+          savedProfileName: profile.displayName
+        }
+        await db.importMeta.put(storedImport)
+      })
     }
+    const savedRankings = await loadSavedRankingSummaries()
     set({
       players,
       adjustments: Object.fromEntries(storedAdjustments.map((item) => [item.playerId, item])),
@@ -278,17 +324,9 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       keepers,
       settings: storedSettings ? { ...storedSettings, id: undefined } as unknown as LeagueSettings : defaultLeague,
       evaluationRecords,
-      importIdentity: storedImport ? {
-        fingerprint: storedImport.fingerprint,
-        season: storedImport.season,
-        asOfDate: storedImport.asOfDate,
-        rankingType: storedImport.rankingType,
-        scoringProfile: storedImport.scoringProfile,
-        leagueSize: storedImport.leagueSize,
-        sourceCheatsheetId: storedImport.sourceCheatsheetId,
-        sourceUrl: storedImport.sourceUrl,
-        positionCounts: storedImport.positionCounts
-      } : undefined,
+      savedRankings,
+      activeSavedProfileId: storedImport?.savedProfileId,
+      importIdentity: storedImport ? importIdentityFromMeta(storedImport) : undefined,
       hydrated: true
     })
     await get().refreshRecommendations()
@@ -312,41 +350,144 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       adjustments: state.adjustments
     })
   },
-  commitFootballersImport: async (prepared) => {
+  prepareSavedRanking: (profileId, settings) => {
+    const state = get()
+    return db.savedRankings.get(profileId).then((profile) => {
+      if (!profile) {
+        return {
+          ok: false as const,
+          errors: [{ message: 'Saved rankings profile not found.' }],
+          warnings: []
+        }
+      }
+      const validKeepers = state.keepers.filter((keeper) => keeper.teamId >= 1 && keeper.teamId <= settings.teamCount)
+      return prepareFootballersDataset(profile.dataset, settings, {
+        settings,
+        picks: state.picks,
+        keepers: validKeepers,
+        adjustments: state.adjustments
+      })
+    })
+  },
+  findSavedProfileByName: (name) => {
+    const normalized = normalizeProfileName(name)
+    return get().savedRankings.find((profile) => normalizeProfileName(profile.displayName) === normalized)
+  },
+  commitFootballersImport: async (prepared, options) => {
     if (get().picks.length > 0) {
       throw new Error('Cannot import while draft picks exist. Reset the draft first.')
     }
-    const importMeta: ImportMeta = {
-      id: 'import',
-      fingerprint: prepared.identity.fingerprint,
-      season: prepared.identity.season,
-      asOfDate: prepared.identity.asOfDate,
-      rankingType: prepared.identity.rankingType,
-      scoringProfile: prepared.identity.scoringProfile,
-      leagueSize: prepared.identity.leagueSize,
-      sourceCheatsheetId: prepared.identity.sourceCheatsheetId,
-      sourceUrl: prepared.identity.sourceUrl,
-      importedAt: Date.now(),
-      playerCount: prepared.players.length,
-      positionCounts: prepared.identity.positionCounts
+    const profileName = (options?.profileName ?? get().settings.name).trim()
+    if (!profileName) throw new Error('Saved rankings profile name is required.')
+    const normalized = normalizeProfileName(profileName)
+    const existingByName = get().savedRankings.find((item) => normalizeProfileName(item.displayName) === normalized)
+    if (existingByName && !options?.overwriteProfileId) {
+      throw new Error(`A saved rankings profile named "${existingByName.displayName}" already exists. Choose overwrite or a different name.`)
     }
-    await db.transaction('rw', db.players, db.evaluationRecords, db.importMeta, db.events, async () => {
-      if (get().picks.length > 0) {
-        throw new Error('Cannot import while draft picks exist. Reset the draft first.')
-      }
-      await db.players.clear()
-      await db.players.bulkPut(prepared.players)
-      await db.evaluationRecords.clear()
-      await db.importMeta.put(importMeta)
-      await queueEvent('CSV_IMPORTED', {
-        count: prepared.players.length,
-        fingerprint: prepared.identity.fingerprint,
-        sourceCheatsheetId: prepared.identity.sourceCheatsheetId
-      })
-    })
+    const existing = options?.overwriteProfileId
+      ? await db.savedRankings.get(options.overwriteProfileId)
+      : existingByName
+        ? await db.savedRankings.get(existingByName.id)
+        : undefined
+    if (options?.overwriteProfileId && !existing) {
+      throw new Error('Saved rankings profile to overwrite was not found.')
+    }
+    const profile = buildSavedProfileRecord(
+      prepared,
+      { profileName, overwriteProfileId: options?.overwriteProfileId },
+      existing ?? undefined
+    )
+    await commitActiveImportTransaction(prepared, profile)
+    const savedRankings = await loadSavedRankingSummaries()
+    const importIdentity = identityWithProfile(prepared.identity, profile)
+    const players = prepared.players.map((player) => ({
+      ...player,
+      importSource: player.importSource
+        ? { ...player.importSource, fingerprint: importIdentity.fingerprint }
+        : {
+            season: importIdentity.season,
+            asOfDate: importIdentity.asOfDate,
+            rankingType: importIdentity.rankingType,
+            scoringProfile: importIdentity.scoringProfile,
+            leagueSize: importIdentity.leagueSize,
+            sourceCheatsheetId: importIdentity.sourceCheatsheetId,
+            sourceUrl: importIdentity.sourceUrl,
+            fingerprint: importIdentity.fingerprint
+          }
+    }))
     set({
-      players: prepared.players,
-      importIdentity: prepared.identity,
+      players,
+      importIdentity,
+      activeSavedProfileId: profile.id,
+      savedRankings,
+      evaluationRecords: [],
+      recommendations: [],
+      recommendationContext: undefined
+    })
+    try {
+      await get().refreshRecommendations()
+    } catch {
+      set({ recommendations: [], recommendationContext: undefined })
+    }
+  },
+  saveLeagueSetup: async (nextSettings, selectedProfileId) => {
+    const state = get()
+    const settings = normalizeLeagueSettings(nextSettings)
+    const validKeepers = state.keepers.filter((keeper) => keeper.teamId >= 1 && keeper.teamId <= settings.teamCount)
+    const targetProfileId = selectedProfileId ?? state.activeSavedProfileId
+    const rankingsChanging = Boolean(targetProfileId && targetProfileId !== state.activeSavedProfileId)
+    if (state.picks.length > 0 && rankingsChanging) {
+      throw new Error('Cannot switch rankings while draft picks exist. Reset the draft first.')
+    }
+    if (!targetProfileId) {
+      if (validKeepers.length !== state.keepers.length) {
+        await db.transaction('rw', db.keepers, async () => {
+          await db.keepers.clear()
+          await db.keepers.bulkPut(validKeepers)
+        })
+      }
+      await db.settings.put({ ...settings, id: 'active' })
+      await queueEvent('SETTINGS_UPDATED', settings)
+      set({ settings, keepers: validKeepers })
+      await get().refreshRecommendations()
+      return
+    }
+    const profile = await db.savedRankings.get(targetProfileId)
+    if (!profile) throw new Error('Saved rankings profile not found.')
+    const prepared = prepareFootballersDataset(profile.dataset, settings, {
+      settings,
+      picks: state.picks,
+      keepers: validKeepers,
+      adjustments: state.adjustments
+    })
+    if (!prepared.ok) {
+      throw new Error(prepared.errors.map((error) => error.message).join(' '))
+    }
+    await commitActiveImportTransaction(prepared, profile, settings, validKeepers)
+    const savedRankings = await loadSavedRankingSummaries()
+    const importIdentity = identityWithProfile(prepared.identity, profile)
+    const players = prepared.players.map((player) => ({
+      ...player,
+      importSource: player.importSource
+        ? { ...player.importSource, fingerprint: importIdentity.fingerprint }
+        : {
+            season: importIdentity.season,
+            asOfDate: importIdentity.asOfDate,
+            rankingType: importIdentity.rankingType,
+            scoringProfile: importIdentity.scoringProfile,
+            leagueSize: importIdentity.leagueSize,
+            sourceCheatsheetId: importIdentity.sourceCheatsheetId,
+            sourceUrl: importIdentity.sourceUrl,
+            fingerprint: importIdentity.fingerprint
+          }
+    }))
+    set({
+      settings,
+      keepers: validKeepers,
+      players,
+      importIdentity,
+      activeSavedProfileId: profile.id,
+      savedRankings,
       evaluationRecords: [],
       recommendations: [],
       recommendationContext: undefined
@@ -374,7 +515,7 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       await db.importMeta.delete('import')
       await queueEvent('CSV_IMPORTED', { count: seedPlayers.length, bundled: true })
     })
-    set({ players: seedPlayers, importIdentity: undefined })
+    set({ players: seedPlayers, importIdentity: undefined, activeSavedProfileId: undefined })
     await get().refreshRecommendations()
   },
   draftPlayer: async (player) => enqueueDraftWrite(async () => {
@@ -543,7 +684,7 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       evaluationCount,
       playerCount: seedPlayers.length
     })
-    set({ picks: [], keepers: [], evaluationRecords: [], players: seedPlayers, importIdentity: undefined })
+    set({ picks: [], keepers: [], evaluationRecords: [], players: seedPlayers, importIdentity: undefined, activeSavedProfileId: undefined })
     await get().refreshRecommendations()
   }),
   removePick: async (id) => enqueueDraftWrite(async () => {
@@ -595,6 +736,21 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
     await queueEvent('PLAYER_ADJUSTED', { id, patch })
     set((state) => ({ adjustments: { ...state.adjustments, [id]: updated } }))
     await get().refreshRecommendations()
+  },
+  removeAdjustments: async (playerIds) => {
+    const uniqueIds = [...new Set(playerIds)].filter((id) => Boolean(get().adjustments[id]))
+    if (!uniqueIds.length) return
+    await db.transaction('rw', db.adjustments, db.events, async () => {
+      for (const id of uniqueIds) {
+        await db.adjustments.delete(id)
+        await queueEvent('PLAYER_ADJUSTED', { id, removed: true })
+      }
+    })
+    set((state) => {
+      const adjustments = { ...state.adjustments }
+      for (const id of uniqueIds) delete adjustments[id]
+      return { adjustments }
+    })
   },
   updateSettings: async (patch) => {
     const next = { ...get().settings, ...patch }

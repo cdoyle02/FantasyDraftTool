@@ -9,6 +9,7 @@ const {
   settingsTable,
   metaTable,
   importMetaTable,
+  savedRankingsTable,
   evaluationRecordsTable,
   eventsTable
 } = vi.hoisted(() => ({
@@ -32,9 +33,14 @@ const {
     clear: vi.fn(),
     bulkPut: vi.fn()
   },
-  settingsTable: { get: vi.fn() },
+  settingsTable: { get: vi.fn(), put: vi.fn() },
   metaTable: { get: vi.fn(), put: vi.fn(), delete: vi.fn() },
   importMetaTable: { get: vi.fn(), put: vi.fn(), delete: vi.fn() },
+  savedRankingsTable: {
+    get: vi.fn(),
+    put: vi.fn(),
+    orderBy: vi.fn(() => ({ reverse: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) })) }))
+  },
   evaluationRecordsTable: {
     orderBy: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) })),
     put: vi.fn(),
@@ -52,6 +58,7 @@ vi.mock('../data/db', () => ({
     settings: settingsTable,
     meta: metaTable,
     importMeta: importMetaTable,
+    savedRankings: savedRankingsTable,
     evaluationRecords: evaluationRecordsTable,
     events: eventsTable,
     transaction: async (...args: unknown[]) => {
@@ -122,6 +129,7 @@ describe('hydrate seed versioning', () => {
     settingsTable.get.mockResolvedValue(undefined)
     metaTable.get.mockImplementation(async (id: string) => (id === 'seed' ? undefined : undefined))
     importMetaTable.get.mockResolvedValue(undefined)
+    savedRankingsTable.orderBy.mockReturnValue({ reverse: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) })) })
     evaluationRecordsTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     picksTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     const { useDraftStore } = await import('./draftStore')
@@ -134,7 +142,9 @@ describe('hydrate seed versioning', () => {
       recommendationContext: undefined,
       evaluationRecords: [],
       hydrated: false,
-      offlineReady: false
+      offlineReady: false,
+      savedRankings: [],
+      activeSavedProfileId: undefined
     })
   })
 
@@ -570,6 +580,7 @@ describe('Footballers CSV import store flow', () => {
     settingsTable.get.mockResolvedValue(undefined)
     metaTable.get.mockImplementation(async (id: string) => (id === 'seed' ? { id: 'seed', version: '2026.6' } : undefined))
     importMetaTable.get.mockResolvedValue(undefined)
+    savedRankingsTable.orderBy.mockReturnValue({ reverse: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) })) })
     evaluationRecordsTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     picksTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     const { defaultLeague } = await import('../types')
@@ -597,7 +608,9 @@ describe('Footballers CSV import store flow', () => {
       },
       evaluationRecords: [{ id: 'eval-1' } as never],
       hydrated: true,
-      importIdentity: undefined
+      importIdentity: undefined,
+      savedRankings: [],
+      activeSavedProfileId: undefined
     })
   })
 
@@ -652,20 +665,7 @@ describe('Footballers CSV import store flow', () => {
     await useDraftStore.getState().commitFootballersImport(leagueA)
     const before = useDraftStore.getState()
     const invalid = useDraftStore.getState().prepareFootballersImport(
-      buildFootballersCsv([
-        ...leagueARows(),
-        {
-          position: 'RB',
-          positionRank: 1,
-          playerName: 'Missing Player',
-          playerSlug: 'missing-player',
-          team: 'FA',
-          tierNumber: 1,
-          tierRank: 1,
-          tierSize: 1,
-          tierValueMultiplier: 1
-        }
-      ], { sourceCheatsheetId: 'sheet-c' })
+      buildFootballersCsv(leagueARows(), { sourceCheatsheetId: 'sheet-c', leagueSize: 10 })
     )
     expect(invalid.ok).toBe(false)
     const after = useDraftStore.getState()
@@ -731,6 +731,7 @@ describe('active rankings badge invariant', () => {
     settingsTable.get.mockResolvedValue(undefined)
     metaTable.get.mockImplementation(async (id: string) => (id === 'seed' ? { id: 'seed', version: '2026.6' } : undefined))
     importMetaTable.get.mockResolvedValue(undefined)
+    savedRankingsTable.orderBy.mockReturnValue({ reverse: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) })) })
     evaluationRecordsTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     picksTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     const { defaultLeague } = await import('../types')
@@ -749,7 +750,9 @@ describe('active rankings badge invariant', () => {
       recommendationContext: undefined,
       evaluationRecords: [],
       hydrated: true,
-      importIdentity: undefined
+      importIdentity: undefined,
+      savedRankings: [],
+      activeSavedProfileId: undefined
     })
   })
 
@@ -791,10 +794,12 @@ describe('active rankings badge invariant', () => {
       sourceUrl: prepared.identity.sourceUrl,
       importedAt: Date.now(),
       playerCount: prepared.players.length,
-      positionCounts: prepared.identity.positionCounts
+      positionCounts: prepared.identity.positionCounts,
+      savedProfileId: 'profile-a',
+      savedProfileName: 'Two Flex Too Furious'
     })
 
-    useDraftStore.setState({ importIdentity: undefined, players: [], hydrated: false })
+    useDraftStore.setState({ importIdentity: undefined, players: [], hydrated: false, activeSavedProfileId: undefined })
     await useDraftStore.getState().hydrate()
 
     const { importIdentity, players } = useDraftStore.getState()
@@ -816,6 +821,7 @@ describe('active rankings badge invariant', () => {
     await useDraftStore.getState().loadBundledRankings()
 
     expect(useDraftStore.getState().importIdentity).toBeUndefined()
+    expect(useDraftStore.getState().activeSavedProfileId).toBeUndefined()
     expect(useDraftStore.getState().players).toEqual(seedPlayers)
     expect(importMetaTable.delete).toHaveBeenCalledWith('import')
   })
@@ -832,7 +838,223 @@ describe('active rankings badge invariant', () => {
     await useDraftStore.getState().resetDraft()
 
     expect(useDraftStore.getState().importIdentity).toBeUndefined()
+    expect(useDraftStore.getState().activeSavedProfileId).toBeUndefined()
     expect(useDraftStore.getState().players).toEqual(seedPlayers)
     expect(importMetaTable.delete).toHaveBeenCalledWith('import')
+  })
+})
+
+describe('saved Footballers rankings profiles', () => {
+  const storedProfiles: Array<{
+    id: string
+    displayName: string
+    normalizedName: string
+    dataset: import('../data/footballersImport').FootballersRankingDataset
+    createdAt: number
+    updatedAt: number
+  }> = []
+
+  beforeEach(async () => {
+    storedProfiles.length = 0
+    vi.clearAllMocks()
+    adjustmentsTable.toArray.mockResolvedValue([])
+    settingsTable.get.mockResolvedValue(undefined)
+    metaTable.get.mockImplementation(async (id: string) => (id === 'seed' ? { id: 'seed', version: '2026.6' } : undefined))
+    importMetaTable.get.mockResolvedValue(undefined)
+    savedRankingsTable.put.mockImplementation(async (profile: typeof storedProfiles[number]) => {
+      const index = storedProfiles.findIndex((item) => item.id === profile.id)
+      if (index >= 0) storedProfiles[index] = profile
+      else storedProfiles.push(profile)
+    })
+    savedRankingsTable.get.mockImplementation(async (id: string) => storedProfiles.find((item) => item.id === id))
+    savedRankingsTable.orderBy.mockReturnValue({
+      reverse: vi.fn(() => ({
+        toArray: vi.fn(async () => [...storedProfiles].sort((a, b) => b.updatedAt - a.updatedAt))
+      }))
+    })
+    evaluationRecordsTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
+    picksTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
+    const { defaultLeague } = await import('../types')
+    const { useDraftStore } = await import('./draftStore')
+    useDraftStore.setState({
+      players: [],
+      adjustments: {},
+      picks: [],
+      keepers: [],
+      settings: {
+        ...defaultLeague,
+        teamCount: 8,
+        rosterSlots: { QB: 1, RB: 2, WR: 2, TE: 1, FLEX: 2, SUPERFLEX: 0, BENCH: 6, K: 0, DST: 1 }
+      },
+      recommendations: [],
+      recommendationContext: undefined,
+      evaluationRecords: [],
+      hydrated: true,
+      importIdentity: undefined,
+      savedRankings: [],
+      activeSavedProfileId: undefined
+    })
+  })
+
+  it('saves imported CSV, resets to bundled, and reactivates with identical CSV-owned fields', async () => {
+    const { buildFootballersCsv, leagueARows } = await import('../data/footballersImport.fixtures')
+    const { seedPlayers } = await import('../data/seed')
+    const { useDraftStore } = await import('./draftStore')
+    const prepared = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    if (!prepared.ok) throw new Error('league A failed')
+    await useDraftStore.getState().commitFootballersImport(prepared, { profileName: 'League A' })
+    const active = useDraftStore.getState()
+    const joshBeforeReset = active.players.find((player) => player.id === 'josh-allen-buf-qb')
+    expect(active.savedRankings).toHaveLength(1)
+    expect(active.activeSavedProfileId).toBeTruthy()
+
+    await useDraftStore.getState().resetDraft()
+    expect(useDraftStore.getState().players).toEqual(seedPlayers)
+    expect(useDraftStore.getState().importIdentity).toBeUndefined()
+
+    const profileId = active.savedRankings[0]!.id
+    await useDraftStore.getState().saveLeagueSetup(useDraftStore.getState().settings, profileId)
+    const joshAfter = useDraftStore.getState().players.find((player) => player.id === 'josh-allen-buf-qb')
+    expect(joshAfter?.tier).toBe(joshBeforeReset?.tier)
+    expect(joshAfter?.adp).toBe(joshBeforeReset?.adp)
+    expect(joshAfter?.projectedPoints).toBe(joshBeforeReset?.projectedPoints)
+    expect(useDraftStore.getState().importIdentity?.savedProfileName).toBe('League A')
+  })
+
+  it('switches saved A to saved B without leaving stale A metadata', async () => {
+    const { buildFootballersCsv, leagueARows, leagueBRows } = await import('../data/footballersImport.fixtures')
+    const { useDraftStore } = await import('./draftStore')
+    const leagueA = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    const leagueB = useDraftStore.getState().prepareFootballersImport(
+      buildFootballersCsv(leagueBRows(), { sourceCheatsheetId: 'sheet-b' })
+    )
+    if (!leagueA.ok || !leagueB.ok) throw new Error('prepare failed')
+    await useDraftStore.getState().commitFootballersImport(leagueA, { profileName: 'League A' })
+    storedProfiles.push({
+      id: 'profile-b',
+      displayName: 'League B',
+      normalizedName: 'league b',
+      dataset: leagueB.dataset,
+      createdAt: 1,
+      updatedAt: 2
+    })
+    useDraftStore.setState({
+      savedRankings: [
+        ...useDraftStore.getState().savedRankings,
+        {
+          id: 'profile-b',
+          displayName: 'League B',
+          fingerprint: leagueB.identity.fingerprint,
+          scoringProfile: leagueB.identity.scoringProfile,
+          leagueSize: leagueB.identity.leagueSize,
+          asOfDate: leagueB.identity.asOfDate,
+          playerCount: leagueB.players.length,
+          updatedAt: 2
+        }
+      ]
+    })
+    await useDraftStore.getState().saveLeagueSetup(useDraftStore.getState().settings, 'profile-b')
+    const josh = useDraftStore.getState().players.find((player) => player.id === 'josh-allen-buf-qb')
+    expect(josh?.tier).toBe(2)
+    expect(josh?.adp).toBe(802)
+    expect(useDraftStore.getState().importIdentity?.fingerprint).toBe(leagueB.identity.fingerprint)
+  })
+
+  it('fails saved B activation when a keeper references a missing player and keeps saved A active', async () => {
+    const { buildFootballersCsv, leagueARows, leagueBRows } = await import('../data/footballersImport.fixtures')
+    const { useDraftStore } = await import('./draftStore')
+    const leagueA = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    const leagueB = useDraftStore.getState().prepareFootballersImport(
+      buildFootballersCsv(leagueBRows(), { sourceCheatsheetId: 'sheet-b' })
+    )
+    if (!leagueA.ok || !leagueB.ok) throw new Error('prepare failed')
+    await useDraftStore.getState().commitFootballersImport(leagueA, { profileName: 'League A' })
+    const before = useDraftStore.getState()
+    useDraftStore.setState({
+      keepers: [{
+        id: 'keeper-1',
+        teamId: 1,
+        playerId: 'missing-player-id',
+        playerName: 'Missing Player',
+        position: 'RB',
+        roundCost: 1,
+        timestamp: 1
+      }]
+    })
+    storedProfiles.push({
+      id: 'profile-b',
+      displayName: 'League B',
+      normalizedName: 'league b',
+      dataset: leagueB.dataset,
+      createdAt: 1,
+      updatedAt: 2
+    })
+    await expect(useDraftStore.getState().saveLeagueSetup(before.settings, 'profile-b')).rejects.toThrow(/Keeper Missing Player/)
+    const after = useDraftStore.getState()
+    expect(after.importIdentity?.fingerprint).toBe(before.importIdentity?.fingerprint)
+    expect(after.players).toEqual(before.players)
+    expect(after.settings).toEqual(before.settings)
+  })
+
+  it('keeps settings A and rankings A active when staged settings B and rankings B fail together', async () => {
+    const { buildFootballersCsv, leagueARows, leagueBRows } = await import('../data/footballersImport.fixtures')
+    const { useDraftStore } = await import('./draftStore')
+    const leagueA = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    const leagueB = useDraftStore.getState().prepareFootballersImport(
+      buildFootballersCsv(leagueBRows(), { sourceCheatsheetId: 'sheet-b' })
+    )
+    if (!leagueA.ok || !leagueB.ok) throw new Error('prepare failed')
+    await useDraftStore.getState().commitFootballersImport(leagueA, { profileName: 'League A' })
+    const before = useDraftStore.getState()
+    const settingsB = {
+      ...before.settings,
+      teamCount: 10,
+      userTeam: 5
+    }
+    storedProfiles.push({
+      id: 'profile-b',
+      displayName: 'League B',
+      normalizedName: 'league b',
+      dataset: leagueB.dataset,
+      createdAt: 1,
+      updatedAt: 2
+    })
+    await expect(useDraftStore.getState().saveLeagueSetup(settingsB, 'profile-b')).rejects.toThrow(/league size/)
+    const after = useDraftStore.getState()
+    expect(after.settings).toEqual(before.settings)
+    expect(after.importIdentity?.fingerprint).toBe(before.importIdentity?.fingerprint)
+    expect(after.players).toEqual(before.players)
+    expect(settingsTable.put).not.toHaveBeenCalled()
+  })
+
+  it('activates staged settings B and rankings B together on successful Save League', async () => {
+    const { buildFootballersCsv, leagueARows, leagueBRows } = await import('../data/footballersImport.fixtures')
+    const { useDraftStore } = await import('./draftStore')
+    const leagueA = useDraftStore.getState().prepareFootballersImport(buildFootballersCsv(leagueARows()))
+    const leagueB = useDraftStore.getState().prepareFootballersImport(
+      buildFootballersCsv(leagueBRows(), { sourceCheatsheetId: 'sheet-b' })
+    )
+    if (!leagueA.ok || !leagueB.ok) throw new Error('prepare failed')
+    await useDraftStore.getState().commitFootballersImport(leagueA, { profileName: 'League A' })
+    const settingsB = {
+      ...useDraftStore.getState().settings,
+      name: 'Sunday B',
+      userTeam: 3
+    }
+    storedProfiles.push({
+      id: 'profile-b',
+      displayName: 'League B',
+      normalizedName: 'league b',
+      dataset: leagueB.dataset,
+      createdAt: 1,
+      updatedAt: 2
+    })
+    await useDraftStore.getState().saveLeagueSetup(settingsB, 'profile-b')
+    const after = useDraftStore.getState()
+    expect(after.settings.name).toBe('Sunday B')
+    expect(after.settings.userTeam).toBe(3)
+    expect(after.importIdentity?.fingerprint).toBe(leagueB.identity.fingerprint)
+    expect(after.players.find((player) => player.id === 'josh-allen-buf-qb')?.tier).toBe(2)
+    expect(settingsTable.put).toHaveBeenCalled()
   })
 })

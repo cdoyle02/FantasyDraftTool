@@ -46,6 +46,34 @@ export interface ImportSourceIdentity {
   sourceCheatsheetId: string
   sourceUrl?: string
   positionCounts: Record<string, number>
+  savedProfileId?: string
+  savedProfileName?: string
+}
+
+export interface FootballersRankingRow {
+  name: string
+  team: string
+  position: PlayerPosition
+  positionRank: number
+  tier?: number
+  tierRank?: number
+  tierSize?: number
+  tierValueMultiplier?: number
+  adp?: number
+  adpRoundPick?: string
+  riskScore?: number
+  upsideScore?: number
+  byeWeek?: number
+  slug?: string
+  importedId?: string
+  rowNumber?: number
+  sourceTags: FootballersSourceTags
+  tags?: string
+}
+
+export interface FootballersRankingDataset {
+  identity: ImportSourceIdentity
+  rows: FootballersRankingRow[]
 }
 
 export interface ImportPrepareWarning {
@@ -63,6 +91,7 @@ export interface ImportPrepareSuccess {
   ok: true
   players: Player[]
   identity: ImportSourceIdentity
+  dataset: FootballersRankingDataset
   warnings: ImportPrepareWarning[]
   matchWarnings: MatchWarning[]
 }
@@ -71,6 +100,8 @@ export interface ImportPrepareFailure {
   ok: false
   errors: ImportPrepareError[]
   warnings: ImportPrepareWarning[]
+  staleAdjustmentIds?: string[]
+  identity?: ImportSourceIdentity
 }
 
 export type ImportPrepareResult = ImportPrepareSuccess | ImportPrepareFailure
@@ -275,9 +306,10 @@ function validateReferences(
   preparedIds: Set<string>,
   keepers: KeeperAssignment[],
   adjustments: Record<string, UserAdjustment>
-): { errors: ImportPrepareError[]; warnings: ImportPrepareWarning[] } {
+): { errors: ImportPrepareError[]; warnings: ImportPrepareWarning[]; staleAdjustmentIds: string[] } {
   const errors: ImportPrepareError[] = []
   const warnings: ImportPrepareWarning[] = []
+  const staleAdjustmentIds: string[] = []
   for (const keeper of keepers) {
     if (!preparedIds.has(keeper.playerId)) {
       errors.push({
@@ -287,12 +319,135 @@ function validateReferences(
   }
   for (const adjustment of Object.values(adjustments)) {
     if (!preparedIds.has(adjustment.playerId)) {
-      warnings.push({
+      staleAdjustmentIds.push(adjustment.playerId)
+      errors.push({
         message: `Manual adjustment for ${adjustment.playerId} is not present in the imported pool.`
       })
     }
   }
-  return { errors, warnings }
+  return { errors, warnings, staleAdjustmentIds }
+}
+
+export function datasetFromPlayers(players: Player[], identity: ImportSourceIdentity): FootballersRankingDataset {
+  const rows: FootballersRankingRow[] = []
+  for (const player of players) {
+    if (!player.importSource || player.positionRank === undefined) continue
+    rows.push({
+      name: player.name,
+      team: player.team,
+      position: player.position,
+      positionRank: player.positionRank,
+      tier: player.tier,
+      tierRank: player.tierRank,
+      tierSize: player.tierSize,
+      tierValueMultiplier: player.tierValueMultiplier,
+      adp: player.adp,
+      adpRoundPick: player.adpRoundPick,
+      riskScore: player.riskScore,
+      upsideScore: player.upsideScore,
+      byeWeek: player.byeWeek,
+      slug: player.playerSlug,
+      sourceTags: player.sourceTags ?? {},
+      tags: player.sourceTagsRaw
+    })
+  }
+  return { identity, rows }
+}
+
+export function prepareFootballersDataset(
+  dataset: FootballersRankingDataset,
+  settings: LeagueSettings,
+  commitContext: ImportCommitContext,
+  bundledPlayers: Player[] = seedPlayers
+): ImportPrepareResult {
+  const errors: ImportPrepareError[] = []
+  const warnings: ImportPrepareWarning[] = []
+  const matchWarnings: MatchWarning[] = []
+
+  if (commitContext.picks.length > 0) {
+    return {
+      ok: false,
+      errors: [{ message: 'Cannot import while draft picks exist. Reset the draft first.' }],
+      warnings
+    }
+  }
+
+  errors.push(...validateLeagueCompatibility(settings, dataset.identity, dataset.identity.positionCounts))
+  if (errors.length) {
+    return { ok: false, errors, warnings, identity: dataset.identity }
+  }
+
+  const matcher = new BundledPlayerMatcher(bundledPlayers)
+  const players: Player[] = []
+  const unmatched: ImportPrepareError[] = []
+  for (const [index, row] of dataset.rows.entries()) {
+    const rowNumber = row.rowNumber ?? index + 2
+    const match = matcher.match({
+      row: rowNumber,
+      name: row.name,
+      position: row.position,
+      team: row.team,
+      slug: row.slug,
+      importedId: row.importedId
+    })
+    if (!match.ok) {
+      if (match.reason.startsWith('no bundled projection match')) {
+        warnings.push({ row: rowNumber, message: match.reason })
+        continue
+      }
+      unmatched.push({ row: rowNumber, message: match.reason })
+      continue
+    }
+    matchWarnings.push(...match.result.warnings)
+    players.push(buildPlayer(match.result.bundled, {
+      name: row.name,
+      team: row.team,
+      position: row.position,
+      positionRank: row.positionRank,
+      tier: row.tier,
+      tierRank: row.tierRank,
+      tierSize: row.tierSize,
+      tierValueMultiplier: row.tierValueMultiplier,
+      adp: row.adp,
+      adpRoundPick: row.adpRoundPick,
+      riskScore: row.riskScore,
+      upsideScore: row.upsideScore,
+      byeWeek: row.byeWeek,
+      slug: row.slug,
+      sourceTags: row.sourceTags,
+      tags: row.tags,
+      identity: dataset.identity
+    }))
+  }
+
+  if (unmatched.length) errors.push(...unmatched)
+  if (!players.length) {
+    errors.push({ message: 'CSV contains no players that match bundled projections.' })
+  }
+
+  const preparedIds = new Set(players.map((player) => player.id))
+  const referenceResult = validateReferences(preparedIds, commitContext.keepers, commitContext.adjustments)
+  errors.push(...referenceResult.errors)
+  warnings.push(...referenceResult.warnings)
+
+  if (errors.length) {
+    return {
+      ok: false,
+      errors,
+      warnings,
+      staleAdjustmentIds: referenceResult.staleAdjustmentIds,
+      identity: dataset.identity
+    }
+  }
+
+  return {
+    ok: true,
+    players,
+    identity: dataset.identity,
+    dataset,
+    warnings,
+    matchWarnings
+  }
 }
 
 export function prepareFootballersImport(
@@ -303,7 +458,6 @@ export function prepareFootballersImport(
 ): ImportPrepareResult {
   const errors: ImportPrepareError[] = []
   const warnings: ImportPrepareWarning[] = []
-  const matchWarnings: MatchWarning[] = []
 
   if (!content.trim()) {
     return { ok: false, errors: [{ message: 'CSV content is empty.' }], warnings }
@@ -335,7 +489,6 @@ export function prepareFootballersImport(
   }
   if (errors.length) return { ok: false, errors, warnings }
 
-  const matcher = new BundledPlayerMatcher(bundledPlayers)
   const parsedRows: Array<{
     rowNumber: number
     name: string
@@ -557,8 +710,6 @@ export function prepareFootballersImport(
     positionCounts[row.position] = (positionCounts[row.position] ?? 0) + 1
   }
 
-  errors.push(...validateLeagueCompatibility(settings, identityBase, positionCounts))
-
   const fingerprint = fingerprintForSheet(identityBase, parsedRows.map((row) => ({
     position: row.position,
     positionRank: row.positionRank,
@@ -566,27 +717,9 @@ export function prepareFootballersImport(
   })))
   const identity: ImportSourceIdentity = { ...identityBase, fingerprint, positionCounts }
 
-  const players: Player[] = []
-  const unmatched: ImportPrepareError[] = []
-  for (const row of parsedRows) {
-    const match = matcher.match({
-      row: row.rowNumber,
-      name: row.name,
-      position: row.position,
-      team: row.team,
-      slug: row.slug,
-      importedId: row.importedId
-    })
-    if (!match.ok) {
-      if (match.reason.startsWith('no bundled projection match')) {
-        warnings.push({ row: row.rowNumber, message: match.reason })
-        continue
-      }
-      unmatched.push({ row: row.rowNumber, message: match.reason })
-      continue
-    }
-    matchWarnings.push(...match.result.warnings)
-    players.push(buildPlayer(match.result.bundled, {
+  const dataset: FootballersRankingDataset = {
+    identity,
+    rows: parsedRows.map((row) => ({
       name: row.name,
       team: row.team,
       position: row.position,
@@ -601,33 +734,14 @@ export function prepareFootballersImport(
       upsideScore: row.upsideScore,
       byeWeek: row.byeWeek,
       slug: row.slug,
+      importedId: row.importedId,
+      rowNumber: row.rowNumber,
       sourceTags: row.sourceTags,
-      tags: row.tags,
-      identity
+      tags: row.tags
     }))
   }
 
-  if (unmatched.length) {
-    errors.push(...unmatched)
-  }
-  if (!players.length) {
-    errors.push({ message: 'CSV contains no players that match bundled projections.' })
-  }
-
-  const preparedIds = new Set(players.map((player) => player.id))
-  const referenceResult = validateReferences(preparedIds, commitContext.keepers, commitContext.adjustments)
-  errors.push(...referenceResult.errors)
-  warnings.push(...referenceResult.warnings)
-
-  if (errors.length) return { ok: false, errors, warnings }
-
-  return {
-    ok: true,
-    players,
-    identity,
-    warnings,
-    matchWarnings
-  }
+  return prepareFootballersDataset(dataset, settings, commitContext, bundledPlayers)
 }
 
 export async function readFootballersCsvFile(file: File): Promise<string> {

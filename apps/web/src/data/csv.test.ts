@@ -149,15 +149,15 @@ describe('Footballers CSV import', () => {
     expect(result.players.find((player) => player.name === 'Josh Allen')?.id).toBe('josh-allen-buf-qb')
   })
 
-  it('warns about stale adjustments instead of blocking import', () => {
+  it('blocks stale manual adjustments that are absent from the imported pool', () => {
     const csv = buildFootballersCsv(leagueARows())
     const result = prepareFootballersImport(csv, defaultLeagueSettings, {
       ...emptyContext,
       adjustments: { 'brandon-aubrey-dal-k': { playerId: 'brandon-aubrey-dal-k', pointsDelta: 3 } }
     })
-    expect(result.ok).toBe(true)
-    if (!result.ok) return
-    expect(result.warnings.some((warning) => warning.message.includes('brandon-aubrey-dal-k'))).toBe(true)
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.errors.some((error) => error.message.includes('brandon-aubrey-dal-k'))).toBe(true)
   })
 
   it('rejects duplicate position ranks', () => {

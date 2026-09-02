@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { serializeRecommendationRequest } from '../api/client'
-import { prepareFootballersImport } from './footballersImport'
+import { prepareFootballersDataset, prepareFootballersImport } from './footballersImport'
 import {
   buildFootballersCsv,
   defaultLeagueSettings,
@@ -75,5 +75,31 @@ describe('Footballers import to DVS request wiring', () => {
     expect(a?.projectedPoints).toBe(b?.projectedPoints)
     expect(payloadA.settings.formulaVersion).toBe(4)
     expect(payloadB.settings.formulaVersion).toBe(4)
+  })
+
+  it('reconstructs the same active pool from a saved canonical dataset as a fresh CSV import', () => {
+    const fresh = prepareFootballersImport(
+      buildFootballersCsv(leagueARows()),
+      defaultLeagueSettings,
+      { settings: defaultLeagueSettings, picks: [], keepers: [], adjustments: {} }
+    )
+    expect(fresh.ok).toBe(true)
+    if (!fresh.ok) return
+
+    const saved = prepareFootballersDataset(
+      fresh.dataset,
+      defaultLeagueSettings,
+      { settings: defaultLeagueSettings, picks: [], keepers: [], adjustments: {} }
+    )
+    expect(saved.ok).toBe(true)
+    if (!saved.ok) return
+
+    const freshJosh = fresh.players.find((item) => item.id === 'josh-allen-buf-qb')
+    const savedJosh = saved.players.find((item) => item.id === 'josh-allen-buf-qb')
+    expect(savedJosh?.tier).toBe(freshJosh?.tier)
+    expect(savedJosh?.adp).toBe(freshJosh?.adp)
+    expect(savedJosh?.projectedPoints).toBe(freshJosh?.projectedPoints)
+    expect(savedJosh?.id).toBe(freshJosh?.id)
+    expect(saved.identity.fingerprint).toBe(fresh.identity.fingerprint)
   })
 })
