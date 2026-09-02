@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 import { loadPyodide } from 'pyodide'
-import { normalizeRecommendations, serializeRecommendationRequest, type RecommendationRequest } from '../api/client'
+import { normalizeRecommendationResponse, serializeRecommendationRequest, type RecommendationRequest } from '../api/client'
 
 const PYODIDE_INDEX_URL = '/pyodide/'
 const WHEEL_URL = import.meta.env.VITE_DVS_WHEEL_URL ?? '/engine/dvs_engine-0.1.0-py3-none-any.whl'
@@ -41,7 +41,7 @@ self.onmessage = async (
     const raw = typeof result === 'string' ? result : String(result)
     self.postMessage({
       id: event.data.id,
-      result: { recommendations: normalizeRecommendations(JSON.parse(raw)) }
+      result: normalizeRecommendationResponse(JSON.parse(raw))
     })
   } catch (error) {
     self.postMessage({ id: event.data.id, error: error instanceof Error ? error.message : String(error) })

@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie'
-import type { DraftPick, KeeperAssignment, LeagueSettings, Player, UserAdjustment } from '../types'
+import type { DraftEvaluationRecord, DraftPick, KeeperAssignment, LeagueSettings, Player, UserAdjustment } from '../types'
 
 export interface SeedMeta {
   id: 'seed'
@@ -20,6 +20,7 @@ class DraftDatabase extends Dexie {
   keepers!: EntityTable<KeeperAssignment, 'id'>
   settings!: EntityTable<LeagueSettings & { id: string }, 'id'>
   adjustments!: EntityTable<UserAdjustment, 'playerId'>
+  evaluationRecords!: EntityTable<DraftEvaluationRecord, 'id'>
   events!: EntityTable<QueueEvent, 'id'>
   meta!: EntityTable<SeedMeta, 'id'>
 
@@ -52,6 +53,16 @@ class DraftDatabase extends Dexie {
       keepers: 'id, teamId, playerId',
       settings: 'id',
       adjustments: 'playerId, tag',
+      events: 'id, status, createdAt',
+      meta: 'id'
+    })
+    this.version(5).stores({
+      players: 'id, name, position, adp',
+      picks: 'id, pickNumber, teamId, playerId',
+      keepers: 'id, teamId, playerId',
+      settings: 'id',
+      adjustments: 'playerId, tag',
+      evaluationRecords: 'id, pickId, pickNumber, status, capturedAt',
       events: 'id, status, createdAt',
       meta: 'id'
     })

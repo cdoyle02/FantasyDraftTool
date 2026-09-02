@@ -21,6 +21,11 @@ vi.mock('../data/db', () => ({
       bulkPut: vi.fn(),
       toArray: vi.fn().mockResolvedValue([])
     },
+    evaluationRecords: {
+      put: vi.fn().mockResolvedValue(undefined),
+      orderBy: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) }))
+    },
+    events: {},
     transaction: async (...args: unknown[]) => {
       const work = args.at(-1)
       if (typeof work === 'function') return work()

@@ -31,4 +31,13 @@ def recommendation_json(payload_json: str) -> str:
         )
     }
     results = recommend(players, state, settings, adjustments, int(payload.get("limit", 20)))
-    return json.dumps(as_jsonable(results), separators=(",", ":"), sort_keys=True)
+    response = {
+        "recommendations": as_jsonable(results),
+        "configuration": {
+            "formulaVersion": settings.formula_params.formula_version,
+            "oneTurnSims": settings.formula_params.one_turn_sims,
+            "simulationSeed": settings.formula_params.sim_seed,
+            "formulaParams": as_jsonable(settings.formula_params),
+        },
+    }
+    return json.dumps(response, separators=(",", ":"), sort_keys=True)

@@ -226,7 +226,16 @@ def recommendations(request: RecommendationRequest) -> dict[str, Any]:
         )
     }
     results = recommend(players, state, settings, adjustments, request.limit)
-    return {"recommendations": as_jsonable(results), "count": len(results)}
+    return {
+        "recommendations": as_jsonable(results),
+        "count": len(results),
+        "configuration": {
+            "formulaVersion": settings.formula_params.formula_version,
+            "oneTurnSims": settings.formula_params.one_turn_sims,
+            "simulationSeed": settings.formula_params.sim_seed,
+            "formulaParams": as_jsonable(settings.formula_params),
+        },
+    }
 
 
 @app.post("/api/v1/imports/csv")

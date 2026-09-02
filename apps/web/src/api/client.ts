@@ -1,4 +1,12 @@
-import type { DraftPick, KeeperAssignment, LeagueSettings, Player, Recommendation, UserAdjustment } from '../types'
+import type {
+  DraftPick,
+  FormulaConfigurationSnapshot,
+  KeeperAssignment,
+  LeagueSettings,
+  Player,
+  Recommendation,
+  UserAdjustment
+} from '../types'
 
 export interface RecommendationRequest {
   players: Player[]
@@ -11,6 +19,7 @@ export interface RecommendationRequest {
 export interface RecommendationResponse {
   recommendations: Recommendation[]
   count: number
+  configuration: FormulaConfigurationSnapshot
 }
 
 export interface ImportCsvResponse {
@@ -62,6 +71,17 @@ interface EngineRecommendation {
     replacement_level?: number
   }
   reasons: string[]
+}
+
+interface EngineRecommendationResponse {
+  recommendations: EngineRecommendation[]
+  count?: number
+  configuration?: {
+    formulaVersion?: number
+    oneTurnSims?: number
+    simulationSeed?: number
+    formulaParams?: Record<string, unknown>
+  }
 }
 
 export function buildReservedRosters(keepers: KeeperAssignment[] = []): Record<string, string[]> {
@@ -155,6 +175,19 @@ export function normalizeRecommendations(results: EngineRecommendation[]): Recom
   }))
 }
 
+export function normalizeRecommendationResponse(response: EngineRecommendationResponse): RecommendationResponse {
+  return {
+    recommendations: normalizeRecommendations(response.recommendations),
+    count: response.count ?? response.recommendations.length,
+    configuration: {
+      formulaVersion: response.configuration?.formulaVersion ?? null,
+      oneTurnSims: response.configuration?.oneTurnSims ?? null,
+      simulationSeed: response.configuration?.simulationSeed ?? null,
+      formulaParams: response.configuration?.formulaParams ?? null
+    }
+  }
+}
+
 export class DraftApiClient {
   constructor(private readonly baseUrl = '') {}
 
@@ -168,14 +201,11 @@ export class DraftApiClient {
   }
 
   recommendations(body: RecommendationRequest) {
-    return this.request<{ recommendations: EngineRecommendation[]; count: number }>('/api/v1/recommendations', {
+    return this.request<EngineRecommendationResponse>('/api/v1/recommendations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(serializeRecommendationRequest(body))
-    }).then((response) => ({
-      recommendations: normalizeRecommendations(response.recommendations),
-      count: response.count
-    }))
+    }).then(normalizeRecommendationResponse)
   }
 
   async importCsv(file: File) {

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Player } from '../types'
+import type { Player, Recommendation } from '../types'
 
 const playersTable = {
   toArray: vi.fn(),
@@ -23,6 +23,11 @@ const keepersTable = {
 }
 const settingsTable = { get: vi.fn() }
 const metaTable = { get: vi.fn(), put: vi.fn() }
+const evaluationRecordsTable = {
+  orderBy: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue([]) })),
+  put: vi.fn()
+}
+const eventsTable = {}
 
 vi.mock('../data/db', () => ({
   db: {
@@ -32,6 +37,8 @@ vi.mock('../data/db', () => ({
     keepers: keepersTable,
     settings: settingsTable,
     meta: metaTable,
+    evaluationRecords: evaluationRecordsTable,
+    events: eventsTable,
     transaction: async (...args: unknown[]) => {
       const work = args.at(-1)
       if (typeof work !== 'function') throw new Error('Dexie transaction mock expected a callback')
@@ -42,7 +49,16 @@ vi.mock('../data/db', () => ({
 }))
 
 vi.mock('../engine/adapter', () => ({
-  getRecommendations: vi.fn().mockResolvedValue({ recommendations: [], mode: 'development-fallback' }),
+  getRecommendations: vi.fn().mockResolvedValue({
+    recommendations: [],
+    mode: 'development-fallback',
+    configuration: {
+      formulaVersion: 4,
+      oneTurnSims: null,
+      simulationSeed: null,
+      formulaParams: null
+    }
+  }),
   prepareOfflineEngine: vi.fn().mockRejectedValue(new Error('offline skipped in unit test'))
 }))
 
@@ -90,6 +106,7 @@ describe('hydrate seed versioning', () => {
     adjustmentsTable.toArray.mockResolvedValue([])
     settingsTable.get.mockResolvedValue(undefined)
     metaTable.get.mockResolvedValue(undefined)
+    evaluationRecordsTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     picksTable.orderBy.mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) })
     const { useDraftStore } = await import('./draftStore')
     useDraftStore.setState({
@@ -98,6 +115,8 @@ describe('hydrate seed versioning', () => {
       picks: [],
       keepers: [],
       recommendations: [],
+      recommendationContext: undefined,
+      evaluationRecords: [],
       hydrated: false,
       offlineReady: false
     })
@@ -247,7 +266,13 @@ describe('hydrate seed versioning', () => {
         },
         explanation: 'test'
       }],
-      mode: 'development-fallback'
+      mode: 'development-fallback',
+      configuration: {
+        formulaVersion: 4,
+        oneTurnSims: null,
+        simulationSeed: null,
+        formulaParams: null
+      }
     })
     useDraftStore.setState({
       players: demoPlayers,
@@ -272,7 +297,12 @@ describe('hydrate seed versioning', () => {
   it('reloads the bundled seed when stored players are missing ESPN ADP', async () => {
     const { seedPlayers } = await import('../data/seed')
     const { useDraftStore } = await import('./draftStore')
-    playersTable.toArray.mockResolvedValue(seedPlayers.map(({ espnAdp: _espnAdp, sleeperAdp: _sleeperAdp, ...player }) => player))
+    playersTable.toArray.mockResolvedValue(seedPlayers.map((player) => {
+      const withoutAdp: Player = { ...player }
+      delete withoutAdp.espnAdp
+      delete withoutAdp.sleeperAdp
+      return withoutAdp
+    }))
     metaTable.get.mockResolvedValue({ id: 'seed', version: (await import('../data/seed')).SEED_VERSION })
 
     await useDraftStore.getState().hydrate()
@@ -321,5 +351,117 @@ describe('hydrate seed versioning', () => {
     await useDraftStore.getState().hydrate()
 
     expect(useDraftStore.getState().players).toEqual(csvPlayers)
+  })
+})
+
+function recommendationFor(player: Player, score: number): Recommendation {
+  return {
+    playerId: player.id,
+    playerName: player.name,
+    position: player.position,
+    dvsScore: score,
+    tierLabel: 'BEST PICK',
+    breakdown: {
+      vorp: score - 10,
+      marginalValue: score - 5,
+      waitLoss: 3,
+      tierUrgency: 2,
+      tierOpportunityCost: 2,
+      survivalProbability: 0.5,
+      adjustedSurvivalProbability: 0.4,
+      needMultiplier: 1,
+      opponentDemandFactor: 1,
+      guardrailAdjustment: 0,
+      expectedNextPickValue: 20,
+      shapeAdjustment: 1.5,
+      decisionScore: score,
+      lateRoundUpside: 1,
+      handcuffBonus: 0,
+      irStashValue: 0,
+      latePhaseWeight: 0.25,
+      replacementLevel: 150
+    },
+    reasons: [`Decision score ${score}`],
+    explanation: `Decision score ${score}`
+  }
+}
+
+describe('draft evaluation capture', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    const { defaultLeague } = await import('../types')
+    const { useDraftStore } = await import('./draftStore')
+    const recommendations = demoPlayers.slice(0, 12).map((player, index) => recommendationFor(player, 100 - index))
+    useDraftStore.setState({
+      players: demoPlayers,
+      adjustments: {},
+      picks: [],
+      keepers: [],
+      settings: { ...defaultLeague, teamCount: 4, userTeam: 1 },
+      recommendations,
+      recommendationContext: {
+        formulaVersion: 4,
+        oneTurnSims: 48,
+        simulationSeed: 2026,
+        formulaParams: { one_turn_sims: 48, sim_seed: 2026 },
+        engineMode: 'offline-python',
+        generatedAt: 10,
+        generatedForPickIds: [],
+        generatedForPickCount: 0
+      },
+      evaluationRecords: [],
+      engineMode: 'offline-python'
+    })
+  })
+
+  it('captures a pre-pick snapshot only for the user team with explicit top-10 ranks', async () => {
+    const { useDraftStore } = await import('./draftStore')
+
+    await useDraftStore.getState().draftPlayer(demoPlayers[11])
+
+    const [record] = useDraftStore.getState().evaluationRecords
+    expect(record.pickNumber).toBe(1)
+    expect(record.round).toBe(1)
+    expect(record.userRoster).toEqual([])
+    expect(record.availablePlayerPool).toHaveLength(demoPlayers.length)
+    expect(record.boardState.picks).toEqual([])
+    expect(record.topRecommendations.map((item) => item.rank)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    expect(record.topRecommendations[0].player.adp).toBe(1)
+    expect(record.topRecommendations[0].reasonStrings).toEqual(['Decision score 100'])
+    expect(record.actualSelectionRecommendationRank).toBeNull()
+    expect(record.actualSelectionDecisionScore).toBe(89)
+    expect(record.actualSelectionScoreBreakdown?.decisionScore).toBe(89)
+    expect(record.recommendationGeneration.oneTurnSims).toBe(48)
+    expect(record.recommendationsMatchBoardState).toBe(true)
+    expect(evaluationRecordsTable.put).toHaveBeenCalledWith(record)
+
+    useDraftStore.setState({
+      picks: [],
+      evaluationRecords: [],
+      settings: { ...useDraftStore.getState().settings, userTeam: 2 }
+    })
+    await useDraftStore.getState().draftPlayer(demoPlayers[0])
+    expect(useDraftStore.getState().evaluationRecords).toEqual([])
+  })
+
+  it('retains correction and undo history for a user selection', async () => {
+    const { useDraftStore } = await import('./draftStore')
+    await useDraftStore.getState().draftPlayer(demoPlayers[0])
+    const pickId = useDraftStore.getState().picks[0].id
+
+    await useDraftStore.getState().correctPick(pickId, demoPlayers[1])
+    let record = useDraftStore.getState().evaluationRecords[0]
+    expect(record.actualSelection.id).toBe(demoPlayers[1].id)
+    expect(record.actualSelectionRecommendationRank).toBe(2)
+    expect(record.revisions[0]).toMatchObject({
+      type: 'CORRECTED',
+      previousSelection: { id: demoPlayers[0].id },
+      nextSelection: { id: demoPlayers[1].id }
+    })
+
+    await useDraftStore.getState().undoLastPick()
+    record = useDraftStore.getState().evaluationRecords[0]
+    expect(record.status).toBe('undone')
+    expect(record.revisions.at(-1)?.type).toBe('UNDONE')
   })
 })

@@ -113,6 +113,79 @@ export interface Recommendation {
   reasons?: string[]
 }
 
+export type EngineMode = 'online-api' | 'offline-python' | 'development-fallback'
+
+export interface FormulaConfigurationSnapshot {
+  formulaVersion: number | null
+  oneTurnSims: number | null
+  simulationSeed: number | null
+  formulaParams: Record<string, unknown> | null
+}
+
+export interface RecommendationGenerationContext extends FormulaConfigurationSnapshot {
+  engineMode: EngineMode
+  engineWarning?: string
+  generatedAt: number
+  generatedForPickIds: string[]
+  generatedForPickCount: number
+}
+
+export interface EvaluationRecommendation {
+  rank: number
+  player: Player
+  dvsScore: number
+  decisionScore: number
+  tierLabel: Recommendation['tierLabel']
+  breakdown: ScoreBreakdown
+  reasonStrings: string[]
+}
+
+export interface EvaluationRevision {
+  type: 'CORRECTED' | 'UNDONE' | 'REMOVED'
+  timestamp: number
+  previousSelection: Player
+  nextSelection?: Player
+}
+
+export interface DraftEvaluationRecord {
+  id: string
+  pickId: string
+  pickNumber: number
+  round: number
+  capturedAt: number
+  status: 'active' | 'undone' | 'removed'
+  userRoster: DraftPick[]
+  availablePlayerPool: Player[]
+  topRecommendations: EvaluationRecommendation[]
+  recommendationGeneration: RecommendationGenerationContext
+  recommendationsMatchBoardState: boolean
+  actualSelection: Player
+  actualSelectionRecommendationRank: number | null
+  actualSelectionDecisionScore: number | null
+  actualSelectionScoreBreakdown: ScoreBreakdown | null
+  boardState: {
+    settings: LeagueSettings
+    picks: DraftPick[]
+    keepers: KeeperAssignment[]
+    adjustments: UserAdjustment[]
+    players: Player[]
+  }
+  revisions: EvaluationRevision[]
+}
+
+export interface DraftEvaluationExport {
+  schemaVersion: 2
+  exportedAt: string
+  finalState: {
+    settings: LeagueSettings
+    players: Player[]
+    adjustments: Record<string, UserAdjustment>
+    picks: DraftPick[]
+    keepers: KeeperAssignment[]
+  }
+  evaluationRecords: DraftEvaluationRecord[]
+}
+
 export const defaultLeague: LeagueSettings = {
   name: 'Sunday League',
   teamCount: 12,

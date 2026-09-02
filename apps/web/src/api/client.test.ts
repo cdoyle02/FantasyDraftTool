@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { defaultLeague, type Player, type UserAdjustment } from '../types'
-import { normalizeRecommendations, serializeRecommendationRequest } from './client'
+import { normalizeRecommendationResponse, normalizeRecommendations, serializeRecommendationRequest } from './client'
 
 const player: Player = {
   id: 'player-1',
@@ -80,8 +80,11 @@ describe('DVS API contract adapter', () => {
         optionality_value: 3.5,
         late_round_upside: 2.0,
         handcuff_bonus: 3.5,
+        ir_stash_value: 1.5,
+        late_phase_weight: 0.75,
         starter_completion: 0.86,
-        replacement_level: 150
+        replacement_level: 150,
+        decision_score: 42
       },
       reasons: ['30.0 points above replacement']
     }])
@@ -96,8 +99,42 @@ describe('DVS API contract adapter', () => {
     expect(result.breakdown.optionalityValue).toBe(3.5)
     expect(result.breakdown.lateRoundUpside).toBe(2)
     expect(result.breakdown.handcuffBonus).toBe(3.5)
+    expect(result.breakdown.irStashValue).toBe(1.5)
+    expect(result.breakdown.latePhaseWeight).toBe(0.75)
+    expect(result.breakdown.shapeAdjustment).toBe(2)
+    expect(result.breakdown.decisionScore).toBe(42)
     expect(result.breakdown.starterCompletion).toBe(0.86)
     expect(result.breakdown.replacementLevel).toBe(150)
     expect(result.explanation).toContain('above replacement')
+  })
+
+  it('preserves the effective engine formula and simulation configuration', () => {
+    const response = normalizeRecommendationResponse({
+      recommendations: [],
+      count: 0,
+      configuration: {
+        formulaVersion: 4,
+        oneTurnSims: 48,
+        simulationSeed: 2026,
+        formulaParams: {
+          formula_version: 4,
+          one_turn_sims: 48,
+          sim_seed: 2026,
+          wait_loss_weight_v4: 0.35
+        }
+      }
+    })
+
+    expect(response.configuration).toEqual({
+      formulaVersion: 4,
+      oneTurnSims: 48,
+      simulationSeed: 2026,
+      formulaParams: {
+        formula_version: 4,
+        one_turn_sims: 48,
+        sim_seed: 2026,
+        wait_loss_weight_v4: 0.35
+      }
+    })
   })
 })

@@ -35,8 +35,14 @@ def test_browser_json_entrypoint(players, settings):
     }
     output = json.loads(recommendation_json(json.dumps(payload)))
 
-    assert len(output) == 3
-    assert {"player_id", "dvs_score", "breakdown", "tier_label"} <= output[0].keys()
+    assert len(output["recommendations"]) == 3
+    assert {"player_id", "dvs_score", "breakdown", "tier_label"} <= output[
+        "recommendations"
+    ][0].keys()
+    assert output["configuration"]["formulaVersion"] == 4
+    assert output["configuration"]["oneTurnSims"] == 48
+    assert output["configuration"]["simulationSeed"] == 2026
+    assert output["configuration"]["formulaParams"]["one_turn_sims"] == 48
 
 
 def test_browser_json_excludes_reserved_rosters_without_advancing_pick(players, settings):
@@ -68,4 +74,6 @@ def test_browser_json_excludes_reserved_rosters_without_advancing_pick(players, 
         "limit": 20,
     }
     output = json.loads(recommendation_json(json.dumps(payload)))
-    assert all(item["player_id"] != reserved_id for item in output)
+    assert all(
+        item["player_id"] != reserved_id for item in output["recommendations"]
+    )

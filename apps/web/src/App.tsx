@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { PositionPill } from './components/PositionPill'
 import { parsePlayerCsv } from './data/csv'
+import { buildDraftEvaluationExport, downloadDraftEvaluationExport } from './data/export'
 import { AvailablePlayers } from './pool/AvailablePlayers'
 import { rosterEntriesForTeam, keptPlayerIds, roundForPick, teamForPick, useDraftStore } from './store/draftStore'
 import { assignRosterSlots, SLOT_LABELS } from './store/rosterSlots'
@@ -241,7 +242,7 @@ function PickHistory({ onCorrect }: { onCorrect: (id: string) => void }) {
 }
 
 export default function App() {
-  const { hydrate, hydrated, refreshRecommendations, loadBundledRankings, settings, players, adjustments, picks, keepers, recommendations, engineMode, engineWarning, offlineReady } = useDraftStore()
+  const { hydrate, hydrated, refreshRecommendations, loadBundledRankings, settings, players, adjustments, picks, keepers, recommendations, evaluationRecords, engineMode, engineWarning, offlineReady } = useDraftStore()
   const [modal, setModal] = useState<'setup' | 'import' | null>(null)
   const [correctionId, setCorrectionId] = useState<string>()
   const [online, setOnline] = useState(navigator.onLine)
@@ -261,23 +262,25 @@ export default function App() {
     (_, offset) => offset
   ).find((offset) => teamForPick(currentPick + offset, settings.teamCount) === settings.userTeam) ?? settings.teamCount
   const exportBackup = () => {
-    const blob = new Blob(
-      [JSON.stringify({ schemaVersion: 1, exportedAt: new Date().toISOString(), settings, players, adjustments, picks, keepers }, null, 2)],
-      { type: 'application/json' }
-    )
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `fantasy-draft-backup-${new Date().toISOString().slice(0, 10)}.json`
-    link.click()
-    URL.revokeObjectURL(url)
+    downloadDraftEvaluationExport(buildDraftEvaluationExport({
+      settings,
+      players,
+      adjustments,
+      picks,
+      keepers,
+      evaluationRecords
+    }))
   }
   if (!hydrated) return <main className="grid min-h-screen place-items-center bg-ink text-mint">Opening your local draft room…</main>
   return <div className="min-h-screen bg-ink text-slate-100">
     <header className="sticky top-0 z-20 border-b border-line bg-ink/95 backdrop-blur">
       <div className="mx-auto flex max-w-[1600px] items-center gap-3 px-4 py-3 sm:px-6"><div className="grid h-9 w-9 place-items-center rounded-lg bg-mint font-black text-ink">F</div><div className="mr-auto"><h1 className="text-sm font-bold sm:text-base">Fantasy Draft Tool</h1><p className="hidden text-[10px] text-muted sm:block">{settings.name} · {settings.scoring.replace('_', ' ')} · Snake</p></div>
         <div data-testid="offline-status" data-ready={offlineReady} className={`flex items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${offlineReady ? 'border-mint/30 text-mint' : 'border-amber-300/30 text-amber-200'}`}><span className={`h-1.5 w-1.5 rounded-full ${offlineReady ? 'bg-mint' : 'bg-amber-300'}`} /><span className="hidden sm:inline">{online ? (offlineReady ? 'ONLINE · OFFLINE READY' : 'ONLINE · PREPARING OFFLINE') : (offlineReady ? 'OFFLINE READY' : 'OFFLINE NOT READY')}</span><span className="sm:hidden">{offlineReady ? 'READY' : 'SETUP'}</span></div>
-        <button className="button-secondary" onClick={exportBackup}>Export</button>
+        <button
+          className="button-secondary"
+          title="Download the final board and per-pick evaluation log"
+          onClick={exportBackup}
+        >Export draft log</button>
         <button
           className="button-secondary"
           title="Replace the player pool with the committed expert rankings. Does not fetch from the internet."
@@ -298,7 +301,7 @@ export default function App() {
       </section>
       {engineWarning && <div role="status" className="mb-4 rounded-lg border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-xs text-amber-100">{engineWarning}</div>}
       <div className="grid gap-4 lg:grid-cols-12">
-        <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><span className="text-xs text-muted">For your roster · pick goes to on-clock team</span></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 6).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
+        <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><span className="text-xs text-muted">Top 10 for your roster · pick goes to on-clock team</span></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 10).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
         <AvailablePlayers /><Rosters /><div className="lg:col-span-8"><PickHistory onCorrect={setCorrectionId} /></div>
       </div>
     </main>

@@ -1,8 +1,8 @@
-import { draftApi, type RecommendationRequest } from '../api/client'
-import type { Recommendation } from '../types'
+import { draftApi, type RecommendationRequest, type RecommendationResponse } from '../api/client'
+import type { EngineMode, FormulaConfigurationSnapshot, Recommendation } from '../types'
 import { developmentFallbackScore } from './fallback'
 
-export type EngineMode = 'online-api' | 'offline-python' | 'development-fallback'
+export type { EngineMode } from '../types'
 
 let worker: Worker | undefined
 
@@ -39,17 +39,18 @@ export async function prepareOfflineEngine(): Promise<void> {
   })
 }
 
-async function pythonRecommendations(request: RecommendationRequest): Promise<Recommendation[]> {
+async function pythonRecommendations(request: RecommendationRequest): Promise<RecommendationResponse> {
   const engineWorker = getWorker()
   const id = crypto.randomUUID()
   return new Promise((resolve, reject) => {
     let timeout = 0
-    const listener = (event: MessageEvent<{ id: string; result?: { recommendations: Recommendation[] }; error?: string }>) => {
+    const listener = (event: MessageEvent<{ id: string; result?: RecommendationResponse; error?: string }>) => {
       if (event.data.id !== id) return
       engineWorker.removeEventListener('message', listener)
       window.clearTimeout(timeout)
       if (event.data.error) reject(new Error(event.data.error))
-      else resolve(event.data.result?.recommendations ?? [])
+      else if (event.data.result) resolve(event.data.result)
+      else reject(new Error('Offline engine returned no recommendation result'))
     }
     timeout = window.setTimeout(() => {
       engineWorker.removeEventListener('message', listener)
@@ -63,21 +64,37 @@ async function pythonRecommendations(request: RecommendationRequest): Promise<Re
 export async function getRecommendations(request: RecommendationRequest): Promise<{
   recommendations: Recommendation[]
   mode: EngineMode
+  configuration: FormulaConfigurationSnapshot
   warning?: string
 }> {
   if (navigator.onLine) {
     try {
       const response = await draftApi.recommendations(request)
-      return { recommendations: response.recommendations, mode: 'online-api' }
+      return {
+        recommendations: response.recommendations,
+        configuration: response.configuration,
+        mode: 'online-api'
+      }
     } catch {
       // API is optional for the local-first client.
     }
   }
   try {
-    return { recommendations: await pythonRecommendations(request), mode: 'offline-python' }
+    const response = await pythonRecommendations(request)
+    return {
+      recommendations: response.recommendations,
+      configuration: response.configuration,
+      mode: 'offline-python'
+    }
   } catch (error) {
     return {
       recommendations: developmentFallbackScore(request.players, request.picks, request.settings, request.adjustments, request.keepers),
+      configuration: {
+        formulaVersion: request.settings.formulaVersion ?? null,
+        oneTurnSims: null,
+        simulationSeed: null,
+        formulaParams: null
+      },
       mode: 'development-fallback',
       warning: `Non-production TypeScript scorer active: ${error instanceof Error ? error.message : 'Python engine unavailable'}`
     }

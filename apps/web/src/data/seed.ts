@@ -27,9 +27,13 @@ function toSeedPlayer(player: SeedRow): Player {
     isRookie: player.isRookie === true,
     isBreakout: player.isBreakout === true,
     byeWeek: typeof player.byeWeek === 'number' ? player.byeWeek : undefined,
-    irEligible: player.irEligible === true,
-    injuryStatus: typeof player.injuryStatus === 'string' ? player.injuryStatus : undefined,
-    expectedReturnWeek: typeof player.expectedReturnWeek === 'number' ? player.expectedReturnWeek : undefined
+    irEligible: 'irEligible' in player && player.irEligible === true,
+    injuryStatus: 'injuryStatus' in player && typeof player.injuryStatus === 'string'
+      ? player.injuryStatus
+      : undefined,
+    expectedReturnWeek: 'expectedReturnWeek' in player && typeof player.expectedReturnWeek === 'number'
+      ? player.expectedReturnWeek
+      : undefined
   }
 }
 

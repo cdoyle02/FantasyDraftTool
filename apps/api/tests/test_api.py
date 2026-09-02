@@ -73,6 +73,10 @@ def test_recommendations_endpoint():
     assert body["count"] == 1
     assert body["recommendations"][0]["player_id"] == "rb-1"
     assert "breakdown" in body["recommendations"][0]
+    assert body["configuration"]["formulaVersion"] == 4
+    assert body["configuration"]["oneTurnSims"] == 48
+    assert body["configuration"]["simulationSeed"] == 2026
+    assert body["configuration"]["formulaParams"]["sim_seed"] == 2026
 
 
 def test_request_validation_is_structured():
