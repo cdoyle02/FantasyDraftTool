@@ -63,6 +63,17 @@ def test_validation_rejects_gaps_and_wrong_snake_team():
         validate_state(wrong_team)
 
 
+def test_apply_pick_preserves_reserved_rosters():
+    state = DraftState(
+        team_count=4,
+        reserved_rosters={"1": ("keeper-1",)},
+    )
+    after = apply_pick(state, "p1")
+    assert after.reserved_rosters == state.reserved_rosters
+    undone = undo_last_pick(apply_pick(after, "p2"))
+    assert undone.reserved_rosters == state.reserved_rosters
+
+
 def test_cannot_undo_empty_draft(empty_state):
     with pytest.raises(DraftEventError, match="empty"):
         undo_last_pick(empty_state)

@@ -48,6 +48,18 @@ interface EngineRecommendation {
     two_pick_path_value?: number
     shape_adjustment?: number
     decision_score?: number
+    late_round_upside?: number
+    contingent_value?: number
+    handcuff_bonus?: number
+    ir_stash_value?: number
+    optionality_value?: number
+    special_teams_timing_penalty?: number
+    special_teams_position_cap?: boolean
+    late_phase_weight?: number
+    starter_completion?: number
+    starter_slots_filled?: number
+    starter_slots_total?: number
+    replacement_level?: number
   }
   reasons: string[]
 }
@@ -75,7 +87,9 @@ export function serializeRecommendationRequest(request: RecommendationRequest) {
       draftType: 'snake',
       leagueType: 'redraft',
       userTeamId: String(request.settings.userTeam),
-      formulaVersion: request.settings.formulaVersion ?? 4
+      formulaVersion: request.settings.formulaVersion ?? 4,
+      keeperSlots: request.settings.keeperSlots ?? 0,
+      irSlots: request.settings.irSlots ?? 0
     },
     draftState: {
       teamCount: request.settings.teamCount,
@@ -122,7 +136,19 @@ export function normalizeRecommendations(results: EngineRecommendation[]): Recom
       expectedNextPickValue: result.breakdown.expected_next_pick_value,
       twoPickPathValue: result.breakdown.two_pick_path_value,
       shapeAdjustment: result.breakdown.shape_adjustment,
-      decisionScore: result.breakdown.decision_score ?? result.dvs_score
+      decisionScore: result.breakdown.decision_score ?? result.dvs_score,
+      lateRoundUpside: result.breakdown.late_round_upside,
+      contingentValue: result.breakdown.contingent_value,
+      handcuffBonus: result.breakdown.handcuff_bonus,
+      irStashValue: result.breakdown.ir_stash_value,
+      optionalityValue: result.breakdown.optionality_value,
+      specialTeamsTimingPenalty: result.breakdown.special_teams_timing_penalty,
+      specialTeamsPositionCap: result.breakdown.special_teams_position_cap,
+      latePhaseWeight: result.breakdown.late_phase_weight,
+      starterCompletion: result.breakdown.starter_completion,
+      starterSlotsFilled: result.breakdown.starter_slots_filled,
+      starterSlotsTotal: result.breakdown.starter_slots_total,
+      replacementLevel: result.breakdown.replacement_level
     },
     reasons: result.reasons,
     explanation: result.reasons.join(' · ') || 'Best available value for the current draft state.'

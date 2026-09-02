@@ -18,6 +18,11 @@ HEADER_ALIASES: dict[str, tuple[str, ...]] = {
     "adp": ("adp", "avg pick", "average draft position"),
     "tier": ("tier",),
     "id": ("id", "player id"),
+    "upside_score": ("upside score", "upside_score", "upside"),
+    "risk_score": ("risk score", "risk_score", "risk"),
+    "depth_chart_rank": ("depth chart rank", "depth_chart_rank", "depth rank"),
+    "injury_status": ("injury status", "injury_status", "injury"),
+    "bye_week": ("bye week", "bye_week", "bye"),
 }
 
 
@@ -70,6 +75,11 @@ def import_players_csv(
             adp_text = _value(row, mapping, "adp", required=False)
             tier_text = _value(row, mapping, "tier", required=False)
             supplied_id = _value(row, mapping, "id", required=False)
+            upside_text = _value(row, mapping, "upside_score", required=False)
+            risk_text = _value(row, mapping, "risk_score", required=False)
+            depth_text = _value(row, mapping, "depth_chart_rank", required=False)
+            injury_text = _value(row, mapping, "injury_status", required=False)
+            bye_text = _value(row, mapping, "bye_week", required=False)
             player_id = supplied_id or _slug(f"{name}-{team}-{position.value}")
             if player_id in seen_ids:
                 raise ValueError(f"duplicate player id '{player_id}'")
@@ -81,6 +91,11 @@ def import_players_csv(
                 projected_points=points,
                 adp=_number(adp_text, "adp") if adp_text else None,
                 tier=int(float(tier_text)) if tier_text else 1,
+                upside_score=_number(upside_text, "upside_score") if upside_text else None,
+                risk_score=_number(risk_text, "risk_score") if risk_text else None,
+                depth_chart_rank=int(float(depth_text)) if depth_text else None,
+                injury_status=injury_text.upper() if injury_text else None,
+                bye_week=int(float(bye_text)) if bye_text else None,
             )
             players.append(player)
             seen_ids.add(player_id)

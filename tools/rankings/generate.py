@@ -16,11 +16,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from cheatsheet import DEFAULT_CHEATSHEET, cheatsheet_inputs, overlay_cheatsheet_tiers
+from cheatsheet import DEFAULT_CHEATSHEET, cheatsheet_inputs, cheatsheet_metadata, overlay_cheatsheet_tiers
 from espn_adp import load_espn_adp
 from fetch import FantasyProsError, api_key_from_env, fetch_k_dst_inputs
 from footballers import DEFAULT_WORKBOOK, footballers_inputs
-from merge import AdpRow, MergeConfig, SeedPlayer, merge_rankings
+from merge import AdpRow, MergeConfig, SeedPlayer, apply_v41_metadata, merge_rankings
 from store import load_config, read_inbox, write_bundle
 
 HERE = Path(__file__).resolve().parent
@@ -77,6 +77,8 @@ def main(argv: list[str] | None = None) -> int:
         sleeper_adp_rows=sleeper_rows,
         config=merge_config,
     )
+    if source.startswith("footballers"):
+        players = apply_v41_metadata(players, cheatsheet_metadata(_cheatsheet_path(config)))
     if not players:
         print("generator produced no players", file=sys.stderr)
         return 1

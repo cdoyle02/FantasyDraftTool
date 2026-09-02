@@ -256,7 +256,7 @@ def test_second_te_cannot_claim_flex_at_full_surplus():
     rb_marginal = marginal_value(rb3, roster, settings, levels, params, caps)
     uncapped = marginal_value(te2, roster, settings, levels, params, None)
     assert te_marginal < rb_marginal
-    assert te_marginal == pytest.approx(0.35 * 100.0)
+    assert te_marginal == pytest.approx(0.0)
     assert rb_marginal == pytest.approx(100.0)
     assert uncapped > te_marginal
 

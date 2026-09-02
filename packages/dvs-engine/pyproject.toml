@@ -18,3 +18,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "slow: Monte Carlo convergence and other multi-second checks",
+]

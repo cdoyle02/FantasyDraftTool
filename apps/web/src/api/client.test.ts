@@ -76,7 +76,12 @@ describe('DVS API contract adapter', () => {
         expected_next_pick_value: 18,
         two_pick_path_value: 46,
         tier_opportunity_cost: 4,
-        shape_adjustment: 2
+        shape_adjustment: 2,
+        optionality_value: 3.5,
+        late_round_upside: 2.0,
+        handcuff_bonus: 3.5,
+        starter_completion: 0.86,
+        replacement_level: 150
       },
       reasons: ['30.0 points above replacement']
     }])
@@ -88,6 +93,11 @@ describe('DVS API contract adapter', () => {
     expect(result.breakdown.adjustedSurvivalProbability).toBe(0.25)
     expect(result.breakdown.expectedNextPickValue).toBe(18)
     expect(result.breakdown.twoPickPathValue).toBe(46)
+    expect(result.breakdown.optionalityValue).toBe(3.5)
+    expect(result.breakdown.lateRoundUpside).toBe(2)
+    expect(result.breakdown.handcuffBonus).toBe(3.5)
+    expect(result.breakdown.starterCompletion).toBe(0.86)
+    expect(result.breakdown.replacementLevel).toBe(150)
     expect(result.explanation).toContain('above replacement')
   })
 })

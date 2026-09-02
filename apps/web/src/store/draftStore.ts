@@ -158,8 +158,9 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
   draftPlayer: async (player) => enqueueDraftWrite(async () => {
     if (get().picks.some((pick) => pick.playerId === player.id)) return
     if (get().keepers.some((keeper) => keeper.playerId === player.id)) return
-    const totalRounds = Object.values(get().settings.rosterSlots).reduce((sum, count) => sum + count, 0)
-    if (get().picks.length >= get().settings.teamCount * totalRounds) return
+    const rosterSize = Object.values(get().settings.rosterSlots).reduce((sum, count) => sum + count, 0)
+    const liveRounds = rosterSize - (get().settings.keeperSlots ?? 0)
+    if (get().picks.length >= get().settings.teamCount * liveRounds) return
     const pickNumber = get().picks.length + 1
     const pick: DraftPick = {
       id: crypto.randomUUID(),

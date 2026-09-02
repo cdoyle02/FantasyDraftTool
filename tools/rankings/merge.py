@@ -49,9 +49,16 @@ class SeedPlayer:
     tier: int
     espn_adp: float | None = None
     sleeper_adp: float | None = None
+    depth_chart_rank: int | None = None
+    depth_chart_source: str | None = None
+    upside_score: float | None = None
+    risk_score: float | None = None
+    is_rookie: bool = False
+    is_breakout: bool = False
+    bye_week: int | None = None
 
-    def as_web_dict(self) -> dict[str, str | float | int]:
-        data: dict[str, str | float | int] = {
+    def as_web_dict(self) -> dict[str, str | float | int | bool]:
+        data: dict[str, str | float | int | bool] = {
             "id": self.id,
             "name": self.name,
             "position": self.position,
@@ -64,6 +71,20 @@ class SeedPlayer:
             data["espnAdp"] = self.espn_adp
         if self.sleeper_adp is not None:
             data["sleeperAdp"] = self.sleeper_adp
+        if self.depth_chart_rank is not None:
+            data["depthChartRank"] = self.depth_chart_rank
+        if self.depth_chart_source is not None:
+            data["depthChartSource"] = self.depth_chart_source
+        if self.upside_score is not None:
+            data["upsideScore"] = self.upside_score
+        if self.risk_score is not None:
+            data["riskScore"] = self.risk_score
+        if self.is_rookie:
+            data["isRookie"] = True
+        if self.is_breakout:
+            data["isBreakout"] = True
+        if self.bye_week is not None:
+            data["byeWeek"] = self.bye_week
         return data
 
 
@@ -160,6 +181,84 @@ def merge_rankings(
     _apply_gap_tiers(players, pooled_index, settings.gap_tier_threshold)
     players.sort(key=lambda item: (item.adp, -item.projected_points, item.name))
     return players
+
+
+def apply_v41_metadata(
+    players: Sequence[SeedPlayer],
+    cheatsheet_meta: Mapping[tuple[str, str], object] | None = None,
+) -> list[SeedPlayer]:
+    """Attach cheatsheet metadata and derived depth-chart ranks without changing FPTS/ADP/tier."""
+    enriched: list[SeedPlayer] = []
+    for player in players:
+        key = player_key(player.name, player.position)
+        meta = cheatsheet_meta.get(key) if cheatsheet_meta else None
+        if meta is None:
+            enriched.append(player)
+            continue
+        enriched.append(
+            SeedPlayer(
+                id=player.id,
+                name=player.name,
+                position=player.position,
+                team=player.team,
+                projected_points=player.projected_points,
+                adp=player.adp,
+                tier=player.tier,
+                espn_adp=player.espn_adp,
+                sleeper_adp=player.sleeper_adp,
+                upside_score=getattr(meta, "upside_score", None),
+                risk_score=getattr(meta, "risk_score", None),
+                is_rookie=getattr(meta, "is_rookie", False),
+                is_breakout=getattr(meta, "is_breakout", False),
+                bye_week=getattr(meta, "bye_week", None),
+            )
+        )
+
+    depth_ranks = _derived_depth_chart_ranks(enriched)
+    final: list[SeedPlayer] = []
+    for player in enriched:
+        rank = depth_ranks.get(player.id)
+        if rank is None:
+            final.append(player)
+            continue
+        final.append(
+            SeedPlayer(
+                id=player.id,
+                name=player.name,
+                position=player.position,
+                team=player.team,
+                projected_points=player.projected_points,
+                adp=player.adp,
+                tier=player.tier,
+                espn_adp=player.espn_adp,
+                sleeper_adp=player.sleeper_adp,
+                depth_chart_rank=rank,
+                depth_chart_source="derived",
+                upside_score=player.upside_score,
+                risk_score=player.risk_score,
+                is_rookie=player.is_rookie,
+                is_breakout=player.is_breakout,
+                bye_week=player.bye_week,
+            )
+        )
+    return final
+
+
+def _derived_depth_chart_ranks(players: Sequence[SeedPlayer]) -> dict[str, int]:
+    grouped: dict[tuple[str, str], list[SeedPlayer]] = {}
+    for player in players:
+        if player.position not in {"RB", "WR", "TE", "QB"}:
+            continue
+        team = player.team.upper()
+        if not team or team in {"FA", "TBD", "UNK"}:
+            continue
+        grouped.setdefault((team, player.position), []).append(player)
+    ranks: dict[str, int] = {}
+    for rows in grouped.values():
+        ordered = sorted(rows, key=lambda item: (item.adp, -item.projected_points, item.name))
+        for index, player in enumerate(ordered, start=1):
+            ranks[player.id] = index
+    return ranks
 
 
 def gap_tiers(ranks: Sequence[int], threshold: int = 4) -> list[int]:

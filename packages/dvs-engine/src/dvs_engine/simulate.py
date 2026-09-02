@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from .formula import roster_shape_need, survival_probability
 from .lookahead import MarginalCache
 from .models import DraftState, FormulaParams, LeagueSettings, Player, Position
+from .special_teams import future_special_teams_eligible, opponent_at_special_teams_cap
 from .survival import per_pick_hazard
 
 
@@ -41,6 +42,8 @@ def _pick_weight(
     ]
     need = roster_shape_need(player.position, roster, settings, current_round)
     run = run_pressure.get(player.position, 1.0)
+    if opponent_at_special_teams_cap(roster, player.position, settings):
+        return 0.0
     return max(0.0, hazard * need * run)
 
 
@@ -111,11 +114,30 @@ def _best_pool_value(
     pool: Sequence[Player],
     marginals: Mapping[str, float],
     exclude_ids: frozenset[str] | None = None,
+    *,
+    roster_plus_candidate: Sequence[Player] | None = None,
+    settings: LeagueSettings | None = None,
+    next_round: int | None = None,
+    params: FormulaParams | None = None,
 ) -> float:
     excluded = exclude_ids or frozenset()
     best = 0.0
     for candidate in pool:
         if candidate.id not in remaining_ids or candidate.id in excluded:
+            continue
+        if (
+            roster_plus_candidate is not None
+            and settings is not None
+            and next_round is not None
+            and params is not None
+            and not future_special_teams_eligible(
+                candidate,
+                roster_plus_candidate,
+                settings,
+                next_round,
+                params,
+            )
+        ):
             continue
         best = max(best, marginals.get(candidate.id, 0.0))
     return best
@@ -248,6 +270,9 @@ def next_pick_value_from_sim(
     pool: Sequence[Player],
     cache: MarginalCache,
     sim_result: OneTurnSimResult,
+    settings: LeagueSettings,
+    next_round: int,
+    params: FormulaParams,
 ) -> float:
     """Expected best marginal at the next pick after drafting this player."""
     if not sim_result.path_survivors:
@@ -256,7 +281,16 @@ def next_pick_value_from_sim(
     marginals = {player.id: cache.marginal(player, simulated) for player in pool}
     exclude = frozenset({drafted_player.id})
     total = sum(
-        _best_pool_value(survivors, pool, marginals, exclude_ids=exclude)
+        _best_pool_value(
+            survivors,
+            pool,
+            marginals,
+            exclude_ids=exclude,
+            roster_plus_candidate=simulated,
+            settings=settings,
+            next_round=next_round,
+            params=params,
+        )
         for survivors in sim_result.path_survivors
     )
     return total / len(sim_result.path_survivors)

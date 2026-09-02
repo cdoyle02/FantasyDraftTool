@@ -72,8 +72,14 @@ export function AvailablePlayers() {
   const [adpDir, setAdpDir] = useState<SortDir>('asc')
   const onClockTeam = teamForPick(picks.length + 1, settings.teamCount)
   const draftLabel = onClockTeam === settings.userTeam ? 'YOU' : `T${onClockTeam}`
-  const totalRounds = useMemo(() => Object.values(settings.rosterSlots).reduce((sum, count) => sum + count, 0), [settings.rosterSlots])
-  const draftFull = picks.length >= settings.teamCount * totalRounds
+  const rosterSize = useMemo(() => Object.values(settings.rosterSlots).reduce((sum, count) => sum + count, 0), [settings.rosterSlots])
+  const keepersOnUserTeam = useMemo(
+    () => keepers.filter((keeper) => keeper.teamId === settings.userTeam).length,
+    [keepers, settings.userTeam]
+  )
+  const configuredKeeperSlots = settings.keeperSlots ?? keepersOnUserTeam
+  const liveRounds = rosterSize - configuredKeeperSlots
+  const draftFull = picks.length >= settings.teamCount * liveRounds
   const unavailable = useMemo(() => {
     const ids = keptPlayerIds(keepers)
     for (const pick of picks) ids.add(pick.playerId)

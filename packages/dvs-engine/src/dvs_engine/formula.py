@@ -30,10 +30,12 @@ def effective_player(player: Player, adjustment: UserAdjustment | None) -> Playe
     """Return a scoring view without mutating imported baseline data."""
     if adjustment is None:
         return player
+    ir_eligible = player.ir_eligible or adjustment.tag == "irStash"
     return replace(
         player,
         projected_points=player.projected_points + adjustment.points_delta,
         tier=adjustment.tier_override or player.tier,
+        ir_eligible=ir_eligible,
     )
 
 
@@ -94,10 +96,19 @@ def replacement_counts(settings: LeagueSettings) -> dict[Position, int]:
 
 
 def replacement_levels(
-    players: Iterable[Player], settings: LeagueSettings
+    players: Iterable[Player],
+    settings: LeagueSettings,
+    drafted_by_position: Mapping[Position, int] | None = None,
 ) -> dict[Position, float]:
     params = settings.formula_params
     counts = replacement_counts(settings)
+    if params.demand_adjusted_replacement and drafted_by_position is not None:
+        adjusted_counts = {
+            position: max(1, counts[position] - drafted_by_position.get(position, 0))
+            for position in counts
+        }
+    else:
+        adjusted_counts = counts
     grouped: dict[Position, list[float]] = {position: [] for position in counts}
     for player in players:
         if player.position in grouped:
@@ -105,7 +116,7 @@ def replacement_levels(
     levels: dict[Position, float] = {}
     for position, points in grouped.items():
         ordered = sorted(points, reverse=True)
-        replacement_rank = counts[position] + params.replacement_index_offset
+        replacement_rank = adjusted_counts[position] + params.replacement_index_offset
         index = min(replacement_rank, len(ordered)) - 1
         levels[position] = ordered[index] if ordered else 0.0
     return levels
@@ -388,8 +399,14 @@ def guardrail_adjustment(
         and player_vorp < settings.qb_te_vorp_threshold
     ):
         adjustment -= weight * (1.0 - player_vorp / max(1.0, settings.qb_te_vorp_threshold))
-    if player.position in (Position.K, Position.DST) and current_round < settings.rounds - 1:
-        adjustment -= weight * 3.0
+    if player.position in (Position.K, Position.DST):
+        from .special_teams import special_teams_status
+
+        status = special_teams_status(
+            player, roster, settings, current_round, settings.formula_params
+        )
+        if status.timing_penalty < 0:
+            adjustment += status.timing_penalty
     if player.position in (Position.RB, Position.WR) and current_round >= 4:
         counts = Counter(item.position for item in roster)
         other = Position.WR if player.position == Position.RB else Position.RB

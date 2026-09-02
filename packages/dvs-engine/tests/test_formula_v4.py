@@ -131,6 +131,7 @@ def test_v4_score_matches_decomposition():
         + params.lookahead_weight * top.breakdown.expected_next_pick_value
         + top.breakdown.shape_adjustment
         + top.breakdown.guardrail_adjustment
+        + top.breakdown.optionality_value
     )
     assert top.dvs_score == pytest.approx(expected, abs=0.05)
     assert top.breakdown.decision_score == pytest.approx(expected, abs=0.05)

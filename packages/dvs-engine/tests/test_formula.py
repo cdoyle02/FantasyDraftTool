@@ -1,4 +1,5 @@
 import pytest
+from dataclasses import replace
 from dvs_engine import (
     DraftState,
     FormulaParams,
@@ -106,8 +107,14 @@ def test_roster_need_diminishes_after_slots_fill(players, settings):
 
 def test_guardrails_suppress_early_kicker(players, settings):
     kicker = next(player for player in players if player.position == Position.K)
-    assert guardrail_adjustment(kicker, 20, [], settings, 1) < -30
-    assert guardrail_adjustment(kicker, 20, [], settings, settings.rounds) == 0
+    legacy = replace(
+        settings.formula_params,
+        special_teams_hard_gate=False,
+    )
+    legacy_settings = replace(settings, formula_params=legacy)
+    assert guardrail_adjustment(kicker, 20, [], legacy_settings, 1) < -30
+    assert guardrail_adjustment(kicker, 20, [], legacy_settings, settings.rounds) == 0
+    assert guardrail_adjustment(kicker, 20, [], settings, 1) == 0
 
 
 def test_recommendations_are_deterministic_explainable_and_adjustable(

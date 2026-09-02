@@ -128,3 +128,56 @@ For each intervening pick, `roster_shape_need` on the **updated** opponent roste
 - Python default: `FormulaParams(formula_version=4)`
 - API / browser: `settings.formulaVersion: 4` (web app default)
 - Prior versions: set `formula_version` to 1, 2, or 3 explicitly
+
+## V4.1 — Late-round roster optimization
+
+V4.1 adds an optional late-round layer on top of the V4 core. Every new term is **zero** when metadata is absent or the draft is early, so Footballers projections/tiers/ADP remain the primary ranking inputs.
+
+### Decision equation (V4.1)
+
+```text
+decision_score = V4(p) + optionality_value(p)
+optionality_value = max(late_round_upside, handcuff_bonus, ir_stash_value)   # default combine
+```
+
+Special teams (K/DST) are handled separately:
+
+- **Hard gate (default):** ineligible K/DST are removed from scoring and candidate selection until their timing window.
+- **Position caps:** second K/DST at cap contributes **0 marginal** (lineup caps on direct slots and bench).
+- **Scarcity zeroing:** K/DST tier cost and wait-loss scale to 0; run pressure fixed at 1.0.
+- **Candidate-conditioned lookahead:** future K/DST eligibility is evaluated against `roster + drafted_candidate` at the next round.
+
+### Metadata inputs (optional)
+
+| Field | Source | Used for |
+|-------|--------|----------|
+| `upside_score`, `is_rookie`, `is_breakout` | Footballers cheatsheet | Late-round upside tie-breaking |
+| `risk_score` | Cheatsheet | Bounded handcuff modifier only (±15% on role probability) |
+| `depth_chart_rank`, `depth_chart_source` | Derived from team+position ADP order | Handcuff pairing; `"derived"` gets 0.7 confidence |
+| `ir_eligible`, `injury_status` | Manual / explicit only | IR stash (not `is_injury_concern` alone) |
+| `keeper_slots`, `reserved_rosters` | League settings + draft state | Live round count and pre-draft rosters |
+
+Missing metadata degrades gracefully: optionality terms stay at 0.
+
+### Keeper replacement
+
+`demand_adjusted_replacement` ships **disabled** (`False`). Static replacement levels match pre-V4.1 behavior. Keeper round accounting: `rounds = roster_size - keeper_slots`.
+
+### Monte Carlo convergence (measured)
+
+Reference: 480 paths. Tested at team 6 (middle seat) on three boards with 4 seeds each.
+
+| Board | sims=48 | Top-1 | Top-3 | max Δ survival | max Δ next-pick | Runtime |
+|-------|---------|-------|-------|----------------|-----------------|---------|
+| Pick 1 empty | 48 | OK | OK | ≤ 0.05 | ≤ 0.02 | ~180 ms |
+| Mid partial roster | 48 | OK | OK | 0.00 | ≤ 0.04 | ~310 ms |
+| Penultimate K/DST open | 48 | OK | OK | 0.00 | 0.00 | ~430 ms |
+
+**Recommendation:** keep `one_turn_sims = 48`. All boards pass top-1, top-3, and tolerance checks (Δ survival ≤ 0.15, Δ next-pick ≤ 1.0, Δ score ≤ 1.0) without raising the default.
+
+### V4.1 limitations
+
+- IR eligibility is not inferred from cheatsheet injury flags; use explicit fields or the `irStash` tag.
+- Handcuff depth charts are ADP-derived heuristics, not NFL official charts.
+- `demand_adjusted_replacement` remains off until backtesting justifies enabling it.
+- Regenerate `expertRankings.json` after rankings pipeline changes to pick up cheatsheet metadata in the web seed.

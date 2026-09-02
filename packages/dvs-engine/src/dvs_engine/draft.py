@@ -44,14 +44,18 @@ def apply_pick(
     if any(pick.player_id == player_id for pick in state.pick_history):
         raise DraftEventError(f"player {player_id} has already been drafted")
     pick = Pick(state.current_pick, actual_team, player_id, timestamp, event_id)
-    return DraftState(state.team_count, state.pick_history + (pick,))
+    return DraftState(
+        state.team_count,
+        state.pick_history + (pick,),
+        state.reserved_rosters,
+    )
 
 
 def undo_last_pick(state: DraftState) -> DraftState:
     validate_state(state)
     if not state.pick_history:
         raise DraftEventError("cannot undo an empty draft")
-    return DraftState(state.team_count, state.pick_history[:-1])
+    return DraftState(state.team_count, state.pick_history[:-1], state.reserved_rosters)
 
 
 def correct_last_pick(state: DraftState, player_id: str) -> DraftState:

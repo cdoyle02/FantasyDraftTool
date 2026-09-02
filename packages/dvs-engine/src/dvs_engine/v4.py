@@ -9,6 +9,7 @@ from dataclasses import dataclass, replace
 from .formula import (
     effective_player,
     guardrail_adjustment,
+    picks_until_team_turn,
     position_caps_map,
     replacement_levels,
     roster_shape_need,
@@ -31,7 +32,10 @@ from .models import (
     RecommendationResult,
     UserAdjustment,
 )
+from .optionality import optionality_for_player
+from .phase import draft_phase
 from .simulate import adp_prior_survival, next_pick_value_from_sim, simulate_one_turn
+from .special_teams import is_special_teams_eligible, special_teams_status
 from .survival import compute_survival_maps
 from .tiers import (
     players_remaining_in_tier,
@@ -76,6 +80,9 @@ def _reasons_v4(
     current_round: int,
     best_path: float,
     player_path: float,
+    optionality: float,
+    optionality_reason: str | None,
+    phase_late_weight: float,
 ) -> tuple[str, ...]:
     reasons: list[str] = []
     if marginal > 0:
@@ -132,6 +139,10 @@ def _reasons_v4(
         reasons.append(f"user tag: {adjustment.tag}")
     if tier_exhaust > 0.5 and tier_cost > 0:
         reasons.append("tier unlikely to survive to your next pick")
+    if optionality_reason and optionality >= 1.0:
+        reasons.append(optionality_reason)
+    elif optionality >= 2.0 and phase_late_weight > 0.5:
+        reasons.append("late-round bench upside")
     return tuple(reasons)
 
 
@@ -158,6 +169,18 @@ class _DraftRow:
     two_pick_path: float
     run: float
     opponent_need: float
+    optionality: float
+    optionality_reason: str | None
+    late_round_upside: float
+    contingent_value: float
+    handcuff_bonus: float
+    ir_stash_value: float
+    special_teams_timing_penalty: float
+    special_teams_position_cap: bool
+    phase_late_weight: float
+    starter_completion: float
+    starter_slots_filled: int
+    starter_slots_total: int
 
 
 def recommend_v4(
@@ -186,8 +209,14 @@ def recommend_v4(
         if player_id in player_map
     ]
     current_round = (state.current_pick - 1) // settings.team_count + 1
+    available = [
+        player
+        for player in available
+        if is_special_teams_eligible(player, roster, settings, current_round, params)
+    ]
     caps = position_caps_map(settings)
     cache = MarginalCache(settings, levels, params, caps)
+    phase = draft_phase(roster, settings, levels, params, current_round, caps)
 
     (
         _adp_from_maps,
@@ -205,9 +234,9 @@ def recommend_v4(
         current_round,
         params,
     )
-    from .formula import picks_until_team_turn
 
     until_next = picks_until_team_turn(state, settings.user_team_id)
+    next_round = (state.current_pick + until_next - 1) // settings.team_count + 1
 
     marginals = {player.id: cache.marginal(player, roster) for player in available}
     pool = build_lookahead_pool(available, marginals, params)
@@ -241,7 +270,15 @@ def recommend_v4(
         for player in available
     }
 
-    candidates = select_candidates(available, marginals, wait_by_id, params)
+    candidates = select_candidates(
+        available,
+        marginals,
+        wait_by_id,
+        params,
+        roster=roster,
+        settings=settings,
+        current_round=current_round,
+    )
     candidate_ids = {player.id for player in candidates}
     baseline_next = sim_result.expected_best
 
@@ -249,7 +286,14 @@ def recommend_v4(
     for player in available:
         if player.id in candidate_ids:
             next_by_id[player.id] = next_pick_value_from_sim(
-                player, roster, pool, cache, sim_result
+                player,
+                roster,
+                pool,
+                cache,
+                sim_result,
+                settings,
+                next_round,
+                params,
             )
         else:
             next_by_id[player.id] = baseline_next
@@ -274,11 +318,26 @@ def recommend_v4(
             intervening_picks=intervening_count,
             sim_exhaustion=sim_exhaust,
         )
+        if player.position in (Position.K, Position.DST):
+            tier_cost *= params.special_teams_tier_scale
+            loss *= params.special_teams_wait_loss_scale
         next_value = next_by_id[player.id]
         need = roster_shape_need(player.position, roster, settings, current_round)
         shape = shape_adjustment(player.position, roster, settings, current_round, params)
         guardrail = guardrail_adjustment(
             player, player_vorp, roster, settings, current_round
+        )
+        st_status = special_teams_status(
+            player, roster, settings, current_round, params
+        )
+        optionality = optionality_for_player(
+            player,
+            roster,
+            settings,
+            levels,
+            phase,
+            params,
+            current_round,
         )
         adjustment = adjustments.get(player.id)
         opinion = adjustment.points_delta if adjustment else 0.0
@@ -292,6 +351,7 @@ def recommend_v4(
             + shape
             + guardrail
             + tag_bonus
+            + optionality.optionality_value
         )
         two_pick_path = marginal + next_value
         run = run_pressure.get(player.position, 1.0)
@@ -319,6 +379,18 @@ def recommend_v4(
                 two_pick_path=two_pick_path,
                 run=run,
                 opponent_need=opponent_need_by_id[player.id],
+                optionality=optionality.optionality_value,
+                optionality_reason=optionality.reason,
+                late_round_upside=optionality.late_round_upside,
+                contingent_value=optionality.contingent_value,
+                handcuff_bonus=optionality.handcuff_bonus,
+                ir_stash_value=optionality.ir_stash_value,
+                special_teams_timing_penalty=st_status.timing_penalty,
+                special_teams_position_cap=st_status.cap_blocked,
+                phase_late_weight=phase.late_weight,
+                starter_completion=phase.starter_completion,
+                starter_slots_filled=phase.starter_slots_filled,
+                starter_slots_total=phase.starter_slots_total,
             )
         )
 
@@ -347,6 +419,9 @@ def recommend_v4(
             current_round,
             best_path,
             row.two_pick_path,
+            row.optionality,
+            row.optionality_reason,
+            row.phase_late_weight,
         )
 
         scored.append(
@@ -380,6 +455,18 @@ def recommend_v4(
                     two_pick_path_value=round(row.two_pick_path, 4),
                     shape_adjustment=round(row.shape, 4),
                     decision_score=round(row.decision_score, 4),
+                    late_round_upside=round(row.late_round_upside, 4),
+                    contingent_value=round(row.contingent_value, 4),
+                    handcuff_bonus=round(row.handcuff_bonus, 4),
+                    ir_stash_value=round(row.ir_stash_value, 4),
+                    optionality_value=round(row.optionality, 4),
+                    special_teams_timing_penalty=round(row.special_teams_timing_penalty, 4),
+                    special_teams_position_cap=row.special_teams_position_cap,
+                    late_phase_weight=round(row.phase_late_weight, 4),
+                    starter_completion=round(row.starter_completion, 4),
+                    starter_slots_filled=row.starter_slots_filled,
+                    starter_slots_total=row.starter_slots_total,
+                    replacement_level=round(levels.get(player.position, 0.0), 4),
                 ),
                 reasons,
             )

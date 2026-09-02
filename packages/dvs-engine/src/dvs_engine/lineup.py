@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 
 from .models import FormulaParams, LeagueSettings, Player, Position
 
@@ -19,6 +20,14 @@ DIRECT_POSITIONS = (
     Position.K,
     Position.DST,
 )
+STARTER_SLOT_LABELS = ("QB", "RB", "WR", "TE", "FLEX", "SUPERFLEX")
+
+
+@dataclass(frozen=True, slots=True)
+class StarterFill:
+    filled: int
+    total: int
+    open_slots: tuple[str, ...]
 
 
 def _user_slot_cap(settings: LeagueSettings) -> dict[str, int]:
@@ -49,6 +58,138 @@ def _bench_discount(params: FormulaParams, depth: int) -> float:
     return tiers[-1] if tiers else params.bench_discount_default
 
 
+def _under_cap(
+    player: Player,
+    assigned: Counter[Position],
+    position_caps: Mapping[Position, int] | None,
+) -> bool:
+    if position_caps is None:
+        return True
+    cap = position_caps.get(player.position, _UNBOUNDED_CAP)
+    return assigned[player.position] < cap
+
+
+def _allocate_lineup(
+    roster: Sequence[Player],
+    settings: LeagueSettings,
+    levels: Mapping[Position, float],
+    params: FormulaParams,
+    position_caps: Mapping[Position, int] | None = None,
+) -> tuple[float, StarterFill]:
+    """Assign starters and compute utility plus starter-slot occupancy."""
+    slots = _user_slot_cap(settings)
+    remaining = list(roster)
+    utility = 0.0
+    assigned: Counter[Position] = Counter()
+    open_slots: list[str] = []
+
+    def consume(position: Position, count: int, slot_label: str) -> None:
+        nonlocal remaining, utility
+        if count <= 0:
+            return
+        matches = [
+            player
+            for player in remaining
+            if player.position == position and _under_cap(player, assigned, position_caps)
+        ]
+        matches.sort(key=lambda player: player.projected_points, reverse=True)
+        chosen = matches[:count]
+        if len(chosen) < count:
+            open_slots.extend([slot_label] * (count - len(chosen)))
+        remaining = [player for player in remaining if player not in chosen]
+        assigned[position] += len(chosen)
+        utility += sum(_position_surplus(player, levels) for player in chosen)
+
+    for position in (Position.QB, Position.RB, Position.WR, Position.TE):
+        consume(position, slots[position.value], position.value)
+
+    flex_taken = 0
+    flex_pool = [
+        player
+        for player in remaining
+        if player.position in FLEX_ELIGIBLE and _under_cap(player, assigned, position_caps)
+    ]
+    flex_pool.sort(key=lambda player: _position_surplus(player, levels), reverse=True)
+    for player in flex_pool:
+        if flex_taken >= slots["FLEX"]:
+            break
+        remaining.remove(player)
+        assigned[player.position] += 1
+        flex_taken += 1
+        utility += _position_surplus(player, levels)
+    if flex_taken < slots["FLEX"]:
+        open_slots.extend(["FLEX"] * (slots["FLEX"] - flex_taken))
+
+    superflex_taken = 0
+    superflex_pool = [
+        player
+        for player in remaining
+        if player.position in SUPERFLEX_ELIGIBLE and _under_cap(player, assigned, position_caps)
+    ]
+    superflex_pool.sort(key=lambda player: _position_surplus(player, levels), reverse=True)
+    for player in superflex_pool:
+        if superflex_taken >= slots["SUPERFLEX"]:
+            break
+        remaining.remove(player)
+        assigned[player.position] += 1
+        superflex_taken += 1
+        utility += _position_surplus(player, levels)
+    if superflex_taken < slots["SUPERFLEX"]:
+        open_slots.extend(["SUPERFLEX"] * (slots["SUPERFLEX"] - superflex_taken))
+
+    starter_total = (
+        slots["QB"]
+        + slots["RB"]
+        + slots["WR"]
+        + slots["TE"]
+        + slots["FLEX"]
+        + slots["SUPERFLEX"]
+    )
+    starter_filled = starter_total - len(open_slots)
+    starter_open_slots = tuple(open_slots)
+
+    for position in (Position.K, Position.DST):
+        consume(position, slots[position.value], position.value)
+
+    bench_pool = sorted(
+        remaining,
+        key=lambda player: _position_surplus(player, levels),
+        reverse=True,
+    )
+    bench_depth = Counter[str]()
+    for player in bench_pool[: slots["BENCH"]]:
+        if not _under_cap(player, assigned, position_caps):
+            continue
+        bench_depth[player.position.value] += 1
+        depth = bench_depth[player.position.value]
+        assigned[player.position] += 1
+        utility += _bench_discount(params, depth) * _position_surplus(player, levels)
+
+    fill = StarterFill(
+        filled=starter_filled,
+        total=starter_total,
+        open_slots=starter_open_slots,
+    )
+    return utility, fill
+
+
+def starter_slot_fill(
+    roster: Sequence[Player],
+    settings: LeagueSettings,
+    levels: Mapping[Position, float],
+    position_caps: Mapping[Position, int] | None = None,
+) -> StarterFill:
+    """Lineup-aware starter occupancy over non-K/DST starting slots."""
+    _, fill = _allocate_lineup(
+        roster,
+        settings,
+        levels,
+        settings.formula_params,
+        position_caps,
+    )
+    return fill
+
+
 def roster_utility(
     roster: Sequence[Player],
     settings: LeagueSettings,
@@ -59,77 +200,7 @@ def roster_utility(
     """Starter assignment plus discounted bench value for the user's roster."""
     if not roster:
         return 0.0
-
-    slots = _user_slot_cap(settings)
-    remaining = list(roster)
-    utility = 0.0
-    assigned: Counter[Position] = Counter()
-
-    def consume(position: Position, count: int) -> None:
-        nonlocal remaining, utility
-        if count <= 0:
-            return
-        matches = [player for player in remaining if player.position == position]
-        matches.sort(key=lambda player: player.projected_points, reverse=True)
-        chosen = matches[:count]
-        remaining = [player for player in remaining if player not in chosen]
-        assigned[position] += len(chosen)
-        utility += sum(_position_surplus(player, levels) for player in chosen)
-
-    for position in DIRECT_POSITIONS:
-        consume(position, slots[position.value])
-
-    def _under_cap(player: Player) -> bool:
-        if position_caps is None:
-            return True
-        cap = position_caps.get(player.position, _UNBOUNDED_CAP)
-        return assigned[player.position] < cap
-
-    flex_pool = [
-        player
-        for player in remaining
-        if player.position in FLEX_ELIGIBLE and _under_cap(player)
-    ]
-    flex_pool.sort(key=lambda player: _position_surplus(player, levels), reverse=True)
-    flex_taken = 0
-    for player in flex_pool:
-        if flex_taken >= slots["FLEX"]:
-            break
-        if not _under_cap(player):
-            continue
-        remaining.remove(player)
-        assigned[player.position] += 1
-        flex_taken += 1
-        utility += _position_surplus(player, levels)
-
-    superflex_pool = [
-        player
-        for player in remaining
-        if player.position in SUPERFLEX_ELIGIBLE and _under_cap(player)
-    ]
-    superflex_pool.sort(key=lambda player: _position_surplus(player, levels), reverse=True)
-    superflex_taken = 0
-    for player in superflex_pool:
-        if superflex_taken >= slots["SUPERFLEX"]:
-            break
-        if not _under_cap(player):
-            continue
-        remaining.remove(player)
-        assigned[player.position] += 1
-        superflex_taken += 1
-        utility += _position_surplus(player, levels)
-
-    bench_pool = sorted(
-        remaining,
-        key=lambda player: _position_surplus(player, levels),
-        reverse=True,
-    )
-    bench_depth = Counter[str]()
-    for player in bench_pool[: slots["BENCH"]]:
-        bench_depth[player.position.value] += 1
-        depth = bench_depth[player.position.value]
-        utility += _bench_discount(params, depth) * _position_surplus(player, levels)
-
+    utility, _ = _allocate_lineup(roster, settings, levels, params, position_caps)
     return utility
 
 

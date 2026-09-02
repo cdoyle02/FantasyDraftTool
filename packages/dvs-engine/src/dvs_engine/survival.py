@@ -112,7 +112,10 @@ def run_pressure_by_position(
         observed = counts[position] / total if total else expected_share
         shrink = total / (total + params.run_prior_strength)
         excess = (observed - expected_share) * shrink
-        pressure[position] = 1.0 + params.run_weight * excess
+        if position in (Position.K, Position.DST) and not params.special_teams_run_pressure:
+            pressure[position] = 1.0
+        else:
+            pressure[position] = 1.0 + params.run_weight * excess
     return pressure
 
 

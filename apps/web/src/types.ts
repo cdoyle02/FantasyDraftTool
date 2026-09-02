@@ -12,13 +12,23 @@ export interface Player {
   espnAdp?: number
   sleeperAdp?: number
   tier: number
+  depthChartRank?: number
+  depthChartSource?: string
+  upsideScore?: number
+  riskScore?: number
+  isRookie?: boolean
+  isBreakout?: boolean
+  injuryStatus?: string
+  irEligible?: boolean
+  expectedReturnWeek?: number
+  byeWeek?: number
 }
 
 export interface UserAdjustment {
   playerId: string
   pointsDelta: number
   tierOverride?: number
-  tag?: 'myGuy' | 'avoid'
+  tag?: 'myGuy' | 'avoid' | 'irStash'
   note?: string
 }
 
@@ -30,6 +40,8 @@ export interface LeagueSettings {
   scoring: ScoringFormat
   draftType: 'SNAKE'
   formulaVersion?: number
+  keeperSlots?: number
+  irSlots?: number
 }
 
 export interface DraftPick {
@@ -76,6 +88,18 @@ export interface ScoreBreakdown {
   twoPickPathValue?: number
   shapeAdjustment?: number
   decisionScore?: number
+  lateRoundUpside?: number
+  contingentValue?: number
+  handcuffBonus?: number
+  irStashValue?: number
+  optionalityValue?: number
+  specialTeamsTimingPenalty?: number
+  specialTeamsPositionCap?: boolean
+  latePhaseWeight?: number
+  starterCompletion?: number
+  starterSlotsFilled?: number
+  starterSlotsTotal?: number
+  replacementLevel?: number
 }
 
 export interface Recommendation {

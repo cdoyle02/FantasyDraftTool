@@ -34,6 +34,16 @@ class Player:
     projected_points: float = 0.0
     adp: float | None = None
     tier: int = 1
+    depth_chart_rank: int | None = None
+    depth_chart_source: str | None = None
+    upside_score: float | None = None
+    risk_score: float | None = None
+    is_rookie: bool = False
+    is_breakout: bool = False
+    injury_status: str | None = None
+    ir_eligible: bool = False
+    expected_return_week: int | None = None
+    bye_week: int | None = None
 
     def __post_init__(self) -> None:
         if not self.id.strip() or not self.name.strip():
@@ -42,6 +52,10 @@ class Player:
             raise ValueError("player tier must be at least 1")
         if self.adp is not None and self.adp <= 0:
             raise ValueError("adp must be positive")
+        if self.depth_chart_rank is not None and self.depth_chart_rank < 1:
+            raise ValueError("depth_chart_rank must be at least 1")
+        if self.expected_return_week is not None and self.expected_return_week < 1:
+            raise ValueError("expected_return_week must be at least 1")
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,8 +73,8 @@ class UserAdjustment:
             raise ValueError("adjustment player_id is required")
         if self.tier_override is not None and self.tier_override < 1:
             raise ValueError("tier override must be at least 1")
-        if self.tag not in (None, "myGuy", "avoid"):
-            raise ValueError("tag must be 'myGuy', 'avoid', or null")
+        if self.tag not in (None, "myGuy", "avoid", "irStash"):
+            raise ValueError("tag must be 'myGuy', 'avoid', 'irStash', or null")
 
 
 def default_roster_slots() -> dict[str, int]:
@@ -166,10 +180,56 @@ class FormulaParams:
     one_turn_sims: int = 48
     sim_seed: int = 2026
     sim_pick_pool: int = 40
+    # v4.1 special teams (K/DST)
+    special_teams_hard_gate: bool = True
+    kicker_final_rounds: int = 1
+    dst_final_rounds: int = 2
+    special_teams_timing_penalty_multiple: float = 3.0
+    special_teams_tier_scale: float = 0.0
+    special_teams_wait_loss_scale: float = 0.0
+    special_teams_run_pressure: bool = False
+    special_teams_lookahead_mode: str = "eligibility_window"
+    # v4.1 late-round phase transition
+    late_phase_start_progress: float = 0.55
+    upside_weight_max: float = 6.0
+    upside_starter_damp: float = 0.25
+    upside_reference_score: float = 5.0
+    upside_score_span: float = 5.0
+    rookie_upside_bonus: float = 0.15
+    breakout_upside_bonus: float = 0.15
+    # v4.1 contingent / handcuff
+    handcuff_positions: tuple[str, ...] = ("RB",)
+    handcuff_max_depth_rank: int = 2
+    handcuff_base_role_probability: float = 0.30
+    handcuff_risk_sensitivity: float = 0.20
+    handcuff_risk_modifier_min: float = 0.85
+    handcuff_risk_modifier_max: float = 1.20
+    handcuff_derived_depth_confidence: float = 0.70
+    handcuff_inherit_share: float = 0.60
+    handcuff_min_starter_surplus: float = 20.0
+    handcuff_min_reason_points: float = 1.0
+    handcuff_weight_max: float = 5.0
+    handcuff_max_bonus: float = 6.0
+    # v4.1 IR stash
+    ir_stash_final_rounds: int = 3
+    ir_stash_weight: float = 4.0
+    ir_stash_max_bonus: float = 8.0
+    ir_return_week_horizon: int = 8
+    # v4.1 combination / replacement
+    optionality_combine: str = "max"
+    demand_adjusted_replacement: bool = False
 
     def __post_init__(self) -> None:
         if self.formula_version not in (1, 2, 3, 4):
             raise ValueError("formula_version must be 1, 2, 3, or 4")
+        if self.special_teams_lookahead_mode not in (
+            "never",
+            "eligibility_window",
+            "always",
+        ):
+            raise ValueError("special_teams_lookahead_mode is invalid")
+        if self.optionality_combine not in ("max", "sum"):
+            raise ValueError("optionality_combine must be 'max' or 'sum'")
 
 
 @dataclass(frozen=True, slots=True)
@@ -183,6 +243,8 @@ class LeagueSettings:
     qb_te_vorp_threshold: float = 45.0
     guardrail_weight: float = 12.0
     formula_params: FormulaParams = field(default_factory=FormulaParams)
+    keeper_slots: int = 0
+    ir_slots: int = 0
 
     def __post_init__(self) -> None:
         if not 2 <= self.team_count <= 32:
@@ -193,10 +255,18 @@ class LeagueSettings:
             raise ValueError("unsupported scoring format")
         if self.draft_type != "snake":
             raise ValueError("only snake drafts are supported")
+        if self.keeper_slots < 0:
+            raise ValueError("keeper_slots cannot be negative")
+        if self.ir_slots < 0:
+            raise ValueError("ir_slots cannot be negative")
+
+    @property
+    def roster_size(self) -> int:
+        return sum(int(value) for value in self.roster_slots.values())
 
     @property
     def rounds(self) -> int:
-        return sum(int(value) for value in self.roster_slots.values())
+        return max(1, self.roster_size - self.keeper_slots)
 
 
 @dataclass(frozen=True, slots=True)
@@ -277,6 +347,19 @@ class RecommendationBreakdown:
     two_pick_path_value: float = 0.0
     shape_adjustment: float = 0.0
     decision_score: float = 0.0
+    late_round_upside: float = 0.0
+    contingent_value: float = 0.0
+    handcuff_bonus: float = 0.0
+    ir_stash_value: float = 0.0
+    optionality_value: float = 0.0
+    special_teams_timing_penalty: float = 0.0
+    special_teams_position_cap: bool = False
+    late_phase_weight: float = 0.0
+    starter_completion: float = 0.0
+    starter_slots_filled: int = 0
+    starter_slots_total: int = 0
+    replacement_level: float = 0.0
+    replacement_demand: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -319,6 +402,22 @@ def player_from_dict(data: Mapping[str, Any]) -> Player:
         projected_points=float(data.get("projected_points", data.get("projectedPoints", 0))),
         adp=_optional_float(data.get("adp")),
         tier=int(data.get("tier", 1)),
+        depth_chart_rank=_optional_int(
+            data.get("depth_chart_rank", data.get("depthChartRank"))
+        ),
+        depth_chart_source=_optional_str(
+            data.get("depth_chart_source", data.get("depthChartSource"))
+        ),
+        upside_score=_optional_float(data.get("upside_score", data.get("upsideScore"))),
+        risk_score=_optional_float(data.get("risk_score", data.get("riskScore"))),
+        is_rookie=bool(data.get("is_rookie", data.get("isRookie", False))),
+        is_breakout=bool(data.get("is_breakout", data.get("isBreakout", False))),
+        injury_status=_optional_str(data.get("injury_status", data.get("injuryStatus"))),
+        ir_eligible=bool(data.get("ir_eligible", data.get("irEligible", False))),
+        expected_return_week=_optional_int(
+            data.get("expected_return_week", data.get("expectedReturnWeek"))
+        ),
+        bye_week=_optional_int(data.get("bye_week", data.get("byeWeek"))),
     )
 
 
@@ -367,6 +466,8 @@ def settings_from_dict(data: Mapping[str, Any]) -> LeagueSettings:
         ),
         guardrail_weight=float(data.get("guardrail_weight", data.get("guardrailWeight", 12))),
         formula_params=formula_params_from_dict(formula_payload),
+        keeper_slots=int(data.get("keeper_slots", data.get("keeperSlots", 0))),
+        ir_slots=int(data.get("ir_slots", data.get("irSlots", 0))),
     )
 
 
@@ -399,3 +500,9 @@ def _optional_float(value: Any) -> float | None:
 
 def _optional_int(value: Any) -> int | None:
     return None if value in (None, "") else int(value)
+
+
+def _optional_str(value: Any) -> str | None:
+    if value in (None, ""):
+        return None
+    return str(value)

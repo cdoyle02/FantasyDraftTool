@@ -77,8 +77,14 @@ def select_candidates(
     marginals: Mapping[str, float],
     wait_losses: Mapping[str, float],
     params: FormulaParams,
+    *,
+    roster: Sequence[Player] | None = None,
+    settings: LeagueSettings | None = None,
+    current_round: int | None = None,
 ) -> list[Player]:
     """Top prescore candidates plus the best player at each position."""
+    from .special_teams import is_special_teams_eligible
+
     limit = max(1, params.lookahead_candidates)
     prescore = {
         player.id: marginals.get(player.id, 0.0) + 0.5 * wait_losses.get(player.id, 0.0)
@@ -102,6 +108,21 @@ def select_candidates(
         position_players = [player for player in available if player.position == position]
         if not position_players:
             continue
+        if (
+            roster is not None
+            and settings is not None
+            and current_round is not None
+            and position in (Position.K, Position.DST)
+        ):
+            position_players = [
+                player
+                for player in position_players
+                if is_special_teams_eligible(
+                    player, roster, settings, current_round, params
+                )
+            ]
+            if not position_players:
+                continue
         best = max(
             position_players,
             key=lambda player: (

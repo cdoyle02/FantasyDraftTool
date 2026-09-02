@@ -19,7 +19,17 @@ function toSeedPlayer(player: SeedRow): Player {
     adp: player.adp,
     espnAdp: optionalAdp('espnAdp' in player ? player.espnAdp : undefined),
     sleeperAdp: optionalAdp('sleeperAdp' in player ? player.sleeperAdp : undefined),
-    tier: player.tier
+    tier: player.tier,
+    depthChartRank: typeof player.depthChartRank === 'number' ? player.depthChartRank : undefined,
+    depthChartSource: typeof player.depthChartSource === 'string' ? player.depthChartSource : undefined,
+    upsideScore: typeof player.upsideScore === 'number' ? player.upsideScore : undefined,
+    riskScore: typeof player.riskScore === 'number' ? player.riskScore : undefined,
+    isRookie: player.isRookie === true,
+    isBreakout: player.isBreakout === true,
+    byeWeek: typeof player.byeWeek === 'number' ? player.byeWeek : undefined,
+    irEligible: player.irEligible === true,
+    injuryStatus: typeof player.injuryStatus === 'string' ? player.injuryStatus : undefined,
+    expectedReturnWeek: typeof player.expectedReturnWeek === 'number' ? player.expectedReturnWeek : undefined
   }
 }
 

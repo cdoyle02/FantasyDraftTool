@@ -1,6 +1,6 @@
 {
   "seedVersion": "2026.6",
-  "generatedAt": "2026-08-31T21:30:02+00:00",
+  "generatedAt": "2026-09-02T15:39:37+00:00",
   "source": "footballers+cheatsheet+bundled-k-dst",
   "experts": {
     "accuracyYear": 2025,
@@ -119,7 +119,12 @@
       "projectedPoints": 379.0,
       "adp": 1.9,
       "tier": 1,
-      "espnAdp": 1.35
+      "espnAdp": 1.33,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.8,
+      "riskScore": 2.0,
+      "byeWeek": 6
     },
     {
       "id": "bijan-robinson-atl-rb",
@@ -129,7 +134,12 @@
       "projectedPoints": 367.2,
       "adp": 2.2,
       "tier": 1,
-      "espnAdp": 2.39
+      "espnAdp": 2.38,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 10.0,
+      "riskScore": 1.3,
+      "byeWeek": 11
     },
     {
       "id": "ja-marr-chase-cin-wr",
@@ -139,7 +149,12 @@
       "projectedPoints": 340.1,
       "adp": 3.2,
       "tier": 1,
-      "espnAdp": 4.3
+      "espnAdp": 4.3,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.7,
+      "riskScore": 3.2,
+      "byeWeek": 6
     },
     {
       "id": "puka-nacua-lar-wr",
@@ -149,7 +164,12 @@
       "projectedPoints": 325.4,
       "adp": 4.4,
       "tier": 1,
-      "espnAdp": 5.28
+      "espnAdp": 5.27,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.6,
+      "riskScore": 6.3,
+      "byeWeek": 11
     },
     {
       "id": "christian-mccaffrey-sf-rb",
@@ -159,7 +179,12 @@
       "projectedPoints": 344.8,
       "adp": 5.4,
       "tier": 2,
-      "espnAdp": 7.66
+      "espnAdp": 7.69,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.3,
+      "riskScore": 5.6,
+      "byeWeek": 8
     },
     {
       "id": "jaxon-smith-njigba-sea-wr",
@@ -169,7 +194,12 @@
       "projectedPoints": 320.5,
       "adp": 6.2,
       "tier": 2,
-      "espnAdp": 6.15
+      "espnAdp": 6.23,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.7,
+      "riskScore": 2.0,
+      "byeWeek": 11
     },
     {
       "id": "jonathan-taylor-ind-rb",
@@ -179,7 +209,12 @@
       "projectedPoints": 292.5,
       "adp": 7.2,
       "tier": 3,
-      "espnAdp": 6.43
+      "espnAdp": 6.25,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.0,
+      "riskScore": 3.9,
+      "byeWeek": 13
     },
     {
       "id": "james-cook-iii-buf-rb",
@@ -189,7 +224,12 @@
       "projectedPoints": 293.0,
       "adp": 8.6,
       "tier": 3,
-      "espnAdp": 10.57
+      "espnAdp": 10.27,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.4,
+      "riskScore": 2.5,
+      "byeWeek": 7
     },
     {
       "id": "amon-ra-st-brown-det-wr",
@@ -199,7 +239,12 @@
       "projectedPoints": 310.4,
       "adp": 8.8,
       "tier": 2,
-      "espnAdp": 8.34
+      "espnAdp": 8.36,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.7,
+      "riskScore": 1.0,
+      "byeWeek": 6
     },
     {
       "id": "ceedee-lamb-dal-wr",
@@ -209,7 +254,12 @@
       "projectedPoints": 287.2,
       "adp": 10.4,
       "tier": 2,
-      "espnAdp": 11.65
+      "espnAdp": 11.84,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.3,
+      "riskScore": 2.6,
+      "byeWeek": 14
     },
     {
       "id": "justin-jefferson-min-wr",
@@ -219,7 +269,12 @@
       "projectedPoints": 261.3,
       "adp": 11.3,
       "tier": 3,
-      "espnAdp": 12.63
+      "espnAdp": 12.71,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.5,
+      "riskScore": 4.7,
+      "byeWeek": 6
     },
     {
       "id": "saquon-barkley-phi-rb",
@@ -229,7 +284,12 @@
       "projectedPoints": 244.4,
       "adp": 12.6,
       "tier": 5,
-      "espnAdp": 14.19
+      "espnAdp": 14.04,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.3,
+      "riskScore": 4.9,
+      "byeWeek": 10
     },
     {
       "id": "de-von-achane-mia-rb",
@@ -239,7 +299,12 @@
       "projectedPoints": 283.8,
       "adp": 13.1,
       "tier": 4,
-      "espnAdp": 12.12
+      "espnAdp": 12.15,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.1,
+      "riskScore": 3.8,
+      "byeWeek": 6
     },
     {
       "id": "ashton-jeanty-lv-rb",
@@ -249,7 +314,12 @@
       "projectedPoints": 251.6,
       "adp": 14.2,
       "tier": 5,
-      "espnAdp": 21.41
+      "espnAdp": 21.78,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.7,
+      "riskScore": 10.0,
+      "byeWeek": 13
     },
     {
       "id": "omarion-hampton-lac-rb",
@@ -259,7 +329,13 @@
       "projectedPoints": 254.7,
       "adp": 15.3,
       "tier": 5,
-      "espnAdp": 19.87
+      "espnAdp": 18.76,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.7,
+      "riskScore": 4.7,
+      "isBreakout": true,
+      "byeWeek": 7
     },
     {
       "id": "chase-brown-cin-rb",
@@ -269,7 +345,12 @@
       "projectedPoints": 264.4,
       "adp": 16.7,
       "tier": 4,
-      "espnAdp": 17.63
+      "espnAdp": 17.18,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.4,
+      "riskScore": 4.8,
+      "byeWeek": 6
     },
     {
       "id": "a-j-brown-ne-wr",
@@ -279,7 +360,12 @@
       "projectedPoints": 257.5,
       "adp": 17.1,
       "tier": 3,
-      "espnAdp": 21.93
+      "espnAdp": 21.18,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.0,
+      "riskScore": 5.3,
+      "byeWeek": 11
     },
     {
       "id": "drake-london-atl-wr",
@@ -289,7 +375,12 @@
       "projectedPoints": 252.6,
       "adp": 17.7,
       "tier": 3,
-      "espnAdp": 19.91
+      "espnAdp": 20.11,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.1,
+      "riskScore": 4.0,
+      "byeWeek": 11
     },
     {
       "id": "kenneth-walker-kc-rb",
@@ -299,7 +390,13 @@
       "projectedPoints": 266.1,
       "adp": 19.9,
       "tier": 4,
-      "espnAdp": 24.79
+      "espnAdp": 25.06,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.2,
+      "riskScore": 5.0,
+      "isBreakout": true,
+      "byeWeek": 5
     },
     {
       "id": "derrick-henry-bal-rb",
@@ -309,7 +406,12 @@
       "projectedPoints": 240.1,
       "adp": 20.0,
       "tier": 6,
-      "espnAdp": 16.96
+      "espnAdp": 16.68,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.6,
+      "riskScore": 5.3,
+      "byeWeek": 13
     },
     {
       "id": "josh-allen-buf-qb",
@@ -319,7 +421,12 @@
       "projectedPoints": 366.6,
       "adp": 21.0,
       "tier": 1,
-      "espnAdp": 19.61
+      "espnAdp": 19.27,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.7,
+      "riskScore": 2.6,
+      "byeWeek": 7
     },
     {
       "id": "george-pickens-dal-wr",
@@ -329,7 +436,12 @@
       "projectedPoints": 253.1,
       "adp": 22.1,
       "tier": 3,
-      "espnAdp": 28.65
+      "espnAdp": 28.36,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 8.9,
+      "riskScore": 5.0,
+      "byeWeek": 14
     },
     {
       "id": "brock-bowers-lv-te",
@@ -339,7 +451,12 @@
       "projectedPoints": 259.8,
       "adp": 23.2,
       "tier": 1,
-      "espnAdp": 24.0
+      "espnAdp": 23.97,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.8,
+      "riskScore": 2.5,
+      "byeWeek": 13
     },
     {
       "id": "trey-mcbride-ari-te",
@@ -349,7 +466,12 @@
       "projectedPoints": 258.9,
       "adp": 24.3,
       "tier": 1,
-      "espnAdp": 22.35
+      "espnAdp": 22.64,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.3,
+      "riskScore": 4.2,
+      "byeWeek": 14
     },
     {
       "id": "nico-collins-hou-wr",
@@ -359,7 +481,12 @@
       "projectedPoints": 252.6,
       "adp": 25.1,
       "tier": 3,
-      "espnAdp": 25.95
+      "espnAdp": 25.78,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.9,
+      "riskScore": 4.6,
+      "byeWeek": 8
     },
     {
       "id": "jeremiyah-love-ari-rb",
@@ -369,7 +496,13 @@
       "projectedPoints": 234.7,
       "adp": 26.0,
       "tier": 6,
-      "espnAdp": 25.79
+      "espnAdp": 26.14,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.5,
+      "riskScore": 5.3,
+      "isRookie": true,
+      "byeWeek": 14
     },
     {
       "id": "malik-nabers-nyg-wr",
@@ -379,7 +512,12 @@
       "projectedPoints": 249.4,
       "adp": 26.9,
       "tier": 4,
-      "espnAdp": 34.54
+      "espnAdp": 34.77,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.0,
+      "riskScore": 7.8,
+      "byeWeek": 8
     },
     {
       "id": "kyren-williams-lar-rb",
@@ -389,7 +527,12 @@
       "projectedPoints": 231.0,
       "adp": 28.5,
       "tier": 6,
-      "espnAdp": 36.8
+      "espnAdp": 35.68,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.0,
+      "riskScore": 5.5,
+      "byeWeek": 11
     },
     {
       "id": "rashee-rice-kc-wr",
@@ -399,7 +542,12 @@
       "projectedPoints": 253.1,
       "adp": 29.0,
       "tier": 3,
-      "espnAdp": 28.13
+      "espnAdp": 29.09,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.3,
+      "riskScore": 9.5,
+      "byeWeek": 5
     },
     {
       "id": "chris-olave-no-wr",
@@ -409,7 +557,12 @@
       "projectedPoints": 256.1,
       "adp": 30.1,
       "tier": 3,
-      "espnAdp": 29.84
+      "espnAdp": 29.48,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.8,
+      "riskScore": 6.2,
+      "byeWeek": 8
     },
     {
       "id": "lamar-jackson-bal-qb",
@@ -419,7 +572,12 @@
       "projectedPoints": 334.0,
       "adp": 31.2,
       "tier": 2,
-      "espnAdp": 35.4
+      "espnAdp": 35.04,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.0,
+      "riskScore": 5.5,
+      "byeWeek": 13
     },
     {
       "id": "devonta-smith-phi-wr",
@@ -429,7 +587,12 @@
       "projectedPoints": 242.3,
       "adp": 32.1,
       "tier": 4,
-      "espnAdp": 37.32
+      "espnAdp": 36.96,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.6,
+      "riskScore": 3.4,
+      "byeWeek": 10
     },
     {
       "id": "javonte-williams-dal-rb",
@@ -439,7 +602,12 @@
       "projectedPoints": 221.3,
       "adp": 33.5,
       "tier": 6,
-      "espnAdp": 33.55
+      "espnAdp": 33.05,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.7,
+      "riskScore": 4.3,
+      "byeWeek": 14
     },
     {
       "id": "breece-hall-nyj-rb",
@@ -449,7 +617,12 @@
       "projectedPoints": 226.2,
       "adp": 34.1,
       "tier": 6,
-      "espnAdp": 35.79
+      "espnAdp": 36.0,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.1,
+      "riskScore": 5.3,
+      "byeWeek": 13
     },
     {
       "id": "tee-higgins-cin-wr",
@@ -459,7 +632,12 @@
       "projectedPoints": 233.6,
       "adp": 35.2,
       "tier": 5,
-      "espnAdp": 51.29
+      "espnAdp": 51.01,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 8.3,
+      "riskScore": 6.1,
+      "byeWeek": 6
     },
     {
       "id": "josh-jacobs-gb-rb",
@@ -469,7 +647,12 @@
       "projectedPoints": 41.1,
       "adp": 35.9,
       "tier": 10,
-      "espnAdp": 52.71
+      "espnAdp": 65.66,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 4.7,
+      "riskScore": 8.7,
+      "byeWeek": 11
     },
     {
       "id": "ladd-mcconkey-lac-wr",
@@ -479,7 +662,12 @@
       "projectedPoints": 239.2,
       "adp": 37.7,
       "tier": 5,
-      "espnAdp": 46.72
+      "espnAdp": 46.14,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.8,
+      "riskScore": 4.7,
+      "byeWeek": 7
     },
     {
       "id": "tetairoa-mcmillan-car-wr",
@@ -489,7 +677,13 @@
       "projectedPoints": 235.3,
       "adp": 38.3,
       "tier": 5,
-      "espnAdp": 41.75
+      "espnAdp": 42.04,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.2,
+      "riskScore": 4.0,
+      "isBreakout": true,
+      "byeWeek": 5
     },
     {
       "id": "emeka-egbuka-tb-wr",
@@ -499,7 +693,12 @@
       "projectedPoints": 236.6,
       "adp": 39.0,
       "tier": 5,
-      "espnAdp": 45.45
+      "espnAdp": 45.03,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.1,
+      "riskScore": 5.5,
+      "byeWeek": 10
     },
     {
       "id": "colston-loveland-chi-te",
@@ -509,7 +708,13 @@
       "projectedPoints": 217.2,
       "adp": 40.5,
       "tier": 2,
-      "espnAdp": 42.89
+      "espnAdp": 42.55,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 9.2,
+      "riskScore": 4.2,
+      "isBreakout": true,
+      "byeWeek": 10
     },
     {
       "id": "zay-flowers-bal-wr",
@@ -519,7 +724,12 @@
       "projectedPoints": 246.9,
       "adp": 41.8,
       "tier": 4,
-      "espnAdp": 44.04
+      "espnAdp": 44.32,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.5,
+      "riskScore": 4.3,
+      "byeWeek": 13
     },
     {
       "id": "cam-skattebo-nyg-rb",
@@ -529,7 +739,12 @@
       "projectedPoints": 215.9,
       "adp": 42.0,
       "tier": 7,
-      "espnAdp": 45.49
+      "espnAdp": 45.1,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.2,
+      "riskScore": 6.5,
+      "byeWeek": 8
     },
     {
       "id": "bucky-irving-tb-rb",
@@ -539,7 +754,12 @@
       "projectedPoints": 217.6,
       "adp": 43.9,
       "tier": 6,
-      "espnAdp": 56.87
+      "espnAdp": 57.1,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.7,
+      "riskScore": 5.8,
+      "byeWeek": 10
     },
     {
       "id": "travis-etienne-jr-no-rb",
@@ -549,7 +769,12 @@
       "projectedPoints": 218.9,
       "adp": 44.3,
       "tier": 6,
-      "espnAdp": 42.4
+      "espnAdp": 41.4,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.6,
+      "riskScore": 4.6,
+      "byeWeek": 8
     },
     {
       "id": "jaylen-waddle-den-wr",
@@ -559,7 +784,12 @@
       "projectedPoints": 242.0,
       "adp": 44.7,
       "tier": 5,
-      "espnAdp": 52.73
+      "espnAdp": 52.16,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.7,
+      "riskScore": 5.0,
+      "byeWeek": 10
     },
     {
       "id": "garrett-wilson-nyj-wr",
@@ -569,7 +799,12 @@
       "projectedPoints": 254.2,
       "adp": 46.4,
       "tier": 3,
-      "espnAdp": 37.19
+      "espnAdp": 37.2,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.1,
+      "riskScore": 4.9,
+      "byeWeek": 13
     },
     {
       "id": "drake-maye-ne-qb",
@@ -579,7 +814,12 @@
       "projectedPoints": 322.6,
       "adp": 47.1,
       "tier": 4,
-      "espnAdp": 47.43
+      "espnAdp": 47.34,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.2,
+      "riskScore": 4.1,
+      "byeWeek": 11
     },
     {
       "id": "david-montgomery-hou-rb",
@@ -589,7 +829,12 @@
       "projectedPoints": 194.5,
       "adp": 48.4,
       "tier": 7,
-      "espnAdp": 63.7
+      "espnAdp": 62.05,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.8,
+      "riskScore": 4.1,
+      "byeWeek": 8
     },
     {
       "id": "tyler-warren-ind-te",
@@ -599,7 +844,12 @@
       "projectedPoints": 217.7,
       "adp": 49.7,
       "tier": 2,
-      "espnAdp": 51.93
+      "espnAdp": 52.15,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.8,
+      "riskScore": 3.4,
+      "byeWeek": 13
     },
     {
       "id": "davante-adams-lar-wr",
@@ -609,7 +859,12 @@
       "projectedPoints": 222.1,
       "adp": 50.1,
       "tier": 6,
-      "espnAdp": 46.3
+      "espnAdp": 46.24,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 7.8,
+      "riskScore": 5.2,
+      "byeWeek": 11
     },
     {
       "id": "joe-burrow-cin-qb",
@@ -619,7 +874,12 @@
       "projectedPoints": 322.8,
       "adp": 51.4,
       "tier": 4,
-      "espnAdp": 54.5
+      "espnAdp": 53.91,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.9,
+      "riskScore": 5.5,
+      "byeWeek": 6
     },
     {
       "id": "d-andre-swift-chi-rb",
@@ -629,7 +889,12 @@
       "projectedPoints": 227.4,
       "adp": 52.6,
       "tier": 6,
-      "espnAdp": 54.71
+      "espnAdp": 52.64,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.8,
+      "riskScore": 5.3,
+      "byeWeek": 10
     },
     {
       "id": "luther-burden-iii-chi-wr",
@@ -639,7 +904,12 @@
       "projectedPoints": 228.7,
       "adp": 53.7,
       "tier": 6,
-      "espnAdp": 76.13
+      "espnAdp": 75.6,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.8,
+      "riskScore": 5.5,
+      "byeWeek": 10
     },
     {
       "id": "quinshon-judkins-cle-rb",
@@ -649,7 +919,12 @@
       "projectedPoints": 204.4,
       "adp": 53.9,
       "tier": 7,
-      "espnAdp": 50.27
+      "espnAdp": 49.3,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.6,
+      "riskScore": 5.0,
+      "byeWeek": 11
     },
     {
       "id": "dj-moore-buf-wr",
@@ -659,7 +934,12 @@
       "projectedPoints": 223.6,
       "adp": 55.6,
       "tier": 6,
-      "espnAdp": 62.27
+      "espnAdp": 61.29,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.1,
+      "riskScore": 4.2,
+      "byeWeek": 7
     },
     {
       "id": "terry-mclaurin-was-wr",
@@ -669,7 +949,12 @@
       "projectedPoints": 221.7,
       "adp": 56.2,
       "tier": 6,
-      "espnAdp": 60.97
+      "espnAdp": 61.12,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.8,
+      "riskScore": 4.4,
+      "byeWeek": 7
     },
     {
       "id": "treveyon-henderson-ne-rb",
@@ -679,7 +964,12 @@
       "projectedPoints": 196.3,
       "adp": 57.2,
       "tier": 7,
-      "espnAdp": 79.64
+      "espnAdp": 78.32,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.2,
+      "riskScore": 5.1,
+      "byeWeek": 11
     },
     {
       "id": "sam-laporta-det-te",
@@ -689,7 +979,12 @@
       "projectedPoints": 186.9,
       "adp": 58.8,
       "tier": 4,
-      "espnAdp": 72.68
+      "espnAdp": 73.67,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.2,
+      "riskScore": 4.4,
+      "byeWeek": 6
     },
     {
       "id": "jameson-williams-det-wr",
@@ -699,7 +994,12 @@
       "projectedPoints": 220.9,
       "adp": 59.0,
       "tier": 6,
-      "espnAdp": 64.63
+      "espnAdp": 64.51,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 7.7,
+      "riskScore": 5.3,
+      "byeWeek": 6
     },
     {
       "id": "jalen-hurts-phi-qb",
@@ -709,7 +1009,12 @@
       "projectedPoints": 327.9,
       "adp": 60.0,
       "tier": 3,
-      "espnAdp": 53.9
+      "espnAdp": 54.6,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.8,
+      "riskScore": 3.8,
+      "byeWeek": 10
     },
     {
       "id": "bhayshul-tuten-jax-rb",
@@ -719,7 +1024,13 @@
       "projectedPoints": 213.1,
       "adp": 61.6,
       "tier": 7,
-      "espnAdp": 63.78
+      "espnAdp": 61.88,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.7,
+      "riskScore": 6.4,
+      "isBreakout": true,
+      "byeWeek": 7
     },
     {
       "id": "mike-evans-sf-wr",
@@ -729,7 +1040,12 @@
       "projectedPoints": 217.9,
       "adp": 62.4,
       "tier": 7,
-      "espnAdp": 86.54
+      "espnAdp": 84.86,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.5,
+      "riskScore": 7.8,
+      "byeWeek": 8
     },
     {
       "id": "tucker-kraft-gb-te",
@@ -739,7 +1055,12 @@
       "projectedPoints": 190.4,
       "adp": 62.8,
       "tier": 3,
-      "espnAdp": 90.84
+      "espnAdp": 91.59,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.2,
+      "riskScore": 5.5,
+      "byeWeek": 11
     },
     {
       "id": "rome-odunze-chi-wr",
@@ -749,7 +1070,12 @@
       "projectedPoints": 215.6,
       "adp": 64.1,
       "tier": 7,
-      "espnAdp": 64.76
+      "espnAdp": 65.02,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 7.3,
+      "riskScore": 3.5,
+      "byeWeek": 10
     },
     {
       "id": "jadarian-price-sea-rb",
@@ -759,7 +1085,13 @@
       "projectedPoints": 194.3,
       "adp": 65.8,
       "tier": 7,
-      "espnAdp": 69.95
+      "espnAdp": 67.99,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.2,
+      "riskScore": 5.5,
+      "isRookie": true,
+      "byeWeek": 11
     },
     {
       "id": "jayden-daniels-was-qb",
@@ -769,7 +1101,12 @@
       "projectedPoints": 325.6,
       "adp": 66.6,
       "tier": 4,
-      "espnAdp": 52.59
+      "espnAdp": 53.01,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.2,
+      "riskScore": 4.7,
+      "byeWeek": 7
     },
     {
       "id": "carnell-tate-ten-wr",
@@ -779,7 +1116,14 @@
       "projectedPoints": 231.7,
       "adp": 67.0,
       "tier": 5,
-      "espnAdp": 76.88
+      "espnAdp": 77.19,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.8,
+      "riskScore": 5.9,
+      "isRookie": true,
+      "isBreakout": true,
+      "byeWeek": 9
     },
     {
       "id": "kyle-pitts-sr-atl-te",
@@ -789,7 +1133,12 @@
       "projectedPoints": 175.9,
       "adp": 68.6,
       "tier": 4,
-      "espnAdp": 67.78
+      "espnAdp": 68.48,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.3,
+      "riskScore": 5.8,
+      "byeWeek": 11
     },
     {
       "id": "christian-watson-gb-wr",
@@ -799,7 +1148,13 @@
       "projectedPoints": 226.9,
       "adp": 69.6,
       "tier": 6,
-      "espnAdp": 90.72
+      "espnAdp": 89.62,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.1,
+      "riskScore": 6.6,
+      "isBreakout": true,
+      "byeWeek": 11
     },
     {
       "id": "harold-fannin-jr-cle-te",
@@ -809,7 +1164,13 @@
       "projectedPoints": 201.2,
       "adp": 70.6,
       "tier": 3,
-      "espnAdp": 71.35
+      "espnAdp": 70.86,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.6,
+      "riskScore": 4.1,
+      "isBreakout": true,
+      "byeWeek": 11
     },
     {
       "id": "caleb-williams-chi-qb",
@@ -819,7 +1180,12 @@
       "projectedPoints": 317.0,
       "adp": 71.0,
       "tier": 4,
-      "espnAdp": 92.42
+      "espnAdp": 90.69,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.8,
+      "riskScore": 5.8,
+      "byeWeek": 10
     },
     {
       "id": "jaylen-warren-pit-rb",
@@ -829,7 +1195,12 @@
       "projectedPoints": 174.1,
       "adp": 71.8,
       "tier": 8,
-      "espnAdp": 90.17
+      "espnAdp": 88.0,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.2,
+      "riskScore": 4.4,
+      "byeWeek": 9
     },
     {
       "id": "parker-washington-jax-wr",
@@ -839,7 +1210,12 @@
       "projectedPoints": 225.2,
       "adp": 73.8,
       "tier": 6,
-      "espnAdp": 90.77
+      "espnAdp": 90.17,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.2,
+      "riskScore": 4.3,
+      "byeWeek": 7
     },
     {
       "id": "brian-thomas-jr-jax-wr",
@@ -849,7 +1225,12 @@
       "projectedPoints": 207.5,
       "adp": 74.6,
       "tier": 8,
-      "espnAdp": 112.71
+      "espnAdp": 114.04,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 7.5,
+      "riskScore": 6.5,
+      "byeWeek": 7
     },
     {
       "id": "dk-metcalf-pit-wr",
@@ -859,7 +1240,12 @@
       "projectedPoints": 211.2,
       "adp": 75.9,
       "tier": 7,
-      "espnAdp": 85.59
+      "espnAdp": 85.34,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.1,
+      "riskScore": 4.4,
+      "byeWeek": 9
     },
     {
       "id": "marvin-harrison-jr-ari-wr",
@@ -869,7 +1255,12 @@
       "projectedPoints": 212.4,
       "adp": 76.6,
       "tier": 7,
-      "espnAdp": 79.82
+      "espnAdp": 79.2,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.3,
+      "riskScore": 6.2,
+      "byeWeek": 14
     },
     {
       "id": "dak-prescott-dal-qb",
@@ -879,7 +1270,12 @@
       "projectedPoints": 311.1,
       "adp": 77.5,
       "tier": 5,
-      "espnAdp": 73.9
+      "espnAdp": 72.43,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.7,
+      "riskScore": 4.1,
+      "byeWeek": 14
     },
     {
       "id": "chuba-hubbard-car-rb",
@@ -889,7 +1285,12 @@
       "projectedPoints": 165.0,
       "adp": 78.1,
       "tier": 8,
-      "espnAdp": 109.03
+      "espnAdp": 108.29,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 6.7,
+      "byeWeek": 5
     },
     {
       "id": "rj-harvey-den-rb",
@@ -899,7 +1300,12 @@
       "projectedPoints": 143.4,
       "adp": 79.3,
       "tier": 9,
-      "espnAdp": 127.38
+      "espnAdp": 126.1,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.5,
+      "riskScore": 6.2,
+      "byeWeek": 10
     },
     {
       "id": "courtland-sutton-den-wr",
@@ -909,7 +1315,12 @@
       "projectedPoints": 180.6,
       "adp": 80.6,
       "tier": 9,
-      "espnAdp": 81.21
+      "espnAdp": 81.33,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.0,
+      "riskScore": 5.0,
+      "byeWeek": 10
     },
     {
       "id": "rhamondre-stevenson-ne-rb",
@@ -919,7 +1330,12 @@
       "projectedPoints": 188.9,
       "adp": 80.7,
       "tier": 8,
-      "espnAdp": 80.62
+      "espnAdp": 79.3,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.6,
+      "riskScore": 4.8,
+      "byeWeek": 11
     },
     {
       "id": "justin-herbert-lac-qb",
@@ -929,7 +1345,12 @@
       "projectedPoints": 308.6,
       "adp": 82.1,
       "tier": 6,
-      "espnAdp": 89.59
+      "espnAdp": 87.05,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.8,
+      "riskScore": 4.8,
+      "byeWeek": 7
     },
     {
       "id": "george-kittle-sf-te",
@@ -939,7 +1360,12 @@
       "projectedPoints": 189.5,
       "adp": 83.2,
       "tier": 3,
-      "espnAdp": 78.09
+      "espnAdp": 75.05,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.4,
+      "riskScore": 8.0,
+      "byeWeek": 8
     },
     {
       "id": "tony-pollard-ten-rb",
@@ -949,7 +1375,12 @@
       "projectedPoints": 164.4,
       "adp": 84.6,
       "tier": 8,
-      "espnAdp": 92.4
+      "espnAdp": 89.32,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.9,
+      "riskScore": 5.6,
+      "byeWeek": 9
     },
     {
       "id": "michael-wilson-ari-wr",
@@ -959,7 +1390,12 @@
       "projectedPoints": 184.3,
       "adp": 85.9,
       "tier": 9,
-      "espnAdp": 101.91
+      "espnAdp": 102.4,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.6,
+      "riskScore": 3.8,
+      "byeWeek": 14
     },
     {
       "id": "rico-dowdle-pit-rb",
@@ -969,7 +1405,12 @@
       "projectedPoints": 185.6,
       "adp": 86.5,
       "tier": 8,
-      "espnAdp": 96.52
+      "espnAdp": 95.3,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.0,
+      "riskScore": 4.5,
+      "byeWeek": 9
     },
     {
       "id": "dalton-kincaid-buf-te",
@@ -979,7 +1420,12 @@
       "projectedPoints": 158.1,
       "adp": 87.7,
       "tier": 4,
-      "espnAdp": 130.81
+      "espnAdp": 130.86,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.7,
+      "riskScore": 5.8,
+      "byeWeek": 7
     },
     {
       "id": "travis-kelce-kc-te",
@@ -989,7 +1435,12 @@
       "projectedPoints": 166.0,
       "adp": 89.1,
       "tier": 4,
-      "espnAdp": 95.16
+      "espnAdp": 95.05,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.5,
+      "riskScore": 4.8,
+      "byeWeek": 5
     },
     {
       "id": "makai-lemon-phi-wr",
@@ -999,7 +1450,13 @@
       "projectedPoints": 161.5,
       "adp": 89.5,
       "tier": 10,
-      "espnAdp": 133.17
+      "espnAdp": 132.19,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.9,
+      "riskScore": 6.6,
+      "isRookie": true,
+      "byeWeek": 10
     },
     {
       "id": "j-k-dobbins-den-rb",
@@ -1009,7 +1466,12 @@
       "projectedPoints": 162.3,
       "adp": 92.0,
       "tier": 8,
-      "espnAdp": 113.09
+      "espnAdp": 112.34,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.2,
+      "riskScore": 7.5,
+      "byeWeek": 10
     },
     {
       "id": "chris-godwin-jr-tb-wr",
@@ -1019,7 +1481,12 @@
       "projectedPoints": 200.4,
       "adp": 93.1,
       "tier": 8,
-      "espnAdp": 125.73
+      "espnAdp": 122.63,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.4,
+      "riskScore": 4.5,
+      "byeWeek": 10
     },
     {
       "id": "jaxson-dart-nyg-qb",
@@ -1029,7 +1496,13 @@
       "projectedPoints": 318.8,
       "adp": 94.5,
       "tier": 4,
-      "espnAdp": 82.21
+      "espnAdp": 83.38,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.2,
+      "riskScore": 5.7,
+      "isBreakout": true,
+      "byeWeek": 8
     },
     {
       "id": "matthew-stafford-lar-qb",
@@ -1039,7 +1512,12 @@
       "projectedPoints": 298.9,
       "adp": 95.3,
       "tier": 6,
-      "espnAdp": 90.67
+      "espnAdp": 92.5,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.1,
+      "riskScore": 4.4,
+      "byeWeek": 11
     },
     {
       "id": "jake-ferguson-dal-te",
@@ -1049,7 +1527,12 @@
       "projectedPoints": 160.6,
       "adp": 97.9,
       "tier": 4,
-      "espnAdp": 108.91
+      "espnAdp": 109.93,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.4,
+      "riskScore": 5.3,
+      "byeWeek": 14
     },
     {
       "id": "jordyn-tyson-no-wr",
@@ -1059,7 +1542,13 @@
       "projectedPoints": 145.3,
       "adp": 98.0,
       "tier": 10,
-      "espnAdp": 168.09
+      "espnAdp": 168.06,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 7.2,
+      "riskScore": 7.2,
+      "isRookie": true,
+      "byeWeek": 8
     },
     {
       "id": "alec-pierce-ind-wr",
@@ -1069,7 +1558,12 @@
       "projectedPoints": 210.5,
       "adp": 98.7,
       "tier": 8,
-      "espnAdp": 108.07
+      "espnAdp": 108.97,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.9,
+      "riskScore": 5.8,
+      "byeWeek": 13
     },
     {
       "id": "trevor-lawrence-jax-qb",
@@ -1079,7 +1573,13 @@
       "projectedPoints": 315.7,
       "adp": 100.7,
       "tier": 5,
-      "espnAdp": 97.56
+      "espnAdp": 100.04,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.7,
+      "riskScore": 4.9,
+      "isBreakout": true,
+      "byeWeek": 7
     },
     {
       "id": "kyle-monangai-chi-rb",
@@ -1089,7 +1589,12 @@
       "projectedPoints": 158.9,
       "adp": 101.1,
       "tier": 8,
-      "espnAdp": 124.29
+      "espnAdp": 124.01,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.7,
+      "riskScore": 5.8,
+      "byeWeek": 10
     },
     {
       "id": "blake-corum-lar-rb",
@@ -1099,7 +1604,12 @@
       "projectedPoints": 146.8,
       "adp": 102.2,
       "tier": 8,
-      "espnAdp": 127.63
+      "espnAdp": 126.33,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.8,
+      "riskScore": 4.6,
+      "byeWeek": 11
     },
     {
       "id": "jordan-addison-min-wr",
@@ -1109,7 +1619,12 @@
       "projectedPoints": 181.0,
       "adp": 103.0,
       "tier": 9,
-      "espnAdp": 119.84
+      "espnAdp": 120.35,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 7.2,
+      "riskScore": 3.7,
+      "byeWeek": 6
     },
     {
       "id": "jonathon-brooks-car-rb",
@@ -1119,7 +1634,12 @@
       "projectedPoints": 163.0,
       "adp": 104.1,
       "tier": 8,
-      "espnAdp": 107.18
+      "espnAdp": 105.26,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.0,
+      "riskScore": 7.2,
+      "byeWeek": 5
     },
     {
       "id": "michael-pittman-jr-pit-wr",
@@ -1129,7 +1649,12 @@
       "projectedPoints": 193.1,
       "adp": 105.9,
       "tier": 8,
-      "espnAdp": 90.14
+      "espnAdp": 89.83,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.9,
+      "riskScore": 3.5,
+      "byeWeek": 9
     },
     {
       "id": "isaiah-likely-nyg-te",
@@ -1139,7 +1664,12 @@
       "projectedPoints": 157.4,
       "adp": 107.6,
       "tier": 4,
-      "espnAdp": 123.31
+      "espnAdp": 122.76,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.8,
+      "riskScore": 3.8,
+      "byeWeek": 8
     },
     {
       "id": "stefon-diggs-was-wr",
@@ -1149,7 +1679,12 @@
       "projectedPoints": 181.2,
       "adp": 107.9,
       "tier": 9,
-      "espnAdp": 105.87
+      "espnAdp": 102.92,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.0,
+      "riskScore": 5.3,
+      "byeWeek": 7
     },
     {
       "id": "jayden-reed-gb-wr",
@@ -1159,7 +1694,12 @@
       "projectedPoints": 174.8,
       "adp": 109.6,
       "tier": 9,
-      "espnAdp": 137.72
+      "espnAdp": 139.16,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.7,
+      "riskScore": 4.2,
+      "byeWeek": 11
     },
     {
       "id": "patrick-mahomes-kc-qb",
@@ -1169,7 +1709,12 @@
       "projectedPoints": 295.3,
       "adp": 110.0,
       "tier": 6,
-      "espnAdp": 107.7
+      "espnAdp": 108.44,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.2,
+      "riskScore": 5.3,
+      "byeWeek": 5
     },
     {
       "id": "jordan-mason-min-rb",
@@ -1179,7 +1724,12 @@
       "projectedPoints": 153.1,
       "adp": 111.4,
       "tier": 8,
-      "espnAdp": 139.33
+      "espnAdp": 139.23,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.4,
+      "riskScore": 4.0,
+      "byeWeek": 6
     },
     {
       "id": "josh-downs-ind-wr",
@@ -1189,7 +1739,12 @@
       "projectedPoints": 168.2,
       "adp": 112.4,
       "tier": 9,
-      "espnAdp": 137.23
+      "espnAdp": 136.79,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 7.3,
+      "riskScore": 4.2,
+      "byeWeek": 13
     },
     {
       "id": "kenny-gainwell-tb-rb",
@@ -1199,7 +1754,12 @@
       "projectedPoints": 173.2,
       "adp": 113.4,
       "tier": 8,
-      "espnAdp": 104.25
+      "espnAdp": 101.6,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.6,
+      "riskScore": 4.4,
+      "byeWeek": 10
     },
     {
       "id": "quentin-johnston-lac-wr",
@@ -1209,7 +1769,12 @@
       "projectedPoints": 194.4,
       "adp": 114.8,
       "tier": 8,
-      "espnAdp": 129.98
+      "espnAdp": 130.14,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.4,
+      "riskScore": 6.3,
+      "byeWeek": 7
     },
     {
       "id": "jacory-croskey-merritt-was-rb",
@@ -1219,7 +1784,12 @@
       "projectedPoints": 173.1,
       "adp": 115.8,
       "tier": 8,
-      "espnAdp": 135.86
+      "espnAdp": 136.07,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.9,
+      "riskScore": 6.3,
+      "byeWeek": 7
     },
     {
       "id": "bo-nix-den-qb",
@@ -1229,7 +1799,12 @@
       "projectedPoints": 308.3,
       "adp": 116.5,
       "tier": 6,
-      "espnAdp": 99.47
+      "espnAdp": 102.11,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.8,
+      "riskScore": 4.6,
+      "byeWeek": 10
     },
     {
       "id": "brandon-aubrey-dal-k",
@@ -1239,7 +1814,7 @@
       "projectedPoints": 168.4,
       "adp": 118.2,
       "tier": 1,
-      "espnAdp": 85.76
+      "espnAdp": 85.74
     },
     {
       "id": "wan-dale-robinson-ten-wr",
@@ -1249,7 +1824,12 @@
       "projectedPoints": 187.2,
       "adp": 119.0,
       "tier": 8,
-      "espnAdp": 115.53
+      "espnAdp": 113.99,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.7,
+      "riskScore": 4.6,
+      "byeWeek": 9
     },
     {
       "id": "dallas-goedert-phi-te",
@@ -1259,7 +1839,12 @@
       "projectedPoints": 156.5,
       "adp": 120.3,
       "tier": 4,
-      "espnAdp": 104.07
+      "espnAdp": 104.04,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.3,
+      "riskScore": 5.1,
+      "byeWeek": 10
     },
     {
       "id": "kc-concepcion-cle-wr",
@@ -1269,7 +1854,13 @@
       "projectedPoints": 156.0,
       "adp": 121.8,
       "tier": 10,
-      "espnAdp": 146.63
+      "espnAdp": 146.72,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.7,
+      "riskScore": 5.9,
+      "isRookie": true,
+      "byeWeek": 11
     },
     {
       "id": "eagles-dst-phi-dst",
@@ -1279,7 +1870,7 @@
       "projectedPoints": 148.6,
       "adp": 122.4,
       "tier": 1,
-      "espnAdp": 137.61
+      "espnAdp": 137.95
     },
     {
       "id": "jakobi-meyers-jax-wr",
@@ -1289,7 +1880,12 @@
       "projectedPoints": 166.0,
       "adp": 122.8,
       "tier": 9,
-      "espnAdp": 122.24
+      "espnAdp": 122.81,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 2.7,
+      "byeWeek": 7
     },
     {
       "id": "brock-purdy-sf-qb",
@@ -1299,7 +1895,12 @@
       "projectedPoints": 304.9,
       "adp": 123.3,
       "tier": 6,
-      "espnAdp": 108.99
+      "espnAdp": 110.31,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.5,
+      "riskScore": 4.2,
+      "byeWeek": 8
     },
     {
       "id": "aaron-jones-sr-min-rb",
@@ -1309,7 +1910,12 @@
       "projectedPoints": 140.0,
       "adp": 125.1,
       "tier": 9,
-      "espnAdp": 116.69
+      "espnAdp": 114.4,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.3,
+      "riskScore": 4.3,
+      "byeWeek": 6
     },
     {
       "id": "matthew-golden-gb-wr",
@@ -1319,7 +1925,12 @@
       "projectedPoints": 155.4,
       "adp": 127.0,
       "tier": 10,
-      "espnAdp": 111.09
+      "espnAdp": 112.04,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 6.8,
+      "riskScore": 5.2,
+      "byeWeek": 11
     },
     {
       "id": "mark-andrews-bal-te",
@@ -1329,7 +1940,12 @@
       "projectedPoints": 149.3,
       "adp": 128.1,
       "tier": 5,
-      "espnAdp": 125.65
+      "espnAdp": 126.46,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.5,
+      "riskScore": 4.0,
+      "byeWeek": 13
     },
     {
       "id": "deebo-samuel-sr-sf-wr",
@@ -1339,7 +1955,12 @@
       "projectedPoints": 132.8,
       "adp": 130.1,
       "tier": 10,
-      "espnAdp": 140.86
+      "espnAdp": 142.66,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 3.7,
+      "riskScore": 6.3,
+      "byeWeek": 8
     },
     {
       "id": "jared-goff-det-qb",
@@ -1349,7 +1970,12 @@
       "projectedPoints": 302.6,
       "adp": 131.7,
       "tier": 6,
-      "espnAdp": 135.99
+      "espnAdp": 136.26,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.2,
+      "riskScore": 2.8,
+      "byeWeek": 6
     },
     {
       "id": "cameron-dicker-lac-k",
@@ -1359,7 +1985,7 @@
       "projectedPoints": 161.2,
       "adp": 132.6,
       "tier": 1,
-      "espnAdp": 112.08
+      "espnAdp": 112.99
     },
     {
       "id": "romeo-doubs-ne-wr",
@@ -1369,7 +1995,12 @@
       "projectedPoints": 164.4,
       "adp": 132.9,
       "tier": 9,
-      "espnAdp": 148.27
+      "espnAdp": 147.7,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.0,
+      "riskScore": 3.9,
+      "byeWeek": 11
     },
     {
       "id": "rachaad-white-was-rb",
@@ -1379,7 +2010,12 @@
       "projectedPoints": 151.6,
       "adp": 133.0,
       "tier": 8,
-      "espnAdp": 126.05
+      "espnAdp": 125.53,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.6,
+      "riskScore": 4.6,
+      "byeWeek": 7
     },
     {
       "id": "ravens-dst-bal-dst",
@@ -1389,7 +2025,7 @@
       "projectedPoints": 144.2,
       "adp": 136.8,
       "tier": 1,
-      "espnAdp": 133.73
+      "espnAdp": 133.96
     },
     {
       "id": "de-zhaun-stribling-sf-wr",
@@ -1399,7 +2035,13 @@
       "projectedPoints": 175.9,
       "adp": 137.3,
       "tier": 9,
-      "espnAdp": 141.9
+      "espnAdp": 139.89,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.5,
+      "riskScore": 5.3,
+      "isRookie": true,
+      "byeWeek": 8
     },
     {
       "id": "oronde-gadsden-lac-te",
@@ -1409,7 +2051,12 @@
       "projectedPoints": 108.2,
       "adp": 138.1,
       "tier": 7,
-      "espnAdp": 170.2
+      "espnAdp": 170.2,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.8,
+      "riskScore": 4.5,
+      "byeWeek": 7
     },
     {
       "id": "xavier-worthy-kc-wr",
@@ -1419,7 +2066,12 @@
       "projectedPoints": 161.6,
       "adp": 139.3,
       "tier": 10,
-      "espnAdp": 129.27
+      "espnAdp": 130.27,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.0,
+      "riskScore": 6.2,
+      "byeWeek": 5
     },
     {
       "id": "chris-rodriguez-jr-jax-rb",
@@ -1429,7 +2081,12 @@
       "projectedPoints": 112.5,
       "adp": 140.4,
       "tier": 9,
-      "espnAdp": 164.93
+      "espnAdp": 164.57,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 5.1,
+      "byeWeek": 7
     },
     {
       "id": "jake-bates-det-k",
@@ -1439,7 +2096,7 @@
       "projectedPoints": 156.8,
       "adp": 141.4,
       "tier": 1,
-      "espnAdp": 157.15
+      "espnAdp": 157.17
     },
     {
       "id": "hunter-henry-ne-te",
@@ -1449,7 +2106,12 @@
       "projectedPoints": 146.2,
       "adp": 141.6,
       "tier": 5,
-      "espnAdp": 151.41
+      "espnAdp": 152.58,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.9,
+      "riskScore": 3.4,
+      "byeWeek": 11
     },
     {
       "id": "baker-mayfield-tb-qb",
@@ -1459,7 +2121,12 @@
       "projectedPoints": 297.0,
       "adp": 143.3,
       "tier": 6,
-      "espnAdp": 145.92
+      "espnAdp": 146.01,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.8,
+      "riskScore": 4.1,
+      "byeWeek": 10
     },
     {
       "id": "khalil-shakir-buf-wr",
@@ -1469,7 +2136,12 @@
       "projectedPoints": 163.6,
       "adp": 143.4,
       "tier": 9,
-      "espnAdp": 139.73
+      "espnAdp": 140.39,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.1,
+      "riskScore": 2.8,
+      "byeWeek": 7
     },
     {
       "id": "tyler-allgeier-ari-rb",
@@ -1479,7 +2151,12 @@
       "projectedPoints": 107.0,
       "adp": 145.3,
       "tier": 10,
-      "espnAdp": 162.77
+      "espnAdp": 162.71,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 3.5,
+      "riskScore": 4.0,
+      "byeWeek": 14
     },
     {
       "id": "jalen-coker-car-wr",
@@ -1489,7 +2166,12 @@
       "projectedPoints": 156.3,
       "adp": 146.1,
       "tier": 10,
-      "espnAdp": 155.91
+      "espnAdp": 154.88,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.8,
+      "riskScore": 3.7,
+      "byeWeek": 5
     },
     {
       "id": "rashid-shaheed-sea-wr",
@@ -1499,7 +2181,12 @@
       "projectedPoints": 157.2,
       "adp": 147.2,
       "tier": 10,
-      "espnAdp": 159.95
+      "espnAdp": 160.74,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.3,
+      "riskScore": 4.4,
+      "byeWeek": 11
     },
     {
       "id": "broncos-dst-den-dst",
@@ -1509,7 +2196,7 @@
       "projectedPoints": 139.2,
       "adp": 147.2,
       "tier": 1,
-      "espnAdp": 98.93
+      "espnAdp": 99.32
     },
     {
       "id": "zach-charbonnet-sea-rb",
@@ -1519,7 +2206,12 @@
       "projectedPoints": 107.4,
       "adp": 149.2,
       "tier": 10,
-      "espnAdp": 153.16
+      "espnAdp": 152.83,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 7.0,
+      "byeWeek": 11
     },
     {
       "id": "ka-imi-fairbairn-hou-k",
@@ -1529,7 +2221,7 @@
       "projectedPoints": 151.8,
       "adp": 150.2,
       "tier": 2,
-      "espnAdp": 126.12
+      "espnAdp": 125.09
     },
     {
       "id": "jordan-love-gb-qb",
@@ -1539,7 +2231,12 @@
       "projectedPoints": 297.0,
       "adp": 150.7,
       "tier": 6,
-      "espnAdp": 155.66
+      "espnAdp": 155.37,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.2,
+      "riskScore": 3.3,
+      "byeWeek": 11
     },
     {
       "id": "brenton-strange-jax-te",
@@ -1549,7 +2246,12 @@
       "projectedPoints": 156.5,
       "adp": 152.2,
       "tier": 5,
-      "espnAdp": 167.55
+      "espnAdp": 167.55,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.5,
+      "riskScore": 3.6,
+      "byeWeek": 7
     },
     {
       "id": "marshawn-lloyd-gb-rb",
@@ -1559,7 +2261,12 @@
       "projectedPoints": 190.1,
       "adp": 157.8,
       "tier": 8,
-      "espnAdp": 140.55
+      "espnAdp": 126.33,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.2,
+      "riskScore": 8.3,
+      "byeWeek": 11
     },
     {
       "id": "steelers-dst-pit-dst",
@@ -1569,7 +2276,7 @@
       "projectedPoints": 136.0,
       "adp": 158.6,
       "tier": 2,
-      "espnAdp": 121.2
+      "espnAdp": 121.95
     },
     {
       "id": "mike-washington-jr-lv-rb",
@@ -1579,7 +2286,13 @@
       "projectedPoints": 106.5,
       "adp": 158.9,
       "tier": 10,
-      "espnAdp": 164.21
+      "espnAdp": 164.37,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.2,
+      "riskScore": 5.8,
+      "isRookie": true,
+      "byeWeek": 13
     },
     {
       "id": "chase-mclaughlin-tb-k",
@@ -1589,7 +2302,7 @@
       "projectedPoints": 148.6,
       "adp": 159.0,
       "tier": 2,
-      "espnAdp": 170.21
+      "espnAdp": 170.26
     },
     {
       "id": "ja-kobi-lane-bal-wr",
@@ -1599,7 +2312,13 @@
       "projectedPoints": 112.6,
       "adp": 159.0,
       "tier": 11,
-      "espnAdp": 168.63
+      "espnAdp": 168.77,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.8,
+      "riskScore": 5.3,
+      "isRookie": true,
+      "byeWeek": 13
     },
     {
       "id": "woody-marks-hou-rb",
@@ -1609,7 +2328,12 @@
       "projectedPoints": 117.8,
       "adp": 160.3,
       "tier": 9,
-      "espnAdp": 151.43
+      "espnAdp": 151.91,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.4,
+      "riskScore": 4.3,
+      "byeWeek": 8
     },
     {
       "id": "kyler-murray-min-qb",
@@ -1619,7 +2343,12 @@
       "projectedPoints": 298.8,
       "adp": 161.6,
       "tier": 6,
-      "espnAdp": 139.81
+      "espnAdp": 137.92,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.5,
+      "riskScore": 7.5,
+      "byeWeek": 6
     },
     {
       "id": "sam-darnold-sea-qb",
@@ -1629,7 +2358,12 @@
       "projectedPoints": 255.8,
       "adp": 163.0,
       "tier": 8,
-      "espnAdp": 162.19
+      "espnAdp": 162.37,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.2,
+      "riskScore": 4.0,
+      "byeWeek": 11
     },
     {
       "id": "t-j-hockenson-min-te",
@@ -1639,7 +2373,12 @@
       "projectedPoints": 127.4,
       "adp": 164.9,
       "tier": 6,
-      "espnAdp": 147.91
+      "espnAdp": 150.95,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 4.1,
+      "byeWeek": 6
     },
     {
       "id": "tyjae-spears-ten-rb",
@@ -1649,7 +2388,12 @@
       "projectedPoints": 134.8,
       "adp": 165.7,
       "tier": 9,
-      "espnAdp": 146.83
+      "espnAdp": 146.37,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.7,
+      "riskScore": 4.6,
+      "byeWeek": 9
     },
     {
       "id": "alvin-kamara-no-rb",
@@ -1659,7 +2403,12 @@
       "projectedPoints": 98.1,
       "adp": 166.3,
       "tier": 10,
-      "espnAdp": 160.25
+      "espnAdp": 160.91,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.2,
+      "riskScore": 6.5,
+      "byeWeek": 8
     },
     {
       "id": "travis-hunter-jax-wr",
@@ -1669,7 +2418,12 @@
       "projectedPoints": 120.0,
       "adp": 167.5,
       "tier": 11,
-      "espnAdp": 118.96
+      "espnAdp": 118.83,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 6.3,
+      "riskScore": 8.3,
+      "byeWeek": 7
     },
     {
       "id": "harrison-butker-kc-k",
@@ -1679,7 +2433,7 @@
       "projectedPoints": 142.4,
       "adp": 167.8,
       "tier": 2,
-      "espnAdp": 143.65
+      "espnAdp": 144.1
     },
     {
       "id": "vikings-dst-min-dst",
@@ -1689,7 +2443,7 @@
       "projectedPoints": 131.0,
       "adp": 169.0,
       "tier": 2,
-      "espnAdp": 168.92
+      "espnAdp": 169.0
     },
     {
       "id": "brian-robinson-atl-rb",
@@ -1699,7 +2453,12 @@
       "projectedPoints": 94.0,
       "adp": 169.1,
       "tier": 10,
-      "espnAdp": 167.56
+      "espnAdp": 167.76,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.3,
+      "riskScore": 3.7,
+      "byeWeek": 11
     },
     {
       "id": "jonah-coleman-den-rb",
@@ -1709,7 +2468,13 @@
       "projectedPoints": 103.5,
       "adp": 170.1,
       "tier": 10,
-      "espnAdp": 169.22
+      "espnAdp": 167.43,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.8,
+      "riskScore": 5.3,
+      "isRookie": true,
+      "byeWeek": 10
     },
     {
       "id": "kenyon-sadiq-nyj-te",
@@ -1719,7 +2484,13 @@
       "projectedPoints": 127.2,
       "adp": 170.8,
       "tier": 6,
-      "espnAdp": 161.09
+      "espnAdp": 163.44,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.4,
+      "riskScore": 4.6,
+      "isRookie": true,
+      "byeWeek": 13
     },
     {
       "id": "denzel-boston-cle-wr",
@@ -1729,7 +2500,13 @@
       "projectedPoints": 132.1,
       "adp": 172.4,
       "tier": 10,
-      "espnAdp": 168.78
+      "espnAdp": 169.13,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.9,
+      "riskScore": 4.7,
+      "isRookie": true,
+      "byeWeek": 11
     },
     {
       "id": "tyrone-tracy-jr-nyg-rb",
@@ -1739,7 +2516,12 @@
       "projectedPoints": 104.0,
       "adp": 173.0,
       "tier": 10,
-      "espnAdp": 170.34
+      "espnAdp": 170.36,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.0,
+      "riskScore": 5.9,
+      "byeWeek": 8
     },
     {
       "id": "malik-washington-mia-wr",
@@ -1749,7 +2531,12 @@
       "projectedPoints": 161.5,
       "adp": 175.5,
       "tier": 10,
-      "espnAdp": 170.17
+      "espnAdp": 170.11,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.1,
+      "riskScore": 4.6,
+      "byeWeek": 6
     },
     {
       "id": "cyrus-allen-kc-wr",
@@ -1759,7 +2546,13 @@
       "projectedPoints": 110.8,
       "adp": 176.3,
       "tier": 11,
-      "espnAdp": 169.76
+      "espnAdp": 169.79,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 4.7,
+      "riskScore": 5.3,
+      "isRookie": true,
+      "byeWeek": 5
     },
     {
       "id": "tyler-loop-bal-k",
@@ -1769,7 +2562,7 @@
       "projectedPoints": 139.8,
       "adp": 176.6,
       "tier": 2,
-      "espnAdp": 165.14
+      "espnAdp": 165.47
     },
     {
       "id": "tank-bigsby-phi-rb",
@@ -1779,7 +2572,12 @@
       "projectedPoints": 98.0,
       "adp": 178.1,
       "tier": 10,
-      "espnAdp": 169.72
+      "espnAdp": 169.68,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.0,
+      "riskScore": 4.6,
+      "byeWeek": 10
     },
     {
       "id": "texans-dst-hou-dst",
@@ -1789,7 +2587,7 @@
       "projectedPoints": 126.6,
       "adp": 179.4,
       "tier": 2,
-      "espnAdp": 91.14
+      "espnAdp": 92.29
     },
     {
       "id": "aj-barner-sea-te",
@@ -1799,7 +2597,12 @@
       "projectedPoints": 113.9,
       "adp": 181.4,
       "tier": 7,
-      "espnAdp": 169.69
+      "espnAdp": 169.76,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 4.2,
+      "riskScore": 3.9,
+      "byeWeek": 11
     },
     {
       "id": "juwan-johnson-no-te",
@@ -1809,7 +2612,12 @@
       "projectedPoints": 167.4,
       "adp": 182.0,
       "tier": 4,
-      "espnAdp": 158.95
+      "espnAdp": 158.24,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 3.8,
+      "byeWeek": 8
     },
     {
       "id": "fernando-mendoza-lv-qb",
@@ -1819,7 +2627,13 @@
       "projectedPoints": 119.2,
       "adp": 183.6,
       "tier": 9,
-      "espnAdp": 168.33
+      "espnAdp": 168.44,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.7,
+      "riskScore": 8.8,
+      "isRookie": true,
+      "byeWeek": 13
     },
     {
       "id": "jalen-nailor-lv-wr",
@@ -1829,7 +2643,12 @@
       "projectedPoints": 125.2,
       "adp": 184.7,
       "tier": 10,
-      "espnAdp": 171.08
+      "espnAdp": 171.14,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 3.9,
+      "riskScore": 4.9,
+      "byeWeek": 13
     },
     {
       "id": "jason-myers-sea-k",
@@ -1839,7 +2658,7 @@
       "projectedPoints": 135.4,
       "adp": 185.4,
       "tier": 3,
-      "espnAdp": 116.26
+      "espnAdp": 116.02
     },
     {
       "id": "tank-dell-hou-wr",
@@ -1849,7 +2668,12 @@
       "projectedPoints": 111.3,
       "adp": 185.5,
       "tier": 11,
-      "espnAdp": 162.6
+      "espnAdp": 164.13,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 6.3,
+      "riskScore": 8.5,
+      "byeWeek": 8
     },
     {
       "id": "keaton-mitchell-lac-rb",
@@ -1859,7 +2683,12 @@
       "projectedPoints": 110.6,
       "adp": 186.9,
       "tier": 10,
-      "espnAdp": 169.36
+      "espnAdp": 169.44,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.9,
+      "riskScore": 4.7,
+      "byeWeek": 7
     },
     {
       "id": "tyler-shough-no-qb",
@@ -1869,7 +2698,12 @@
       "projectedPoints": 298.8,
       "adp": 187.3,
       "tier": 6,
-      "espnAdp": 153.02
+      "espnAdp": 152.54,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 7.3,
+      "riskScore": 4.3,
+      "byeWeek": 8
     },
     {
       "id": "dalton-schultz-hou-te",
@@ -1879,7 +2713,12 @@
       "projectedPoints": 165.5,
       "adp": 188.8,
       "tier": 4,
-      "espnAdp": 168.61
+      "espnAdp": 168.78,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 4.8,
+      "riskScore": 3.1,
+      "byeWeek": 8
     },
     {
       "id": "isiah-pacheco-det-rb",
@@ -1889,7 +2728,12 @@
       "projectedPoints": 113.6,
       "adp": 188.8,
       "tier": 9,
-      "espnAdp": 157.94
+      "espnAdp": 158.87,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 5.0,
+      "byeWeek": 6
     },
     {
       "id": "chiefs-dst-kc-dst",
@@ -1899,7 +2743,7 @@
       "projectedPoints": 121.6,
       "adp": 189.8,
       "tier": 2,
-      "espnAdp": 165.79
+      "espnAdp": 166.18
     },
     {
       "id": "jerry-jeudy-cle-wr",
@@ -1909,7 +2753,12 @@
       "projectedPoints": 114.4,
       "adp": 190.1,
       "tier": 11,
-      "espnAdp": 168.27
+      "espnAdp": 168.71,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.5,
+      "riskScore": 5.5,
+      "byeWeek": 11
     },
     {
       "id": "dylan-sampson-cle-rb",
@@ -1919,7 +2768,12 @@
       "projectedPoints": 107.7,
       "adp": 191.4,
       "tier": 10,
-      "espnAdp": 169.09
+      "espnAdp": 169.13,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.9,
+      "riskScore": 3.7,
+      "byeWeek": 11
     },
     {
       "id": "chig-okonkwo-was-te",
@@ -1929,7 +2783,12 @@
       "projectedPoints": 143.5,
       "adp": 192.2,
       "tier": 6,
-      "espnAdp": 170.16
+      "espnAdp": 170.2,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 3.8,
+      "byeWeek": 7
     },
     {
       "id": "omar-cooper-jr-nyj-wr",
@@ -1939,7 +2798,13 @@
       "projectedPoints": 134.2,
       "adp": 194.2,
       "tier": 10,
-      "espnAdp": 171.19
+      "espnAdp": 171.17,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.9,
+      "riskScore": 6.7,
+      "isRookie": true,
+      "byeWeek": 13
     },
     {
       "id": "will-reichard-min-k",
@@ -1949,7 +2814,7 @@
       "projectedPoints": 130.4,
       "adp": 194.2,
       "tier": 3,
-      "espnAdp": 167.73
+      "espnAdp": 167.84
     },
     {
       "id": "kaelon-black-sf-rb",
@@ -1959,7 +2824,13 @@
       "projectedPoints": 59.5,
       "adp": 196.9,
       "tier": 10,
-      "espnAdp": 170.43
+      "espnAdp": 170.36,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.9,
+      "riskScore": 5.7,
+      "isRookie": true,
+      "byeWeek": 8
     },
     {
       "id": "caleb-douglas-mia-wr",
@@ -1969,7 +2840,13 @@
       "projectedPoints": 98.5,
       "adp": 197.6,
       "tier": 11,
-      "espnAdp": 170.66
+      "espnAdp": 170.81,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.4,
+      "riskScore": 5.3,
+      "isRookie": true,
+      "byeWeek": 6
     },
     {
       "id": "keenan-allen-ind-wr",
@@ -1979,7 +2856,12 @@
       "projectedPoints": 152.8,
       "adp": 197.8,
       "tier": 10,
-      "espnAdp": 165.61
+      "espnAdp": 165.42,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 3.5,
+      "riskScore": 5.7,
+      "byeWeek": 13
     },
     {
       "id": "cooper-kupp-sea-wr",
@@ -1989,7 +2871,12 @@
       "projectedPoints": 116.7,
       "adp": 199.0,
       "tier": 11,
-      "espnAdp": 169.21
+      "espnAdp": 169.3,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 3.5,
+      "riskScore": 5.3,
+      "byeWeek": 11
     },
     {
       "id": "bills-dst-buf-dst",
@@ -1999,7 +2886,7 @@
       "projectedPoints": 118.4,
       "adp": 200.2,
       "tier": 3,
-      "espnAdp": 168.99
+      "espnAdp": 169.04
     },
     {
       "id": "kayshon-boutte-hou-wr",
@@ -2009,7 +2896,12 @@
       "projectedPoints": 155.9,
       "adp": 201.7,
       "tier": 10,
-      "espnAdp": 170.6
+      "espnAdp": 170.57,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.8,
+      "riskScore": 4.4,
+      "byeWeek": 8
     },
     {
       "id": "tre-tucker-lv-wr",
@@ -2019,7 +2911,12 @@
       "projectedPoints": 144.9,
       "adp": 202.8,
       "tier": 10,
-      "espnAdp": 169.12
+      "espnAdp": 169.28,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.6,
+      "riskScore": 4.5,
+      "byeWeek": 13
     },
     {
       "id": "chris-boswell-pit-k",
@@ -2029,7 +2926,7 @@
       "projectedPoints": 126.0,
       "adp": 203.0,
       "tier": 3,
-      "espnAdp": 164.46
+      "espnAdp": 164.65
     },
     {
       "id": "daniel-jones-ind-qb",
@@ -2039,7 +2936,12 @@
       "projectedPoints": 249.2,
       "adp": 204.2,
       "tier": 8,
-      "espnAdp": 159.38
+      "espnAdp": 159.76,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.3,
+      "riskScore": 7.5,
+      "byeWeek": 13
     },
     {
       "id": "c-j-stroud-hou-qb",
@@ -2049,7 +2951,12 @@
       "projectedPoints": 260.9,
       "adp": 205.7,
       "tier": 8,
-      "espnAdp": 165.24
+      "espnAdp": 165.33,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.1,
+      "riskScore": 4.2,
+      "byeWeek": 8
     },
     {
       "id": "terrance-ferguson-lar-te",
@@ -2059,7 +2966,12 @@
       "projectedPoints": 85.1,
       "adp": 206.5,
       "tier": 7,
-      "espnAdp": 168.34
+      "espnAdp": 168.7,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 4.4,
+      "riskScore": 5.1,
+      "byeWeek": 11
     },
     {
       "id": "braelon-allen-nyj-rb",
@@ -2069,7 +2981,12 @@
       "projectedPoints": 64.7,
       "adp": 206.8,
       "tier": 10,
-      "espnAdp": 170.99
+      "espnAdp": 170.94,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.1,
+      "riskScore": 5.0,
+      "byeWeek": 13
     },
     {
       "id": "malik-willis-mia-qb",
@@ -2079,7 +2996,12 @@
       "projectedPoints": 281.4,
       "adp": 208.4,
       "tier": 7,
-      "espnAdp": 167.53
+      "espnAdp": 167.58,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 8.0,
+      "riskScore": 5.3,
+      "byeWeek": 6
     },
     {
       "id": "emmett-johnson-kc-rb",
@@ -2089,7 +3011,13 @@
       "projectedPoints": 79.3,
       "adp": 209.1,
       "tier": 10,
-      "espnAdp": 169.93
+      "espnAdp": 169.91,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.5,
+      "riskScore": 4.8,
+      "isRookie": true,
+      "byeWeek": 5
     },
     {
       "id": "zachariah-branch-atl-wr",
@@ -2099,7 +3027,13 @@
       "projectedPoints": 104.9,
       "adp": 210.3,
       "tier": 11,
-      "espnAdp": 170.89
+      "espnAdp": 170.86,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 4.3,
+      "isRookie": true,
+      "byeWeek": 11
     },
     {
       "id": "rams-dst-lar-dst",
@@ -2109,7 +3043,7 @@
       "projectedPoints": 113.4,
       "adp": 210.6,
       "tier": 3,
-      "espnAdp": 105.83
+      "espnAdp": 103.82
     },
     {
       "id": "jalen-mcmillan-tb-wr",
@@ -2119,7 +3053,12 @@
       "projectedPoints": 89.6,
       "adp": 211.6,
       "tier": 11,
-      "espnAdp": 165.09
+      "espnAdp": 164.29,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 4.0,
+      "riskScore": 3.5,
+      "byeWeek": 10
     },
     {
       "id": "younghoe-koo-atl-k",
@@ -2129,7 +3068,7 @@
       "projectedPoints": 121.6,
       "adp": 211.8,
       "tier": 3,
-      "espnAdp": 169.77
+      "espnAdp": 169.78
     },
     {
       "id": "devin-neal-no-rb",
@@ -2139,7 +3078,12 @@
       "projectedPoints": 37.1,
       "adp": 211.9,
       "tier": 10,
-      "espnAdp": 170.0
+      "espnAdp": 170.0,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 1.0,
+      "riskScore": 5.7,
+      "byeWeek": 8
     },
     {
       "id": "nicholas-singleton-ten-rb",
@@ -2149,7 +3093,13 @@
       "projectedPoints": 79.0,
       "adp": 212.1,
       "tier": 10,
-      "espnAdp": 170.4
+      "espnAdp": 170.37,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.7,
+      "riskScore": 5.4,
+      "isRookie": true,
+      "byeWeek": 9
     },
     {
       "id": "jaylin-noel-hou-wr",
@@ -2159,7 +3109,12 @@
       "projectedPoints": 92.1,
       "adp": 213.7,
       "tier": 11,
-      "espnAdp": 171.85
+      "espnAdp": 171.82,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 3.5,
+      "riskScore": 4.2,
+      "byeWeek": 8
     },
     {
       "id": "jauan-jennings-min-wr",
@@ -2169,7 +3124,12 @@
       "projectedPoints": 133.2,
       "adp": 213.8,
       "tier": 10,
-      "espnAdp": 171.11
+      "espnAdp": 171.12,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.3,
+      "riskScore": 6.4,
+      "byeWeek": 6
     },
     {
       "id": "kaleb-johnson-gb-rb",
@@ -2179,7 +3139,12 @@
       "projectedPoints": 50.9,
       "adp": 215.4,
       "tier": 10,
-      "espnAdp": 169.93
+      "espnAdp": 169.94,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 2.9,
+      "riskScore": 4.7,
+      "byeWeek": 11
     },
     {
       "id": "marvin-mims-jr-den-wr",
@@ -2189,7 +3154,12 @@
       "projectedPoints": 60.4,
       "adp": 219.5,
       "tier": 11,
-      "espnAdp": 170.16
+      "espnAdp": 170.16,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 2.3,
+      "riskScore": 4.7,
+      "byeWeek": 10
     },
     {
       "id": "malachi-fields-nyg-wr",
@@ -2199,7 +3169,13 @@
       "projectedPoints": 112.9,
       "adp": 219.6,
       "tier": 11,
-      "espnAdp": 170.1
+      "espnAdp": 170.3,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 3.7,
+      "riskScore": 5.4,
+      "isRookie": true,
+      "byeWeek": 8
     },
     {
       "id": "najee-harris-nyg-rb",
@@ -2209,7 +3185,12 @@
       "projectedPoints": 97.1,
       "adp": 220.1,
       "tier": 10,
-      "espnAdp": 170.21
+      "espnAdp": 170.21,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 2.7,
+      "riskScore": 5.7,
+      "byeWeek": 8
     },
     {
       "id": "jake-elliott-phi-k",
@@ -2219,7 +3200,7 @@
       "projectedPoints": 117.2,
       "adp": 220.6,
       "tier": 4,
-      "espnAdp": 169.0
+      "espnAdp": 169.07
     },
     {
       "id": "seahawks-dst-sea-dst",
@@ -2229,7 +3210,7 @@
       "projectedPoints": 109.0,
       "adp": 221.0,
       "tier": 3,
-      "espnAdp": 111.77
+      "espnAdp": 112.62
     },
     {
       "id": "kyle-williams-ne-wr",
@@ -2239,7 +3220,12 @@
       "projectedPoints": 110.7,
       "adp": 222.1,
       "tier": 11,
-      "espnAdp": 169.97
+      "espnAdp": 169.98,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.7,
+      "riskScore": 5.0,
+      "byeWeek": 11
     },
     {
       "id": "david-njoku-lac-te",
@@ -2249,7 +3235,12 @@
       "projectedPoints": 106.8,
       "adp": 223.8,
       "tier": 7,
-      "espnAdp": 169.66
+      "espnAdp": 169.7,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 3.9,
+      "riskScore": 5.3,
+      "byeWeek": 7
     },
     {
       "id": "mason-taylor-nyj-te",
@@ -2259,7 +3250,12 @@
       "projectedPoints": 83.3,
       "adp": 224.3,
       "tier": 8,
-      "espnAdp": 170.02
+      "espnAdp": 170.0,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 3.6,
+      "riskScore": 4.1,
+      "byeWeek": 13
     },
     {
       "id": "ray-davis-buf-rb",
@@ -2269,7 +3265,12 @@
       "projectedPoints": 55.9,
       "adp": 224.3,
       "tier": 10,
-      "espnAdp": 171.05
+      "espnAdp": 171.02,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.7,
+      "riskScore": 3.8,
+      "byeWeek": 7
     },
     {
       "id": "brashard-smith-kc-rb",
@@ -2279,7 +3280,12 @@
       "projectedPoints": 58.5,
       "adp": 226.3,
       "tier": 10,
-      "espnAdp": 170.08
+      "espnAdp": 170.19,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 3.0,
+      "riskScore": 4.8,
+      "byeWeek": 5
     },
     {
       "id": "bryce-young-car-qb",
@@ -2289,7 +3295,12 @@
       "projectedPoints": 235.5,
       "adp": 226.4,
       "tier": 8,
-      "espnAdp": 168.9
+      "espnAdp": 168.89,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.4,
+      "riskScore": 4.0,
+      "byeWeek": 5
     },
     {
       "id": "pat-bryant-den-wr",
@@ -2299,7 +3310,12 @@
       "projectedPoints": 123.9,
       "adp": 227.2,
       "tier": 10,
-      "espnAdp": 170.41
+      "espnAdp": 170.38,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 4.7,
+      "riskScore": 4.0,
+      "byeWeek": 10
     },
     {
       "id": "michael-penix-jr-atl-qb",
@@ -2309,7 +3325,12 @@
       "projectedPoints": 109.6,
       "adp": 227.9,
       "tier": 9,
-      "espnAdp": 170.1
+      "espnAdp": 170.1,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 4.7,
+      "riskScore": 5.3,
+      "byeWeek": 11
     },
     {
       "id": "jaydon-blue-fa-rb",
@@ -2318,7 +3339,9 @@
       "team": "FA",
       "projectedPoints": 32.8,
       "adp": 228.6,
-      "tier": 10
+      "tier": 10,
+      "upsideScore": 4.0,
+      "riskScore": 4.0
     },
     {
       "id": "tory-horton-sea-wr",
@@ -2328,7 +3351,12 @@
       "projectedPoints": 89.5,
       "adp": 228.7,
       "tier": 11,
-      "espnAdp": 170.21
+      "espnAdp": 170.19,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 4.0,
+      "riskScore": 5.1,
+      "byeWeek": 11
     },
     {
       "id": "aaron-rodgers-pit-qb",
@@ -2338,7 +3366,12 @@
       "projectedPoints": 234.2,
       "adp": 228.8,
       "tier": 8,
-      "espnAdp": 169.2
+      "espnAdp": 169.18,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 3.8,
+      "riskScore": 7.0,
+      "byeWeek": 9
     },
     {
       "id": "isaac-teslaa-det-wr",
@@ -2348,7 +3381,12 @@
       "projectedPoints": 89.4,
       "adp": 228.9,
       "tier": 11,
-      "espnAdp": 170.28
+      "espnAdp": 170.28,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 6.3,
+      "riskScore": 7.8,
+      "byeWeek": 6
     },
     {
       "id": "elijah-sarratt-bal-wr",
@@ -2358,7 +3396,13 @@
       "projectedPoints": 48.5,
       "adp": 229.2,
       "tier": 11,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 4.3,
+      "riskScore": 4.5,
+      "isRookie": true,
+      "byeWeek": 13
     },
     {
       "id": "cameron-little-jax-k",
@@ -2377,7 +3421,12 @@
       "projectedPoints": 74.7,
       "adp": 229.4,
       "tier": 11,
-      "espnAdp": 169.85
+      "espnAdp": 169.84,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 3.7,
+      "riskScore": 5.1,
+      "byeWeek": 9
     },
     {
       "id": "cam-ward-ten-qb",
@@ -2387,7 +3436,12 @@
       "projectedPoints": 261.2,
       "adp": 229.5,
       "tier": 8,
-      "espnAdp": 169.21
+      "espnAdp": 169.21,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.0,
+      "riskScore": 4.6,
+      "byeWeek": 9
     },
     {
       "id": "greg-dulcich-mia-te",
@@ -2397,7 +3451,12 @@
       "projectedPoints": 130.8,
       "adp": 229.7,
       "tier": 6,
-      "espnAdp": 170.47
+      "espnAdp": 170.48,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.8,
+      "riskScore": 4.8,
+      "byeWeek": 6
     },
     {
       "id": "germie-bernard-pit-wr",
@@ -2407,7 +3466,13 @@
       "projectedPoints": 110.1,
       "adp": 229.8,
       "tier": 11,
-      "espnAdp": 171.33
+      "espnAdp": 171.3,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 4.1,
+      "riskScore": 5.4,
+      "isRookie": true,
+      "byeWeek": 9
     },
     {
       "id": "tre-harris-lac-wr",
@@ -2417,7 +3482,12 @@
       "projectedPoints": 107.3,
       "adp": 230.5,
       "tier": 11,
-      "espnAdp": 171.17
+      "espnAdp": 171.15,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.1,
+      "riskScore": 4.3,
+      "byeWeek": 7
     },
     {
       "id": "ryan-flournoy-dal-wr",
@@ -2427,7 +3497,12 @@
       "projectedPoints": 102.0,
       "adp": 230.7,
       "tier": 11,
-      "espnAdp": 171.09
+      "espnAdp": 171.09,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 4.8,
+      "riskScore": 4.3,
+      "byeWeek": 14
     },
     {
       "id": "adonai-mitchell-nyj-wr",
@@ -2437,7 +3512,12 @@
       "projectedPoints": 111.7,
       "adp": 231.0,
       "tier": 11,
-      "espnAdp": 171.06
+      "espnAdp": 171.21,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 4.5,
+      "riskScore": 4.6,
+      "byeWeek": 13
     },
     {
       "id": "49ers-dst-sf-dst",
@@ -2447,7 +3527,7 @@
       "projectedPoints": 104.6,
       "adp": 231.4,
       "tier": 3,
-      "espnAdp": 168.96
+      "espnAdp": 169.05
     },
     {
       "id": "james-conner-ari-rb",
@@ -2457,7 +3537,12 @@
       "projectedPoints": 68.2,
       "adp": 231.6,
       "tier": 10,
-      "espnAdp": 170.16
+      "espnAdp": 170.13,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 3.3,
+      "riskScore": 4.3,
+      "byeWeek": 14
     },
     {
       "id": "theo-johnson-nyg-te",
@@ -2467,7 +3552,12 @@
       "projectedPoints": 71.0,
       "adp": 232.2,
       "tier": 8,
-      "espnAdp": 170.13
+      "espnAdp": 170.11,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.8,
+      "riskScore": 4.2,
+      "byeWeek": 8
     },
     {
       "id": "rashod-bateman-bal-wr",
@@ -2477,7 +3567,12 @@
       "projectedPoints": 89.5,
       "adp": 232.7,
       "tier": 11,
-      "espnAdp": 171.4
+      "espnAdp": 171.43,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 3.8,
+      "riskScore": 5.2,
+      "byeWeek": 13
     },
     {
       "id": "cade-otton-tb-te",
@@ -2487,7 +3582,12 @@
       "projectedPoints": 122.6,
       "adp": 233.1,
       "tier": 7,
-      "espnAdp": 170.35
+      "espnAdp": 170.33,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 3.8,
+      "riskScore": 3.8,
+      "byeWeek": 10
     },
     {
       "id": "gunnar-helm-ten-te",
@@ -2497,7 +3597,12 @@
       "projectedPoints": 97.9,
       "adp": 233.1,
       "tier": 7,
-      "espnAdp": 170.75
+      "espnAdp": 170.79,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 4.3,
+      "riskScore": 4.2,
+      "byeWeek": 9
     },
     {
       "id": "keon-coleman-buf-wr",
@@ -2507,7 +3612,12 @@
       "projectedPoints": 105.4,
       "adp": 234.8,
       "tier": 11,
-      "espnAdp": 170.32
+      "espnAdp": 170.26,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.3,
+      "riskScore": 5.4,
+      "byeWeek": 7
     },
     {
       "id": "antonio-williams-was-wr",
@@ -2517,7 +3627,13 @@
       "projectedPoints": 89.3,
       "adp": 235.8,
       "tier": 11,
-      "espnAdp": 170.53
+      "espnAdp": 170.44,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 5.3,
+      "isRookie": true,
+      "byeWeek": 7
     },
     {
       "id": "shedeur-sanders-cle-qb",
@@ -2527,7 +3643,12 @@
       "projectedPoints": 140.3,
       "adp": 236.1,
       "tier": 9,
-      "espnAdp": 169.85
+      "espnAdp": 169.88,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 5.8,
+      "riskScore": 8.1,
+      "byeWeek": 11
     },
     {
       "id": "tua-tagovailoa-atl-qb",
@@ -2537,7 +3658,12 @@
       "projectedPoints": 166.6,
       "adp": 236.5,
       "tier": 9,
-      "espnAdp": 170.09
+      "espnAdp": 170.1,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.3,
+      "riskScore": 5.5,
+      "byeWeek": 11
     },
     {
       "id": "audric-estim-no-rb",
@@ -2546,7 +3672,12 @@
       "team": "NO",
       "projectedPoints": 2.3,
       "adp": 237.4,
-      "tier": 10
+      "tier": 10,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 1.0,
+      "riskScore": 1.0,
+      "byeWeek": 8
     },
     {
       "id": "kimani-vidal-lac-rb",
@@ -2556,7 +3687,12 @@
       "projectedPoints": 85.6,
       "adp": 237.8,
       "tier": 10,
-      "espnAdp": 170.97
+      "espnAdp": 170.99,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 3.9,
+      "riskScore": 4.4,
+      "byeWeek": 7
     },
     {
       "id": "matt-gay-was-k",
@@ -2566,7 +3702,7 @@
       "projectedPoints": 108.4,
       "adp": 238.2,
       "tier": 4,
-      "espnAdp": 169.56
+      "espnAdp": 169.57
     },
     {
       "id": "jack-bech-lv-wr",
@@ -2576,7 +3712,12 @@
       "projectedPoints": 86.5,
       "adp": 238.2,
       "tier": 11,
-      "espnAdp": 170.21
+      "espnAdp": 170.2,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.2,
+      "riskScore": 4.6,
+      "byeWeek": 13
     },
     {
       "id": "eli-stowers-phi-te",
@@ -2586,7 +3727,13 @@
       "projectedPoints": 76.8,
       "adp": 238.9,
       "tier": 8,
-      "espnAdp": 169.97
+      "espnAdp": 169.97,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 5.3,
+      "riskScore": 6.3,
+      "isRookie": true,
+      "byeWeek": 10
     },
     {
       "id": "kaytron-allen-was-rb",
@@ -2596,7 +3743,13 @@
       "projectedPoints": 45.0,
       "adp": 239.1,
       "tier": 10,
-      "espnAdp": 170.45
+      "espnAdp": 170.38,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 3.5,
+      "riskScore": 5.3,
+      "isRookie": true,
+      "byeWeek": 7
     },
     {
       "id": "ted-hurst-iii-tb-wr",
@@ -2606,7 +3759,13 @@
       "projectedPoints": 73.7,
       "adp": 239.6,
       "tier": 11,
-      "espnAdp": 170.19
+      "espnAdp": 170.18,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 3.3,
+      "riskScore": 4.3,
+      "isRookie": true,
+      "byeWeek": 10
     },
     {
       "id": "devaughn-vele-no-wr",
@@ -2616,7 +3775,12 @@
       "projectedPoints": 91.5,
       "adp": 239.8,
       "tier": 11,
-      "espnAdp": 171.66
+      "espnAdp": 171.65,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 4.3,
+      "riskScore": 4.8,
+      "byeWeek": 8
     },
     {
       "id": "pat-freiermuth-pit-te",
@@ -2626,7 +3790,12 @@
       "projectedPoints": 126.2,
       "adp": 239.9,
       "tier": 6,
-      "espnAdp": 169.54
+      "espnAdp": 169.64,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 3.8,
+      "riskScore": 4.2,
+      "byeWeek": 9
     },
     {
       "id": "chris-bell-mia-wr",
@@ -2636,7 +3805,13 @@
       "projectedPoints": 82.3,
       "adp": 240.9,
       "tier": 11,
-      "espnAdp": 170.51
+      "espnAdp": 170.52,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 5.6,
+      "riskScore": 6.3,
+      "isRookie": true,
+      "byeWeek": 6
     },
     {
       "id": "jake-tonges-sf-te",
@@ -2646,7 +3821,12 @@
       "projectedPoints": 54.2,
       "adp": 241.4,
       "tier": 8,
-      "espnAdp": 170.19
+      "espnAdp": 170.14,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 2.5,
+      "riskScore": 4.0,
+      "byeWeek": 8
     },
     {
       "id": "elic-ayomanor-ten-wr",
@@ -2656,7 +3836,12 @@
       "projectedPoints": 81.9,
       "adp": 241.5,
       "tier": 11,
-      "espnAdp": 170.0
+      "espnAdp": 170.0,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 4.1,
+      "riskScore": 4.7,
+      "byeWeek": 9
     },
     {
       "id": "christian-kirk-sf-wr",
@@ -2666,7 +3851,12 @@
       "projectedPoints": 68.0,
       "adp": 241.7,
       "tier": 11,
-      "espnAdp": 169.93
+      "espnAdp": 169.94,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 3.9,
+      "riskScore": 5.8,
+      "byeWeek": 8
     },
     {
       "id": "packers-dst-gb-dst",
@@ -2676,7 +3866,7 @@
       "projectedPoints": 100.2,
       "adp": 241.8,
       "tier": 4,
-      "espnAdp": 169.18
+      "espnAdp": 169.36
     },
     {
       "id": "troy-franklin-den-wr",
@@ -2686,7 +3876,12 @@
       "projectedPoints": 87.6,
       "adp": 241.8,
       "tier": 11,
-      "espnAdp": 170.05
+      "espnAdp": 170.05,
+      "depthChartRank": 5,
+      "depthChartSource": "derived",
+      "upsideScore": 3.7,
+      "riskScore": 4.0,
+      "byeWeek": 10
     },
     {
       "id": "demond-claiborne-min-rb",
@@ -2696,7 +3891,13 @@
       "projectedPoints": 42.0,
       "adp": 242.0,
       "tier": 10,
-      "espnAdp": 170.37
+      "espnAdp": 170.32,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 4.8,
+      "riskScore": 5.3,
+      "isRookie": true,
+      "byeWeek": 6
     },
     {
       "id": "jacoby-brissett-ari-qb",
@@ -2706,7 +3907,12 @@
       "projectedPoints": 200.7,
       "adp": 243.0,
       "tier": 9,
-      "espnAdp": 169.98
+      "espnAdp": 169.93,
+      "depthChartRank": 1,
+      "depthChartSource": "derived",
+      "upsideScore": 6.0,
+      "riskScore": 4.7,
+      "byeWeek": 14
     },
     {
       "id": "sean-tucker-tb-rb",
@@ -2716,7 +3922,12 @@
       "projectedPoints": 42.8,
       "adp": 243.9,
       "tier": 10,
-      "espnAdp": 170.33
+      "espnAdp": 170.35,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 3.2,
+      "riskScore": 4.8,
+      "byeWeek": 10
     },
     {
       "id": "daniel-carlson-lv-k",
@@ -2736,7 +3947,12 @@
       "projectedPoints": 47.6,
       "adp": 247.9,
       "tier": 10,
-      "espnAdp": 170.56
+      "espnAdp": 170.62,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.8,
+      "riskScore": 5.0,
+      "byeWeek": 6
     },
     {
       "id": "max-klare-lar-te",
@@ -2746,7 +3962,13 @@
       "projectedPoints": 56.2,
       "adp": 248.8,
       "tier": 8,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 2,
+      "depthChartSource": "derived",
+      "upsideScore": 4.6,
+      "riskScore": 5.4,
+      "isRookie": true,
+      "byeWeek": 11
     },
     {
       "id": "darnell-mooney-nyg-wr",
@@ -2756,7 +3978,12 @@
       "projectedPoints": 76.2,
       "adp": 249.2,
       "tier": 11,
-      "espnAdp": 170.43
+      "espnAdp": 170.39,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 3.8,
+      "riskScore": 4.8,
+      "byeWeek": 8
     },
     {
       "id": "geno-smith-nyj-qb",
@@ -2766,7 +3993,9 @@
       "projectedPoints": 224.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.09
+      "espnAdp": 170.05,
+      "depthChartRank": 1,
+      "depthChartSource": "derived"
     },
     {
       "id": "dontayvion-wicks-phi-wr",
@@ -2776,7 +4005,9 @@
       "projectedPoints": 127.7,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.97
+      "espnAdp": 170.98,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "demario-douglas-ne-wr",
@@ -2786,7 +4017,9 @@
       "projectedPoints": 114.6,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.44
+      "espnAdp": 170.48,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "mike-gesicki-cin-te",
@@ -2796,7 +4029,9 @@
       "projectedPoints": 103.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.25
+      "espnAdp": 170.22,
+      "depthChartRank": 1,
+      "depthChartSource": "derived"
     },
     {
       "id": "darren-waller-car-te",
@@ -2806,7 +4041,9 @@
       "projectedPoints": 103.7,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.36
+      "espnAdp": 170.38,
+      "depthChartRank": 1,
+      "depthChartSource": "derived"
     },
     {
       "id": "cole-kmet-chi-te",
@@ -2816,7 +4053,9 @@
       "projectedPoints": 99.9,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.74
+      "espnAdp": 169.75,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "kirk-cousins-lv-qb",
@@ -2826,7 +4065,9 @@
       "projectedPoints": 99.6,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.97
+      "espnAdp": 169.98,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "wil-lutz-den-k",
@@ -2836,7 +4077,7 @@
       "projectedPoints": 99.6,
       "adp": 250.0,
       "tier": 5,
-      "espnAdp": 169.63
+      "espnAdp": 169.62
     },
     {
       "id": "chargers-dst-lac-dst",
@@ -2846,7 +4087,7 @@
       "projectedPoints": 95.8,
       "adp": 250.0,
       "tier": 4,
-      "espnAdp": 165.63
+      "espnAdp": 165.73
     },
     {
       "id": "evan-engram-den-te",
@@ -2856,7 +4097,9 @@
       "projectedPoints": 94.7,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.03
+      "espnAdp": 170.02,
+      "depthChartRank": 1,
+      "depthChartSource": "derived"
     },
     {
       "id": "justin-tucker-fa-k",
@@ -2866,7 +4109,7 @@
       "projectedPoints": 93.4,
       "adp": 250.0,
       "tier": 5,
-      "espnAdp": 169.68
+      "espnAdp": 169.7
     },
     {
       "id": "darius-slayton-nyg-wr",
@@ -2876,7 +4119,9 @@
       "projectedPoints": 92.5,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.6
+      "espnAdp": 170.57,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "evan-mcpherson-cin-k",
@@ -2886,7 +4131,7 @@
       "projectedPoints": 91.4,
       "adp": 250.0,
       "tier": 5,
-      "espnAdp": 169.28
+      "espnAdp": 169.31
     },
     {
       "id": "lions-dst-det-dst",
@@ -2896,7 +4141,7 @@
       "projectedPoints": 91.4,
       "adp": 250.0,
       "tier": 4,
-      "espnAdp": 154.51
+      "espnAdp": 154.9
     },
     {
       "id": "deshaun-watson-cle-qb",
@@ -2906,7 +4151,9 @@
       "projectedPoints": 91.3,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.09
+      "espnAdp": 170.1,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "xavier-hutchinson-hou-wr",
@@ -2916,7 +4163,9 @@
       "projectedPoints": 90.7,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.06
+      "espnAdp": 170.17,
+      "depthChartRank": 5,
+      "depthChartSource": "derived"
     },
     {
       "id": "chris-brooks-gb-rb",
@@ -2926,7 +4175,9 @@
       "projectedPoints": 89.4,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.2
+      "espnAdp": 170.29,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "jalen-tolbert-mia-wr",
@@ -2936,7 +4187,9 @@
       "projectedPoints": 89.4,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.55
+      "espnAdp": 170.55,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "cowboys-dst-dal-dst",
@@ -2946,7 +4199,7 @@
       "projectedPoints": 87.0,
       "adp": 250.0,
       "tier": 4,
-      "espnAdp": 167.04
+      "espnAdp": 167.31
     },
     {
       "id": "malik-davis-dal-rb",
@@ -2956,7 +4209,9 @@
       "projectedPoints": 86.7,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.1
+      "espnAdp": 170.24,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "cairo-santos-chi-k",
@@ -2966,7 +4221,7 @@
       "projectedPoints": 86.4,
       "adp": 250.0,
       "tier": 5,
-      "espnAdp": 168.98
+      "espnAdp": 169.08
     },
     {
       "id": "jordan-james-sf-rb",
@@ -2976,7 +4231,9 @@
       "projectedPoints": 85.7,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.96
+      "espnAdp": 170.83,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "justice-hill-bal-rb",
@@ -2986,7 +4243,9 @@
       "projectedPoints": 84.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 168.5
+      "espnAdp": 168.62,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "jason-sanders-mia-k",
@@ -2996,7 +4255,7 @@
       "projectedPoints": 83.2,
       "adp": 250.0,
       "tier": 5,
-      "espnAdp": 169.88
+      "espnAdp": 169.89
     },
     {
       "id": "dolphins-dst-mia-dst",
@@ -3006,7 +4265,7 @@
       "projectedPoints": 82.6,
       "adp": 250.0,
       "tier": 5,
-      "espnAdp": 169.66
+      "espnAdp": 169.67
     },
     {
       "id": "charlie-kolar-lac-te",
@@ -3016,7 +4275,9 @@
       "projectedPoints": 82.4,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "andrei-iosivas-cin-wr",
@@ -3026,7 +4287,9 @@
       "projectedPoints": 81.0,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.13
+      "espnAdp": 170.14,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "samaje-perine-cin-rb",
@@ -3036,7 +4299,9 @@
       "projectedPoints": 80.9,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 171.17
+      "espnAdp": 171.18,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "michael-mayer-lv-te",
@@ -3046,7 +4311,9 @@
       "projectedPoints": 80.0,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.25
+      "espnAdp": 170.22,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "dawson-knox-buf-te",
@@ -3056,7 +4323,9 @@
       "projectedPoints": 79.6,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.8
+      "espnAdp": 169.81,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "tyquan-thornton-kc-wr",
@@ -3066,7 +4335,9 @@
       "projectedPoints": 79.5,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.41
+      "espnAdp": 170.37,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "bears-dst-chi-dst",
@@ -3076,7 +4347,7 @@
       "projectedPoints": 78.2,
       "adp": 250.0,
       "tier": 5,
-      "espnAdp": 169.62
+      "espnAdp": 169.6
     },
     {
       "id": "tez-johnson-tb-wr",
@@ -3086,7 +4357,9 @@
       "projectedPoints": 78.2,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.98
+      "espnAdp": 169.98,
+      "depthChartRank": 5,
+      "depthChartSource": "derived"
     },
     {
       "id": "graham-gano-nyg-k",
@@ -3106,7 +4379,9 @@
       "projectedPoints": 77.1,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.74
+      "espnAdp": 170.74,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "lequint-allen-jr-jax-rb",
@@ -3116,7 +4391,9 @@
       "projectedPoints": 75.2,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.33
+      "espnAdp": 170.35,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "luke-musgrave-gb-te",
@@ -3126,7 +4403,9 @@
       "projectedPoints": 74.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.98
+      "espnAdp": 169.98,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "ja-tavion-sanders-car-te",
@@ -3136,7 +4415,9 @@
       "projectedPoints": 74.0,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.95
+      "espnAdp": 169.95,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "bengals-dst-cin-dst",
@@ -3146,7 +4427,7 @@
       "projectedPoints": 73.8,
       "adp": 250.0,
       "tier": 5,
-      "espnAdp": 169.71
+      "espnAdp": 169.73
     },
     {
       "id": "carson-beck-ari-qb",
@@ -3156,7 +4437,9 @@
       "projectedPoints": 73.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.01
+      "espnAdp": 170.01,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "chad-ryland-ari-k",
@@ -3166,7 +4449,7 @@
       "projectedPoints": 73.2,
       "adp": 250.0,
       "tier": 6,
-      "espnAdp": 169.91
+      "espnAdp": 169.92
     },
     {
       "id": "jahan-dotson-atl-wr",
@@ -3176,7 +4459,9 @@
       "projectedPoints": 70.6,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.67
+      "espnAdp": 170.67,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "commanders-dst-was-dst",
@@ -3186,7 +4471,7 @@
       "projectedPoints": 69.4,
       "adp": 250.0,
       "tier": 5,
-      "espnAdp": 169.73
+      "espnAdp": 169.76
     },
     {
       "id": "nick-folk-nyj-k",
@@ -3196,7 +4481,7 @@
       "projectedPoints": 68.8,
       "adp": 250.0,
       "tier": 6,
-      "espnAdp": 170.33
+      "espnAdp": 170.34
     },
     {
       "id": "falcons-dst-atl-dst",
@@ -3206,7 +4491,7 @@
       "projectedPoints": 65.0,
       "adp": 250.0,
       "tier": 5,
-      "espnAdp": 170.07
+      "espnAdp": 170.05
     },
     {
       "id": "noah-gray-kc-te",
@@ -3216,7 +4501,9 @@
       "projectedPoints": 64.9,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.93
+      "espnAdp": 169.92,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "kendrick-bourne-ari-wr",
@@ -3226,7 +4513,9 @@
       "projectedPoints": 64.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.01
+      "espnAdp": 170.0,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "brandon-mcmanus-gb-k",
@@ -3246,7 +4535,9 @@
       "projectedPoints": 63.3,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "george-holani-sea-rb",
@@ -3256,7 +4547,9 @@
       "projectedPoints": 63.1,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.28
+      "espnAdp": 170.31,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "dj-giddens-ind-rb",
@@ -3266,7 +4559,9 @@
       "projectedPoints": 62.2,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.15
+      "espnAdp": 170.13,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "roman-wilson-pit-wr",
@@ -3276,7 +4571,9 @@
       "projectedPoints": 62.1,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.98
+      "espnAdp": 169.98,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "isaiah-davis-nyj-rb",
@@ -3286,7 +4583,9 @@
       "projectedPoints": 61.0,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.58
+      "espnAdp": 170.55,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "bryce-lance-no-wr",
@@ -3296,7 +4595,9 @@
       "projectedPoints": 60.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "olamide-zaccheaus-atl-wr",
@@ -3306,7 +4607,9 @@
       "projectedPoints": 60.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "colts-dst-ind-dst",
@@ -3316,7 +4619,7 @@
       "projectedPoints": 60.6,
       "adp": 250.0,
       "tier": 6,
-      "espnAdp": 170.1
+      "espnAdp": 170.09
     },
     {
       "id": "tommy-tremble-car-te",
@@ -3326,7 +4629,9 @@
       "projectedPoints": 60.4,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.95
+      "espnAdp": 169.96,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "kalif-raymond-chi-wr",
@@ -3336,7 +4641,9 @@
       "projectedPoints": 60.2,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.97
+      "espnAdp": 169.98,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "elijah-arroyo-sea-te",
@@ -3346,7 +4653,9 @@
       "projectedPoints": 60.0,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.92
+      "espnAdp": 169.93,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "jerome-ford-fa-rb",
@@ -3375,7 +4684,9 @@
       "projectedPoints": 57.1,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.97
+      "espnAdp": 169.97,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "mack-hollins-ne-wr",
@@ -3385,7 +4696,9 @@
       "projectedPoints": 56.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.08
+      "espnAdp": 170.1,
+      "depthChartRank": 5,
+      "depthChartSource": "derived"
     },
     {
       "id": "buccaneers-dst-tb-dst",
@@ -3395,7 +4708,7 @@
       "projectedPoints": 56.2,
       "adp": 250.0,
       "tier": 6,
-      "espnAdp": 170.39
+      "espnAdp": 170.52
     },
     {
       "id": "treylon-burks-was-wr",
@@ -3405,7 +4718,9 @@
       "projectedPoints": 56.0,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "andres-borregales-ne-k",
@@ -3424,7 +4739,9 @@
       "projectedPoints": 55.2,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.79
+      "espnAdp": 169.83,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "brenen-thompson-lac-wr",
@@ -3434,7 +4751,9 @@
       "projectedPoints": 53.5,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.98
+      "espnAdp": 169.99,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "dont-e-thornton-jr-lv-wr",
@@ -3444,7 +4763,9 @@
       "projectedPoints": 51.9,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 5,
+      "depthChartSource": "derived"
     },
     {
       "id": "jets-dst-nyj-dst",
@@ -3454,7 +4775,7 @@
       "projectedPoints": 51.8,
       "adp": 250.0,
       "tier": 6,
-      "espnAdp": 170.2
+      "espnAdp": 170.25
     },
     {
       "id": "joshua-karty-lar-k",
@@ -3473,7 +4794,9 @@
       "projectedPoints": 50.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.72
+      "espnAdp": 170.73,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "skyler-bell-buf-wr",
@@ -3483,7 +4806,9 @@
       "projectedPoints": 49.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.92
+      "espnAdp": 169.92,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "calvin-austin-iii-nyg-wr",
@@ -3493,7 +4818,9 @@
       "projectedPoints": 49.6,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 5,
+      "depthChartSource": "derived"
     },
     {
       "id": "ben-sinnott-was-te",
@@ -3503,7 +4830,9 @@
       "projectedPoints": 48.9,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "patriots-dst-ne-dst",
@@ -3513,7 +4842,7 @@
       "projectedPoints": 47.4,
       "adp": 250.0,
       "tier": 6,
-      "espnAdp": 152.97
+      "espnAdp": 153.52
     },
     {
       "id": "jake-moody-sf-k",
@@ -3532,7 +4861,9 @@
       "projectedPoints": 45.7,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.09
+      "espnAdp": 170.05,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "devontez-walker-bal-wr",
@@ -3542,7 +4873,9 @@
       "projectedPoints": 45.4,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.97
+      "espnAdp": 169.97,
+      "depthChartRank": 5,
+      "depthChartSource": "derived"
     },
     {
       "id": "emari-demercado-fa-rb",
@@ -3561,7 +4894,9 @@
       "projectedPoints": 45.1,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.98
+      "espnAdp": 169.98,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "jaylin-lane-was-wr",
@@ -3571,7 +4906,9 @@
       "projectedPoints": 45.1,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 5,
+      "depthChartSource": "derived"
     },
     {
       "id": "noah-fant-no-te",
@@ -3581,7 +4918,9 @@
       "projectedPoints": 45.1,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.98
+      "espnAdp": 169.98,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "cardinals-dst-ari-dst",
@@ -3591,7 +4930,7 @@
       "projectedPoints": 43.0,
       "adp": 250.0,
       "tier": 7,
-      "espnAdp": 169.84
+      "espnAdp": 169.85
     },
     {
       "id": "blake-grupe-no-k",
@@ -3610,7 +4949,9 @@
       "projectedPoints": 41.0,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.97
+      "espnAdp": 169.97,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "trevor-etienne-car-rb",
@@ -3620,7 +4961,9 @@
       "projectedPoints": 40.8,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.04
+      "espnAdp": 170.02,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "ollie-gordon-ii-mia-rb",
@@ -3630,7 +4973,9 @@
       "projectedPoints": 40.6,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.67
+      "espnAdp": 170.67,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "raiders-dst-lv-dst",
@@ -3640,7 +4985,7 @@
       "projectedPoints": 38.6,
       "adp": 250.0,
       "tier": 7,
-      "espnAdp": 169.8
+      "espnAdp": 169.82
     },
     {
       "id": "eddy-pineiro-sf-k",
@@ -3650,7 +4995,7 @@
       "projectedPoints": 38.0,
       "adp": 250.0,
       "tier": 8,
-      "espnAdp": 141.06
+      "espnAdp": 141.62
     },
     {
       "id": "zavion-thomas-chi-wr",
@@ -3660,7 +5005,9 @@
       "projectedPoints": 34.4,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.89
+      "espnAdp": 169.87,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "saints-dst-no-dst",
@@ -3670,7 +5017,7 @@
       "projectedPoints": 34.2,
       "adp": 250.0,
       "tier": 7,
-      "espnAdp": 170.53
+      "espnAdp": 170.57
     },
     {
       "id": "spencer-shrader-ind-k",
@@ -3680,7 +5027,7 @@
       "projectedPoints": 33.6,
       "adp": 250.0,
       "tier": 8,
-      "espnAdp": 169.89
+      "espnAdp": 169.94
     },
     {
       "id": "will-shipley-phi-rb",
@@ -3690,7 +5037,9 @@
       "projectedPoints": 33.2,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.12
+      "espnAdp": 170.14,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "aj-dillon-car-rb",
@@ -3700,7 +5049,9 @@
       "projectedPoints": 31.0,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.98
+      "espnAdp": 169.98,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "jaguars-dst-jax-dst",
@@ -3710,7 +5061,7 @@
       "projectedPoints": 29.8,
       "adp": 250.0,
       "tier": 7,
-      "espnAdp": 167.96
+      "espnAdp": 167.94
     },
     {
       "id": "adam-randall-bal-rb",
@@ -3720,7 +5071,9 @@
       "projectedPoints": 29.2,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.33
+      "espnAdp": 170.27,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "riley-patterson-cle-k",
@@ -3730,7 +5083,7 @@
       "projectedPoints": 29.2,
       "adp": 250.0,
       "tier": 8,
-      "espnAdp": 169.95
+      "espnAdp": 169.94
     },
     {
       "id": "tahj-brooks-cin-rb",
@@ -3740,7 +5093,9 @@
       "projectedPoints": 26.9,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.14
+      "espnAdp": 170.15,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "nate-boerkircher-jax-te",
@@ -3750,7 +5105,9 @@
       "projectedPoints": 25.9,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 2,
+      "depthChartSource": "derived"
     },
     {
       "id": "titans-dst-ten-dst",
@@ -3760,7 +5117,7 @@
       "projectedPoints": 25.4,
       "adp": 250.0,
       "tier": 8,
-      "espnAdp": 169.89
+      "espnAdp": 169.91
     },
     {
       "id": "giants-dst-nyg-dst",
@@ -3770,7 +5127,7 @@
       "projectedPoints": 21.0,
       "adp": 250.0,
       "tier": 8,
-      "espnAdp": 169.65
+      "espnAdp": 169.69
     },
     {
       "id": "kendrick-law-det-wr",
@@ -3780,7 +5137,9 @@
       "projectedPoints": 20.5,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 170.0
+      "espnAdp": 170.0,
+      "depthChartRank": 4,
+      "depthChartSource": "derived"
     },
     {
       "id": "panthers-dst-car-dst",
@@ -3809,7 +5168,7 @@
       "projectedPoints": 12.2,
       "adp": 250.0,
       "tier": 8,
-      "espnAdp": 157.63
+      "espnAdp": 158.08
     },
     {
       "id": "oscar-delp-no-te",
@@ -3819,7 +5178,9 @@
       "projectedPoints": 11.4,
       "adp": 250.0,
       "tier": 1,
-      "espnAdp": 169.99
+      "espnAdp": 169.99,
+      "depthChartRank": 3,
+      "depthChartSource": "derived"
     },
     {
       "id": "emanuel-wilson-sea-rb",
@@ -3829,7 +5190,12 @@
       "projectedPoints": 47.6,
       "adp": 250.3,
       "tier": 10,
-      "espnAdp": 170.21
+      "espnAdp": 170.19,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 3.2,
+      "riskScore": 4.9,
+      "byeWeek": 11
     },
     {
       "id": "colby-parkinson-lar-te",
@@ -3839,7 +5205,12 @@
       "projectedPoints": 109.3,
       "adp": 251.4,
       "tier": 7,
-      "espnAdp": 170.24
+      "espnAdp": 170.21,
+      "depthChartRank": 3,
+      "depthChartSource": "derived",
+      "upsideScore": 4.8,
+      "riskScore": 4.1,
+      "byeWeek": 11
     },
     {
       "id": "calvin-ridley-ten-wr",
@@ -3849,7 +5220,12 @@
       "projectedPoints": 108.0,
       "adp": 253.2,
       "tier": 11,
-      "espnAdp": 168.34
+      "espnAdp": 168.26,
+      "depthChartRank": 5,
+      "depthChartSource": "derived",
+      "upsideScore": 4.7,
+      "riskScore": 5.2,
+      "byeWeek": 9
     },
     {
       "id": "chris-brazzell-ii-car-wr",
@@ -3859,7 +5235,13 @@
       "projectedPoints": 37.0,
       "adp": 400.0,
       "tier": 11,
-      "espnAdp": 170.0
+      "espnAdp": 170.0,
+      "depthChartRank": 4,
+      "depthChartSource": "derived",
+      "upsideScore": 2.8,
+      "riskScore": 7.0,
+      "isRookie": true,
+      "byeWeek": 5
     },
     {
       "id": "van-jefferson-fa-wr",
@@ -3869,7 +5251,9 @@
       "projectedPoints": 48.0,
       "adp": 484.3,
       "tier": 11,
-      "espnAdp": 169.97
+      "espnAdp": 169.97,
+      "upsideScore": 2.0,
+      "riskScore": 4.0
     },
     {
       "id": "cedric-tillman-fa-wr",
@@ -3878,7 +5262,9 @@
       "team": "FA",
       "projectedPoints": 40.7,
       "adp": 667.4,
-      "tier": 11
+      "tier": 11,
+      "upsideScore": 3.6,
+      "riskScore": 4.5
     }
   ]
 }

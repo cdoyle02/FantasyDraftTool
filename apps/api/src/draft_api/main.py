@@ -40,13 +40,23 @@ class PlayerPayload(ApiModel):
     projected_points: float = Field(alias="projectedPoints")
     adp: float | None = Field(default=None, gt=0)
     tier: int = Field(default=1, ge=1)
+    depth_chart_rank: int | None = Field(default=None, alias="depthChartRank", ge=1)
+    depth_chart_source: str | None = Field(default=None, alias="depthChartSource")
+    upside_score: float | None = Field(default=None, alias="upsideScore")
+    risk_score: float | None = Field(default=None, alias="riskScore")
+    is_rookie: bool = Field(default=False, alias="isRookie")
+    is_breakout: bool = Field(default=False, alias="isBreakout")
+    injury_status: str | None = Field(default=None, alias="injuryStatus")
+    ir_eligible: bool = Field(default=False, alias="irEligible")
+    expected_return_week: int | None = Field(default=None, alias="expectedReturnWeek", ge=1)
+    bye_week: int | None = Field(default=None, alias="byeWeek", ge=1, le=18)
 
 
 class AdjustmentPayload(ApiModel):
     player_id: str = Field(alias="playerId", min_length=1)
     points_delta: float = Field(default=0, alias="pointsDelta")
     tier_override: int | None = Field(default=None, alias="tierOverride", ge=1)
-    tag: Literal["myGuy", "avoid"] | None = None
+    tag: Literal["myGuy", "avoid", "irStash"] | None = None
     note: str = ""
 
 
@@ -72,6 +82,8 @@ class LeagueSettingsPayload(ApiModel):
     draft_type: Literal["snake"] = Field(default="snake", alias="draftType")
     league_type: str = Field(default="redraft", alias="leagueType")
     user_team_id: str = Field(default="1", alias="userTeamId")
+    keeper_slots: int = Field(default=0, alias="keeperSlots", ge=0)
+    ir_slots: int = Field(default=0, alias="irSlots", ge=0)
     formula_version: int | None = Field(default=None, alias="formulaVersion", ge=1, le=4)
     formula_params: dict[str, Any] | None = Field(default=None, alias="formulaParams")
 
