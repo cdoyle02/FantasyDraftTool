@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 from mcp.server import MCPServer
@@ -16,20 +17,37 @@ from .client import (
     season_meta_url,
     season_players_url,
 )
+from .filters import parse_fantasy_filter
+from .free_agents import (
+    build_page_filter,
+    effective_scoring_period,
+    normalize_entries,
+    scan_for_search_matches,
+)
+from .players import (
+    normalize_player_entry,
+    normalize_position_alias,
+    pagination_fields,
+    validate_free_agent_query,
+)
 from .reference import (
     LINEUP_SLOT_IDS,
     POSITION_IDS,
     PRO_TEAM_IDS,
     reference_document,
-    stat_source_ids,
 )
 from .shape import describe, render_json
 
 INSTRUCTIONS = """\
-Explore ESPN's undocumented fantasy football v3 API while building an ESPN draft
-integration. Start with espn_reference to see the endpoint and view catalog, then use
-espn_request to inspect real payload shapes. espn_draft_picks, espn_league_settings and
-espn_players return normalized output suited to mapping into an application domain model.
+Explore ESPN's undocumented fantasy football v3 API while building ESPN fantasy football
+integrations. Start with espn_reference to see the endpoint and view catalog, then use
+espn_request to inspect real payload shapes.
+
+Normalized tools:
+- espn_draft_picks — live/completed draft sync
+- espn_league_settings — roster slots and scoring
+- espn_players — draft id map (preserves availability metadata when a league is set)
+- espn_free_agents — league free agents and waiver players with paging, sort, and search
 
 Season defaults to ESPN_SEASON (2026 when unset). League id defaults to ESPN_LEAGUE_ID.
 Credentials come from ESPN_S2 and ESPN_SWID and are never accepted as tool arguments.
@@ -87,7 +105,7 @@ async def espn_request(
     season: int | None = None,
     endpoint: Literal["league", "season_players", "season_meta"] = "league",
     scoring_period_id: int | None = None,
-    fantasy_filter: str | None = None,
+    fantasy_filter: dict[str, Any] | str | None = None,
     path: str | None = None,
     mode: Literal["shape", "json"] = "shape",
     depth: int = 4,
@@ -101,7 +119,7 @@ async def espn_request(
         season: Season year. Defaults to ESPN_SEASON.
         endpoint: Which documented base path to use. Ignored when path is given.
         scoring_period_id: Optional scoringPeriodId query parameter.
-        fantasy_filter: JSON string sent as the X-Fantasy-Filter header.
+        fantasy_filter: JSON object or JSON string sent as the X-Fantasy-Filter header.
         path: Full URL override for an endpoint not covered by the presets.
         mode: "shape" for a structural outline, "json" for the raw payload.
         depth: Nesting levels to describe in shape mode.
@@ -118,12 +136,7 @@ async def espn_request(
     else:
         url = league_url(config.season, _require_league(resolved_league))
 
-    parsed_filter: dict[str, Any] | None = None
-    if fantasy_filter:
-        try:
-            parsed_filter = json.loads(fantasy_filter)
-        except json.JSONDecodeError as error:
-            raise EspnError(f"fantasy_filter must be valid JSON: {error}") from error
+    parsed_filter = parse_fantasy_filter(fantasy_filter)
 
     payload = await fetch(
         url,
@@ -251,6 +264,150 @@ async def draft_picks(
     )
 
 
+async def free_agents(
+    config: EspnConfig,
+    league_id: str,
+    *,
+    statuses: list[str] | None = None,
+    position: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+    sort_by: Literal["percent_owned"] = "percent_owned",
+    sort_asc: bool = False,
+    search: str | None = None,
+    scoring_period_id: int | None = None,
+    season: int | None = None,
+) -> str:
+    """Fetch and normalize league free agents with an explicit configuration."""
+    resolved_season = season if season is not None else config.season
+    query = validate_free_agent_query(
+        league_id=league_id,
+        season=resolved_season,
+        statuses=statuses,
+        position=position,
+        limit=limit,
+        offset=offset,
+        sort_by=sort_by,
+        sort_asc=sort_asc,
+        scoring_period_id=scoring_period_id,
+        search=search,
+    )
+
+    url = league_url(resolved_season, league_id)
+    last_payload: dict[str, Any] = {}
+
+    async def fetch_page(espn_offset: int, espn_limit: int) -> list[dict[str, Any]]:
+        nonlocal last_payload
+        fantasy_filter = build_page_filter(
+            query,
+            limit=espn_limit,
+            offset=espn_offset,
+        )
+        payload = await fetch(
+            url,
+            config=config,
+            views=["kona_player_info"],
+            params={"scoringPeriodId": query.scoring_period_id},
+            fantasy_filter=fantasy_filter,
+        )
+        if not isinstance(payload, dict):
+            raise EspnError("ESPN response for kona_player_info must be an object")
+        last_payload = payload
+        players = payload.get("players")
+        if players is None:
+            raise EspnError("ESPN response missing players list for kona_player_info")
+        return players
+
+    search_meta: dict[str, Any] | None = None
+    if query.search:
+        scan = await scan_for_search_matches(fetch_page, query)
+        raw_entries = scan.entries
+        search_meta = {
+            "query": query.search,
+            "status": scan.status,
+            "pages_scanned": scan.pages_scanned,
+            "rows_scanned": scan.rows_scanned,
+            "match_count": scan.match_count,
+        }
+    else:
+        raw_entries = await fetch_page(query.offset, query.limit)
+
+    effective_period = effective_scoring_period(query.scoring_period_id, last_payload)
+    players = normalize_entries(
+        raw_entries,
+        season=resolved_season,
+        effective_scoring_period=effective_period,
+    )
+
+    page = pagination_fields(offset=query.offset, limit=query.limit, returned=len(players))
+    envelope: dict[str, Any] = {
+        "schema_version": 1,
+        "season": resolved_season,
+        "league_id": league_id,
+        "fetched_at": datetime.now(tz=UTC).isoformat(),
+        "requested_scoring_period_id": query.scoring_period_id,
+        "effective_scoring_period_id": effective_period,
+        "statuses": list(query.statuses),
+        "position": query.position,
+        "sort_by": query.sort_by,
+        "sort_asc": query.sort_asc,
+        **page,
+        "players": players,
+    }
+    if search_meta is not None:
+        envelope["search"] = search_meta
+    return json.dumps(envelope, indent=2)
+
+
+@server.tool(
+    description=(
+        "Normalized league free agents and waiver players from kona_player_info with "
+        "server-side status/position filters, percent-owned sort, paging, and optional "
+        "multi-page name search."
+    )
+)
+async def espn_free_agents(
+    league_id: str | None = None,
+    season: int | None = None,
+    statuses: list[str] | None = None,
+    position: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+    sort_by: Literal["percent_owned"] = "percent_owned",
+    sort_asc: bool = False,
+    search: str | None = None,
+    scoring_period_id: int | None = None,
+) -> str:
+    """Return available players for a league.
+
+    Args:
+        league_id: ESPN league id. Defaults to ESPN_LEAGUE_ID.
+        season: Season year. Defaults to ESPN_SEASON.
+        statuses: Availability statuses to include. Defaults to FREEAGENT and WAIVERS.
+        position: Optional QB, RB, WR, TE, K, DST, or D/ST filter applied in ESPN.
+        limit: Maximum players to return (1-100).
+        offset: Result offset. ESPN pool offset when unsearched; match-list offset when searched.
+        sort_by: Only percent_owned is supported in Phase 1.
+        sort_asc: Sort percent owned ascending when true.
+        search: Case-insensitive name substring with bounded multi-page scan.
+        scoring_period_id: Optional scoringPeriodId for weekly stat splits.
+    """
+    config, resolved_league = _resolve(season, league_id)
+    return await free_agents(
+        config,
+        _require_league(resolved_league),
+        statuses=statuses,
+        position=position,
+        limit=limit,
+        offset=offset,
+        sort_by=sort_by,
+        sort_asc=sort_asc,
+        search=search,
+        scoring_period_id=scoring_period_id,
+        season=season,
+    )
+
+
 @server.tool(
     description=(
         "Normalized league configuration from view=mSettings: team count, draft type, "
@@ -348,7 +505,7 @@ async def espn_players(
         include_projections: Attach the projected season total when available.
     """
     config, resolved_league = _resolve(season, league_id)
-    wanted = position.upper() if position else None
+    wanted = normalize_position_alias(position) if position else None
 
     if resolved_league:
         payload = await fetch(
@@ -366,7 +523,7 @@ async def espn_players(
                 }
             },
         )
-        raw = [entry.get("player", entry) for entry in payload.get("players") or []]
+        raw = payload.get("players") or []
     else:
         payload = await fetch(
             season_players_url(config.season),
@@ -376,28 +533,24 @@ async def espn_players(
         )
         raw = payload if isinstance(payload, list) else payload.get("players") or []
 
-    projected_id = stat_source_ids(config.season)["projected_season"]
     results: list[dict[str, Any]] = []
-    for player in raw:
-        name = player.get("fullName") or player.get("name") or ""
-        slot = POSITION_IDS.get(player.get("defaultPositionId"), "UNKNOWN")
+    for entry in raw:
+        normalized = normalize_player_entry(
+            entry,
+            season=config.season,
+            scoring_period_id=None,
+            include_legacy_projections=include_projections,
+            include_full_stats=False,
+        )
+
+        name = normalized["name"]
+        slot = normalized["position"]
         if wanted and slot != wanted:
             continue
         if search and search.lower() not in name.lower():
             continue
 
-        entry: dict[str, Any] = {
-            "player_id": player.get("id"),
-            "name": name,
-            "position": slot,
-            "pro_team": PRO_TEAM_IDS.get(player.get("proTeamId"), "UNK"),
-            "injury_status": player.get("injuryStatus"),
-        }
-        if include_projections:
-            entry["projected_points"] = _projected_total(player, projected_id)
-            ranks = player.get("draftRanksByRankType") or {}
-            entry["ppr_draft_rank"] = (ranks.get("PPR") or {}).get("rank")
-        results.append(entry)
+        results.append(normalized)
         if len(results) >= limit:
             break
 
@@ -410,15 +563,6 @@ async def espn_players(
         },
         indent=2,
     )
-
-
-def _projected_total(player: dict[str, Any], projected_id: str) -> float | None:
-    for stat in player.get("stats") or []:
-        if stat.get("id") == projected_id or (
-            stat.get("statSourceId") == 1 and stat.get("statSplitTypeId") == 0
-        ):
-            return stat.get("appliedTotal")
-    return None
 
 
 async def _player_lookup(config: EspnConfig, ids: set[Any]) -> dict[int, dict[str, Any]]:

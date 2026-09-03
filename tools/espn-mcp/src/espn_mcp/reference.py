@@ -185,8 +185,25 @@ NOTES: list[str] = [
     "Multiple views can be passed as repeated view query parameters.",
     "Draft picks carry playerId only, so names require a separate player map lookup.",
     "Projected season stats use stat id 10{season}, for example 102026. Actual use 00{season}.",
+    "Select stats by seasonId, statSourceId, statSplitTypeId, and scoringPeriodId — not id alone.",
+    "kona_player_info without X-Fantasy-Filter is truncated to about 50 players.",
+    "Use espn_free_agents for league free agents and waiver players with verified filters.",
     "Full player payloads are megabytes. Prefer shape mode or a filtered limit while exploring.",
 ]
+
+PLAYER_STATUSES: dict[str, str] = {
+    "FREEAGENT": "Unrostered player available to add immediately.",
+    "WAIVERS": "Player on waivers; add timing depends on league waiver rules.",
+    "ONTEAM": "Player rostered by a fantasy team.",
+}
+
+FANTASY_FILTER_KEYS: dict[str, str] = {
+    "filterStatus": "Restrict to availability statuses, e.g. FREEAGENT and WAIVERS.",
+    "filterSlotIds": "Restrict to lineup slot ids (QB=0, RB=2, WR=4, TE=6, K=17, DST=16).",
+    "limit": "Page size (live-verified up to 100 on kona_player_info).",
+    "offset": "Page offset into the filtered player pool.",
+    "sortPercOwned": "Sort by percent owned (sortPriority 1). Only verified sort for free agents.",
+}
 
 
 def stat_source_ids(season: int) -> dict[str, str]:
@@ -207,5 +224,7 @@ def reference_document(season: int) -> dict[str, Any]:
         "lineup_slot_ids": LINEUP_SLOT_IDS,
         "pro_team_ids": PRO_TEAM_IDS,
         "stat_split_ids": stat_source_ids(season),
+        "player_statuses": PLAYER_STATUSES,
+        "fantasy_filter_keys": FANTASY_FILTER_KEYS,
         "notes": NOTES,
     }
