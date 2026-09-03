@@ -233,6 +233,50 @@ class FormulaParams:
 
 
 @dataclass(frozen=True, slots=True)
+class V5FormulaParams(FormulaParams):
+    """Formula V5 coefficients extending V4 defaults."""
+
+    formula_version: int = 5
+    v5_policy_strength: float = 1.0
+    negative_vorp_bench_weight: float = 4.0
+    negative_vorp_bench_cap: float = 3.0
+    negative_vorp_starter_damp: float = 0.15
+    own_handcuff_factor_8_team: float = 0.45
+    own_handcuff_factor_10_team: float = 0.725
+    own_handcuff_factor_12_team: float = 1.0
+    own_handcuff_factor_14_team: float = 1.10
+    own_handcuff_second_multiplier: float = 0.40
+    own_handcuff_third_multiplier: float = 0.20
+    own_handcuff_fourth_plus_multiplier: float = 0.05
+    bench_balance_band_half_width: float = 0.10
+    bench_balance_usable_vorp_floor_ratio: float = -0.25
+    bench_balance_reserve_slots: float = 2.0
+    bench_balance_max_adjustment: float = 3.0
+    reliability_weight_max: float = 0.75
+    reliability_close_score_threshold: float = 1.25
+    reliability_target_risk: float = 5.0
+    reliability_risk_span: float = 2.5
+    reliability_min_known_players: int = 2
+    reliability_flex_weight: float = 0.75
+    reliability_reserve_weight: float = 0.35
+    reliability_reserve_slots: int = 1
+
+    def __post_init__(self) -> None:
+        if self.formula_version != 5:
+            raise ValueError("V5FormulaParams requires formula_version=5")
+        if not 0.0 <= self.v5_policy_strength <= 1.0:
+            raise ValueError("v5_policy_strength must be between 0 and 1")
+        if self.special_teams_lookahead_mode not in (
+            "never",
+            "eligibility_window",
+            "always",
+        ):
+            raise ValueError("special_teams_lookahead_mode is invalid")
+        if self.optionality_combine not in ("max", "sum"):
+            raise ValueError("optionality_combine must be 'max' or 'sum'")
+
+
+@dataclass(frozen=True, slots=True)
 class LeagueSettings:
     team_count: int = 12
     roster_slots: Mapping[str, int] = field(default_factory=default_roster_slots)
@@ -363,6 +407,23 @@ class RecommendationBreakdown:
 
 
 @dataclass(frozen=True, slots=True)
+class V5RecommendationBreakdown(RecommendationBreakdown):
+    negative_vorp_adjustment: float = 0.0
+    raw_handcuff_bonus: float = 0.0
+    adjusted_handcuff_bonus: float = 0.0
+    own_handcuff_league_multiplier: float = 1.0
+    own_handcuff_count: int = 0
+    own_handcuff_count_multiplier: float = 1.0
+    bench_balance_adjustment: float = 0.0
+    usable_rb_depth: float = 0.0
+    usable_wr_depth: float = 0.0
+    roster_risk_score: float = 0.0
+    pre_reliability_score: float = 0.0
+    reliability_adjustment: float = 0.0
+    v5_policy_strength: float = 1.0
+
+
+@dataclass(frozen=True, slots=True)
 class RecommendationResult:
     player_id: str
     player_name: str
@@ -437,10 +498,16 @@ def adjustment_from_dict(data: Mapping[str, Any]) -> UserAdjustment:
 def formula_params_from_dict(data: Mapping[str, Any] | None) -> FormulaParams:
     if not data:
         return FormulaParams()
+    payload = dict(data)
+    if "formulaVersion" in payload and "formula_version" not in payload:
+        payload["formula_version"] = payload.pop("formulaVersion")
+    version = int(payload.get("formula_version", 4))
+    if version == 5:
+        allowed = {item.name for item in fields(V5FormulaParams)}
+        filtered = {key: value for key, value in payload.items() if key in allowed}
+        return V5FormulaParams(**filtered)
     allowed = {item.name for item in fields(FormulaParams)}
-    filtered = {key: value for key, value in data.items() if key in allowed}
-    if "formulaVersion" in filtered and "formula_version" not in filtered:
-        filtered["formula_version"] = filtered.pop("formulaVersion")
+    filtered = {key: value for key, value in payload.items() if key in allowed}
     return FormulaParams(**filtered)
 
 

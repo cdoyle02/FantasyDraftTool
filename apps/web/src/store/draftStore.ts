@@ -72,6 +72,7 @@ interface DraftStore {
   adjustPlayer: (id: string, patch: Partial<Omit<UserAdjustment, 'playerId'>>) => Promise<void>
   removeAdjustments: (playerIds: string[]) => Promise<void>
   updateSettings: (patch: Partial<LeagueSettings>) => Promise<void>
+  setFormulaVersion: (version: 4 | 5) => Promise<void>
   refreshRecommendations: () => Promise<void>
 }
 
@@ -322,7 +323,9 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
       adjustments: Object.fromEntries(storedAdjustments.map((item) => [item.playerId, item])),
       picks,
       keepers,
-      settings: storedSettings ? { ...storedSettings, id: undefined } as unknown as LeagueSettings : defaultLeague,
+      settings: storedSettings
+        ? normalizeLeagueSettings({ ...storedSettings, id: undefined } as unknown as LeagueSettings)
+        : defaultLeague,
       evaluationRecords,
       savedRankings,
       activeSavedProfileId: storedImport?.savedProfileId,
@@ -771,33 +774,51 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
     set({ settings, keepers: validKeepers })
     await get().refreshRecommendations()
   },
+  setFormulaVersion: async (version) => {
+    const { settings } = get()
+    const current = settings.formulaVersion ?? 4
+    if (current === version) return
+    const nextSettings = copySettings({ ...settings, formulaVersion: version })
+    await db.settings.put({ ...nextSettings, id: 'active' })
+    await queueEvent('SETTINGS_UPDATED', { formulaVersion: version })
+    recommendationRequestId += 1
+    set({ settings: nextSettings, recommendations: [], recommendationContext: undefined })
+    await get().refreshRecommendations()
+  },
   refreshRecommendations: async () => {
     const { players, adjustments, picks, keepers, settings } = get()
     if (!players.length) return
     const requestId = ++recommendationRequestId
+    const requestedVersion = settings.formulaVersion ?? 4
     const generatedAt = Date.now()
     const generatedForPickIds = picks.map((pick) => pick.id)
     const unavailable = unavailablePlayerIds(picks, keepers)
     const result = await getRecommendations({ players, adjustments: Object.values(adjustments), picks, keepers, settings })
     if (requestId !== recommendationRequestId) return
+    if ((get().settings.formulaVersion ?? 4) !== requestedVersion) return
     const recommendations = result.recommendations.filter((item) => !unavailable.has(item.playerId))
+    const configuration = result.configuration ?? {
+      formulaVersion: requestedVersion,
+      oneTurnSims: null,
+      simulationSeed: null,
+      formulaParams: null
+    }
+    const engineWarning = configuration.formulaVersion != null
+      && configuration.formulaVersion !== requestedVersion
+      ? `Engine returned formula v${configuration.formulaVersion} but v${requestedVersion} is active.`
+      : result.warning
     set({
       recommendations,
       recommendationContext: {
-        ...(result.configuration ?? {
-          formulaVersion: settings.formulaVersion ?? null,
-          oneTurnSims: null,
-          simulationSeed: null,
-          formulaParams: null
-        }),
+        ...configuration,
         engineMode: result.mode,
-        engineWarning: result.warning,
+        engineWarning,
         generatedAt,
         generatedForPickIds,
         generatedForPickCount: picks.length
       },
       engineMode: result.mode,
-      engineWarning: result.warning
+      engineWarning
     })
   }
 }))

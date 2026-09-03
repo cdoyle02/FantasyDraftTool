@@ -33,6 +33,7 @@ function SetupDialog({ close }: { close: () => void }) {
             <label className="field">Your draft slot<input type="number" min="1" max={draft.teamCount} value={draft.userTeam} onChange={(event) => setDraft({ ...draft, userTeam: Number(event.target.value) })} /></label>
             <label className="field">Teams<input type="number" min="4" max="20" value={draft.teamCount} onChange={(event) => setDraft({ ...draft, teamCount: Number(event.target.value) })} /></label>
             <label className="field">Scoring<select value={draft.scoring} onChange={(event) => setDraft({ ...draft, scoring: event.target.value as typeof draft.scoring })}><option value="PPR">Full PPR</option><option value="HALF_PPR">Half PPR</option><option value="STANDARD">Standard</option></select></label>
+            <label className="field">Formula<select value={draft.formulaVersion ?? 4} onChange={(event) => setDraft({ ...draft, formulaVersion: Number(event.target.value) as 4 | 5 })}><option value={4}>Formula V4 (default)</option><option value={5}>Formula V5 (late-round bench evolution)</option></select></label>
           </div>
           {savedRankings.length > 0 && (
             <label className="field mt-5">
@@ -537,6 +538,34 @@ function PickHistory({ onCorrect, onReset }: { onCorrect: (id: string) => void; 
   </>
 }
 
+function ActiveFormulaBadge() {
+  const settings = useDraftStore((state) => state.settings)
+  const recommendations = useDraftStore((state) => state.recommendations)
+  const setFormulaVersion = useDraftStore((state) => state.setFormulaVersion)
+  const version = settings.formulaVersion ?? 4
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        data-testid="active-formula-badge"
+        className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-semibold text-white"
+      >
+        Active Formula: V{version}
+      </span>
+      <label className="sr-only" htmlFor="active-formula-select">Switch formula version</label>
+      <select
+        id="active-formula-select"
+        data-testid="active-formula-select"
+        className="rounded-lg border border-line bg-ink/70 px-2 py-1 text-[10px] font-semibold"
+        value={version}
+        onChange={(event) => void setFormulaVersion(Number(event.target.value) as 4 | 5)}
+      >
+        <option value={4}>V4</option>
+        <option value={5}>V5</option>
+      </select>
+      {!recommendations.length && <span className="text-[10px] text-muted">Recalculating…</span>}
+    </div>
+  )
+}
 function DvsRecommendationsHeading() {
   const importIdentity = useDraftStore((state) => state.importIdentity)
   const activeSavedProfileId = useDraftStore((state) => state.activeSavedProfileId)
@@ -628,7 +657,7 @@ export default function App() {
       </section>
       {engineWarning && <div role="status" className="mb-4 rounded-lg border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-xs text-amber-100">{engineWarning}</div>}
       <div className="grid gap-4 lg:grid-cols-12">
-        <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><DvsRecommendationsHeading /></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 10).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
+        <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><div className="flex flex-col items-end gap-2"><ActiveFormulaBadge /><DvsRecommendationsHeading /></div></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 10).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
         <AvailablePlayers /><Rosters /><div className="lg:col-span-8"><PickHistory onCorrect={setCorrectionId} onReset={() => setCorrectionId(undefined)} /></div>
       </div>
     </main>

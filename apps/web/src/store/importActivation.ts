@@ -143,6 +143,7 @@ export function normalizeLeagueSettings(settings: LeagueSettings): LeagueSetting
     ...settings,
     teamCount,
     userTeam: Math.max(1, Math.min(teamCount, settings.userTeam)),
-    rosterSlots: { ...settings.rosterSlots }
+    rosterSlots: { ...settings.rosterSlots },
+    formulaVersion: settings.formulaVersion ?? 4
   }
 }

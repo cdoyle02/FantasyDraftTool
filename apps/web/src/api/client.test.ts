@@ -137,4 +137,37 @@ describe('DVS API contract adapter', () => {
       }
     })
   })
+
+  it('normalizes optional V5 breakdown fields', () => {
+    const [result] = normalizeRecommendations([{
+      player_id: player.id,
+      player_name: player.name,
+      position: player.position,
+      dvs_score: 42,
+      tier_label: 'BEST PICK',
+      breakdown: {
+        vorp: 30,
+        marginal_value: 28,
+        wait_loss: 6,
+        tier_urgency: 4,
+        survival_probability: 0.3,
+        need_multiplier: 1.1,
+        opponent_demand_factor: 1,
+        guardrail_adjustment: 0,
+        negative_vorp_adjustment: -1.2,
+        adjusted_handcuff_bonus: 4.5,
+        bench_balance_adjustment: 0.5,
+        reliability_adjustment: 0.25,
+        v5_policy_strength: 1.0,
+        decision_score: 42
+      },
+      reasons: ['significantly below shallow-league replacement level']
+    }])
+
+    expect(result.breakdown.negativeVorpAdjustment).toBe(-1.2)
+    expect(result.breakdown.adjustedHandcuffBonus).toBe(4.5)
+    expect(result.breakdown.benchBalanceAdjustment).toBe(0.5)
+    expect(result.breakdown.reliabilityAdjustment).toBe(0.25)
+    expect(result.breakdown.v5PolicyStrength).toBe(1.0)
+  })
 })

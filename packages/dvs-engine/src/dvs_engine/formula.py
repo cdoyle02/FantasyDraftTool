@@ -491,6 +491,14 @@ def recommend(
         return _recommend_v2(players, state, settings, adjustments, limit)
     if params.formula_version == 3:
         return _recommend_v3(players, state, settings, adjustments, limit)
+    if params.formula_version == 4:
+        from .v4 import recommend_v4
+
+        return recommend_v4(players, state, settings, adjustments, limit)
+    if params.formula_version == 5:
+        from .v5 import recommend_v5
+
+        return recommend_v5(players, state, settings, adjustments, limit)
     from .v4 import recommend_v4
 
     return recommend_v4(players, state, settings, adjustments, limit)

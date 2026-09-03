@@ -84,7 +84,7 @@ class LeagueSettingsPayload(ApiModel):
     user_team_id: str = Field(default="1", alias="userTeamId")
     keeper_slots: int = Field(default=0, alias="keeperSlots", ge=0)
     ir_slots: int = Field(default=0, alias="irSlots", ge=0)
-    formula_version: int | None = Field(default=None, alias="formulaVersion", ge=1, le=4)
+    formula_version: int | None = Field(default=None, alias="formulaVersion", ge=1, le=5)
     formula_params: dict[str, Any] | None = Field(default=None, alias="formulaParams")
 
 

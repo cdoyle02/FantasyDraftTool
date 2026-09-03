@@ -79,6 +79,45 @@ def test_recommendations_endpoint():
     assert body["configuration"]["formulaParams"]["sim_seed"] == 2026
 
 
+def test_recommendations_endpoint_accepts_formula_v5():
+    response = client.post(
+        "/api/v1/recommendations",
+        json={
+            "players": [
+                {
+                    "id": "rb-1",
+                    "name": "Running Back",
+                    "position": "RB",
+                    "projectedPoints": 250,
+                    "adp": 10,
+                    "tier": 1,
+                },
+                {
+                    "id": "rb-2",
+                    "name": "Replacement Back",
+                    "position": "RB",
+                    "projectedPoints": 150,
+                    "adp": 50,
+                    "tier": 2,
+                },
+            ],
+            "settings": {
+                "teamCount": 2,
+                "rosterSlots": {"QB": 1, "RB": 1, "WR": 1, "TE": 1, "BENCH": 1},
+                "userTeamId": "1",
+                "formulaVersion": 5,
+            },
+            "draftState": {"teamCount": 2, "pickHistory": []},
+            "limit": 1,
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["configuration"]["formulaVersion"] == 5
+    assert "negative_vorp_adjustment" in body["recommendations"][0]["breakdown"]
+
+
 def test_request_validation_is_structured():
     response = client.post("/api/v1/imports/csv", json={})
     assert response.status_code == 422

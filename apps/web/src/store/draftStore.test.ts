@@ -1058,3 +1058,65 @@ describe('saved Footballers rankings profiles', () => {
     expect(settingsTable.put).toHaveBeenCalled()
   })
 })
+
+describe('formula version switching', () => {
+  it('defaults missing formulaVersion to V4 on hydrate', async () => {
+    const { defaultLeague } = await import('../types')
+    settingsTable.get.mockResolvedValue({
+      id: 'active',
+      name: 'Test',
+      teamCount: 12,
+      userTeam: 1,
+      rosterSlots: defaultLeague.rosterSlots,
+      scoring: 'PPR',
+      draftType: 'SNAKE'
+    })
+    playersTable.toArray.mockResolvedValue(demoPlayers)
+    const { useDraftStore } = await import('./draftStore')
+    await useDraftStore.getState().hydrate()
+    expect(useDraftStore.getState().settings.formulaVersion).toBe(4)
+  })
+
+  it('clears stale recommendations when switching formula versions', async () => {
+    const { defaultLeague } = await import('../types')
+    const { useDraftStore } = await import('./draftStore')
+    const v4Rec: Recommendation = {
+      playerId: 'seed-1',
+      dvsScore: 80,
+      tierLabel: 'BEST PICK',
+      breakdown: { vorp: 1, marginalValue: 1, waitLoss: 1, tierUrgency: 1, survivalProbability: 1, needMultiplier: 1, opponentDemandFactor: 1, guardrailAdjustment: 0 },
+      explanation: 'v4'
+    }
+    const v5Rec: Recommendation = {
+      playerId: 'seed-2',
+      dvsScore: 81,
+      tierLabel: 'BEST PICK',
+      breakdown: { vorp: 1, marginalValue: 1, waitLoss: 1, tierUrgency: 1, survivalProbability: 1, needMultiplier: 1, opponentDemandFactor: 1, guardrailAdjustment: 0, v5PolicyStrength: 1 },
+      explanation: 'v5'
+    }
+    vi.mocked(getRecommendations)
+      .mockResolvedValueOnce({ recommendations: [v4Rec], mode: 'development-fallback', configuration: { formulaVersion: 4, oneTurnSims: null, simulationSeed: null, formulaParams: null } })
+      .mockImplementationOnce(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20))
+        return { recommendations: [v4Rec], mode: 'development-fallback', configuration: { formulaVersion: 4, oneTurnSims: null, simulationSeed: null, formulaParams: null } }
+      })
+      .mockResolvedValueOnce({ recommendations: [v5Rec], mode: 'development-fallback', configuration: { formulaVersion: 5, oneTurnSims: null, simulationSeed: null, formulaParams: { formula_version: 5 } } })
+
+    useDraftStore.setState({
+      players: demoPlayers,
+      settings: { ...defaultLeague, formulaVersion: 4 },
+      recommendations: [],
+      picks: [],
+      keepers: [],
+      hydrated: true
+    })
+    await useDraftStore.getState().refreshRecommendations()
+    expect(useDraftStore.getState().recommendations[0]?.playerId).toBe('seed-1')
+
+    const refreshPromise = useDraftStore.getState().refreshRecommendations()
+    await useDraftStore.getState().setFormulaVersion(5)
+    await refreshPromise
+    expect(useDraftStore.getState().settings.formulaVersion).toBe(5)
+    expect(useDraftStore.getState().recommendations[0]?.playerId).toBe('seed-2')
+  })
+})

@@ -7,6 +7,7 @@ from dvs_engine import (
     Position,
     RecommendationLabel,
     UserAdjustment,
+    V5FormulaParams,
     recommend,
 )
 
@@ -24,6 +25,10 @@ def test_formula_params_default_to_version_4():
     assert FormulaParams().formula_version == 4
     with pytest.raises(ValueError, match="1, 2, 3, or 4"):
         FormulaParams(formula_version=5)
+
+
+def test_v5_formula_params_default_to_version_5():
+    assert V5FormulaParams().formula_version == 5
 
 
 def test_v3_score_matches_need_weighted_decomposition(players, empty_state):

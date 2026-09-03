@@ -45,6 +45,34 @@ def test_browser_json_entrypoint(players, settings):
     assert output["configuration"]["formulaParams"]["one_turn_sims"] == 48
 
 
+def test_browser_json_accepts_formula_v5(players, settings):
+    payload = {
+        "players": [
+            {
+                "id": player.id,
+                "name": player.name,
+                "position": player.position,
+                "projectedPoints": player.projected_points,
+                "adp": player.adp,
+                "tier": player.tier,
+            }
+            for player in players[:3]
+        ],
+        "settings": {
+            "teamCount": settings.team_count,
+            "rosterSlots": settings.roster_slots,
+            "userTeamId": "1",
+            "formulaVersion": 5,
+        },
+        "draftState": {"teamCount": settings.team_count, "pickHistory": []},
+        "adjustments": [],
+        "limit": 2,
+    }
+    output = json.loads(recommendation_json(json.dumps(payload)))
+    assert output["configuration"]["formulaVersion"] == 5
+    assert "negative_vorp_adjustment" in output["recommendations"][0]["breakdown"]
+
+
 def test_browser_json_excludes_reserved_rosters_without_advancing_pick(players, settings):
     reserved_id = players[0].id
     payload = {

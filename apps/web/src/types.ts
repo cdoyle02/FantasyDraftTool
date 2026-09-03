@@ -130,6 +130,19 @@ export interface ScoreBreakdown {
   starterSlotsFilled?: number
   starterSlotsTotal?: number
   replacementLevel?: number
+  negativeVorpAdjustment?: number
+  rawHandcuffBonus?: number
+  adjustedHandcuffBonus?: number
+  ownHandcuffLeagueMultiplier?: number
+  ownHandcuffCount?: number
+  ownHandcuffCountMultiplier?: number
+  benchBalanceAdjustment?: number
+  usableRbDepth?: number
+  usableWrDepth?: number
+  rosterRiskScore?: number
+  preReliabilityScore?: number
+  reliabilityAdjustment?: number
+  v5PolicyStrength?: number
 }
 
 export interface Recommendation {

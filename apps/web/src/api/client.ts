@@ -69,6 +69,19 @@ interface EngineRecommendation {
     starter_slots_filled?: number
     starter_slots_total?: number
     replacement_level?: number
+    negative_vorp_adjustment?: number
+    raw_handcuff_bonus?: number
+    adjusted_handcuff_bonus?: number
+    own_handcuff_league_multiplier?: number
+    own_handcuff_count?: number
+    own_handcuff_count_multiplier?: number
+    bench_balance_adjustment?: number
+    usable_rb_depth?: number
+    usable_wr_depth?: number
+    roster_risk_score?: number
+    pre_reliability_score?: number
+    reliability_adjustment?: number
+    v5_policy_strength?: number
   }
   reasons: string[]
 }
@@ -168,7 +181,20 @@ export function normalizeRecommendations(results: EngineRecommendation[]): Recom
       starterCompletion: result.breakdown.starter_completion,
       starterSlotsFilled: result.breakdown.starter_slots_filled,
       starterSlotsTotal: result.breakdown.starter_slots_total,
-      replacementLevel: result.breakdown.replacement_level
+      replacementLevel: result.breakdown.replacement_level,
+      negativeVorpAdjustment: result.breakdown.negative_vorp_adjustment,
+      rawHandcuffBonus: result.breakdown.raw_handcuff_bonus,
+      adjustedHandcuffBonus: result.breakdown.adjusted_handcuff_bonus,
+      ownHandcuffLeagueMultiplier: result.breakdown.own_handcuff_league_multiplier,
+      ownHandcuffCount: result.breakdown.own_handcuff_count,
+      ownHandcuffCountMultiplier: result.breakdown.own_handcuff_count_multiplier,
+      benchBalanceAdjustment: result.breakdown.bench_balance_adjustment,
+      usableRbDepth: result.breakdown.usable_rb_depth,
+      usableWrDepth: result.breakdown.usable_wr_depth,
+      rosterRiskScore: result.breakdown.roster_risk_score,
+      preReliabilityScore: result.breakdown.pre_reliability_score,
+      reliabilityAdjustment: result.breakdown.reliability_adjustment,
+      v5PolicyStrength: result.breakdown.v5_policy_strength
     },
     reasons: result.reasons,
     explanation: result.reasons.join(' · ') || 'Best available value for the current draft state.'

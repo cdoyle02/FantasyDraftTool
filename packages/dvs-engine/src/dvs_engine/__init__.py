@@ -28,6 +28,8 @@ from .models import (
     RecommendationLabel,
     RecommendationResult,
     UserAdjustment,
+    V5FormulaParams,
+    V5RecommendationBreakdown,
     adjustment_from_dict,
     as_jsonable,
     formula_params_from_dict,
@@ -39,6 +41,7 @@ from .models import (
 from .survival import compute_survival_maps
 from .tiers import tier_cliff, tier_opportunity_cost
 from .v4 import recommend_v4
+from .v5 import recommend_v5
 
 __version__ = "0.1.0"
 
@@ -57,6 +60,8 @@ __all__ = [
     "RecommendationResult",
     "RowIssue",
     "UserAdjustment",
+    "V5FormulaParams",
+    "V5RecommendationBreakdown",
     "adjustment_from_dict",
     "apply_pick",
     "as_jsonable",
@@ -69,6 +74,7 @@ __all__ = [
     "player_from_dict",
     "recommend",
     "recommend_v4",
+    "recommend_v5",
     "recommendation_json",
     "replacement_counts",
     "replacement_levels",
