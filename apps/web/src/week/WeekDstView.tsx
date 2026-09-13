@@ -97,10 +97,12 @@ function DstPlayCard({ game, rank }: { game: WeekOddsGame; rank: number }) {
       </div>
       <div className="mt-3 grid grid-cols-2 gap-3 text-xs text-muted">
         <div>
-          Fav implied <span className="font-semibold text-slate-200">{game.favoriteImplied.toFixed(1)}</span>
+          {game.favoriteTeam} D/ST PA{' '}
+          <span className="font-semibold text-slate-200">{game.underdogImplied.toFixed(1)}</span>
         </div>
         <div className="text-right">
-          Dog implied <span className="font-semibold text-slate-200">{game.underdogImplied.toFixed(1)}</span>
+          {game.underdogTeam} D/ST PA{' '}
+          <span className="font-semibold text-slate-200">{game.favoriteImplied.toFixed(1)}</span>
         </div>
       </div>
     </article>
@@ -147,7 +149,12 @@ export function WeekDstView() {
       return
     }
     setSortKey(key)
-    setSortDir(key === 'underdogImplied' || key === 'total' || key === 'commenceTime' ? 'asc' : 'desc')
+    // Lower PA / earlier kickoff / lower total are usually the useful default.
+    setSortDir(
+      key === 'underdogImplied' || key === 'favoriteImplied' || key === 'total' || key === 'commenceTime'
+        ? 'asc'
+        : 'desc'
+    )
   }
 
   return (
@@ -205,27 +212,49 @@ export function WeekDstView() {
               </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-sm">
+              <table className="w-full min-w-[720px] text-left text-sm">
                 <thead className="border-b border-line bg-ink/50">
                   <tr className="[&>th]:px-3 [&>th]:py-2">
-                    <th><SortHeader label="D/ST" active={sortKey === 'dstPlayTeam'} dir={sortDir} onClick={() => onSort('dstPlayTeam')} /></th>
-                    <th className="text-[10px] font-bold uppercase tracking-wider text-muted">Opp</th>
+                    <th><SortHeader label="Fav" active={sortKey === 'dstPlayTeam'} dir={sortDir} onClick={() => onSort('dstPlayTeam')} /></th>
+                    <th className="text-[10px] font-bold uppercase tracking-wider text-muted">Dog</th>
                     <th><SortHeader label="Spread" active={sortKey === 'spread'} dir={sortDir} onClick={() => onSort('spread')} /></th>
                     <th><SortHeader label="O/U" testId="sort-total" active={sortKey === 'total'} dir={sortDir} onClick={() => onSort('total')} /></th>
-                    <th><SortHeader label="Fav impl" active={sortKey === 'favoriteImplied'} dir={sortDir} onClick={() => onSort('favoriteImplied')} /></th>
-                    <th><SortHeader label="Dog impl" active={sortKey === 'underdogImplied'} dir={sortDir} onClick={() => onSort('underdogImplied')} /></th>
+                    <th title="Implied points the favorite D/ST is projected to allow (underdog team total)">
+                      <SortHeader
+                        label="Fav D/ST PA"
+                        testId="sort-fav-dst-pa"
+                        active={sortKey === 'underdogImplied'}
+                        dir={sortDir}
+                        onClick={() => onSort('underdogImplied')}
+                      />
+                    </th>
+                    <th title="Implied points the underdog D/ST is projected to allow (favorite team total)">
+                      <SortHeader
+                        label="Dog D/ST PA"
+                        testId="sort-dog-dst-pa"
+                        active={sortKey === 'favoriteImplied'}
+                        dir={sortDir}
+                        onClick={() => onSort('favoriteImplied')}
+                      />
+                    </th>
                     <th><SortHeader label="Kickoff" active={sortKey === 'commenceTime'} dir={sortDir} onClick={() => onSort('commenceTime')} /></th>
                   </tr>
                 </thead>
                 <tbody>
                   {tableRows.map((game) => (
                     <tr key={`${game.homeTeam}-${game.awayTeam}-${game.commenceTime}`} className="border-b border-line/60 bg-ink/30 last:border-0">
-                      <td className="px-3 py-2 font-semibold text-mint">{game.dstPlayTeam}</td>
+                      <td className="px-3 py-2 font-semibold text-mint">{game.favoriteTeam}</td>
                       <td className="px-3 py-2 text-muted">{game.underdogTeam}</td>
                       <td className="px-3 py-2">{formatSpread(game.spread, game.favoriteTeam)}</td>
                       <td className="px-3 py-2">{game.total}</td>
-                      <td className="px-3 py-2">{game.favoriteImplied.toFixed(1)}</td>
-                      <td className="px-3 py-2 font-semibold">{game.underdogImplied.toFixed(1)}</td>
+                      <td className="px-3 py-2 font-semibold">
+                        {game.underdogImplied.toFixed(1)}
+                        <span className="ml-1 text-[10px] font-normal text-muted">{game.favoriteTeam}</span>
+                      </td>
+                      <td className="px-3 py-2">
+                        {game.favoriteImplied.toFixed(1)}
+                        <span className="ml-1 text-[10px] text-muted">{game.underdogTeam}</span>
+                      </td>
                       <td className="px-3 py-2 text-xs text-muted">{formatKickoff(game.commenceTime)}</td>
                     </tr>
                   ))}

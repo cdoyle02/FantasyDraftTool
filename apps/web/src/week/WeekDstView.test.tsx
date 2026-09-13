@@ -100,4 +100,25 @@ describe('WeekDstView', () => {
     expect(rows[1]).toHaveTextContent('KC')
     expect(rows[2]).toHaveTextContent('BUF')
   })
+
+  it('shows implied points allowed for both defenses', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify(weekPayload), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    )
+
+    render(<WeekDstView />)
+    await waitFor(() => expect(screen.getByText('Week 1')).toBeInTheDocument())
+
+    expect(screen.getByTestId('sort-fav-dst-pa')).toHaveTextContent(/Fav D\/ST PA/)
+    expect(screen.getByTestId('sort-dog-dst-pa')).toHaveTextContent(/Dog D\/ST PA/)
+
+    const table = screen.getByRole('table')
+    const rows = within(table).getAllByRole('row')
+    // KC fav D/ST PA = underdogImplied 16.0; dog (LV) D/ST PA = favoriteImplied 25.5
+    expect(rows[1]).toHaveTextContent('16.0')
+    expect(rows[1]).toHaveTextContent('25.5')
+  })
 })
