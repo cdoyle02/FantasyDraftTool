@@ -7,6 +7,7 @@ import logging
 import os
 import time
 import uuid
+from datetime import datetime, timezone
 from typing import Any, Literal
 
 from dvs_engine import (
@@ -26,6 +27,9 @@ from pydantic import BaseModel, Field
 from starlette.middleware.base import RequestResponseEndpoint
 
 from . import __version__
+from .implied_totals import GameLine
+from .odds import OddsApiError, OddsProvider, TheOddsApiProvider, TtlCache
+from .week_odds import build_week_odds_payload
 
 
 class ApiModel(BaseModel):
@@ -135,6 +139,46 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Odds provider is injectable for tests; production uses The Odds API + TTL cache.
+_odds_provider_override: OddsProvider | None = None
+_odds_cache: TtlCache[list[GameLine]] = TtlCache(
+    ttl_seconds=float(os.getenv("ODDS_CACHE_TTL_SECONDS", "1800"))
+)
+
+
+class _CachingOddsProvider:
+    """Wraps an OddsProvider with process-local TTL caching."""
+
+    def __init__(self, inner: OddsProvider, cache: TtlCache[list[GameLine]]) -> None:
+        self._inner = inner
+        self._cache = cache
+
+    def fetch_nfl_odds(self) -> list[GameLine]:
+        cached = self._cache.get()
+        if cached is not None:
+            return cached
+        games = self._inner.fetch_nfl_odds()
+        self._cache.set(games)
+        return games
+
+
+def set_odds_provider(provider: OddsProvider | None) -> None:
+    """Test hook: override the odds provider (None restores env-based default)."""
+    global _odds_provider_override
+    _odds_provider_override = provider
+    _odds_cache.clear()
+
+
+def get_odds_provider() -> OddsProvider:
+    if _odds_provider_override is not None:
+        return _odds_provider_override
+    api_key = os.getenv("ODDS_API_KEY", "").strip()
+    if not api_key:
+        raise OddsApiError(
+            "ODDS_API_KEY is not set. Add it to your environment (see .env.example)."
+        )
+    return _CachingOddsProvider(TheOddsApiProvider(api_key), _odds_cache)
 
 
 @app.middleware("http")
@@ -248,3 +292,13 @@ def csv_import(request: CsvImportRequest) -> dict[str, Any]:
         "warnings": as_jsonable(result.warnings),
         "adjustments": [],
     }
+
+
+@app.get("/api/v1/nfl/week-odds", response_model=None)
+def week_odds() -> dict[str, Any] | JSONResponse:
+    """Current fantasy-week NFL spreads/totals with ranked favorite D/ST plays."""
+    try:
+        provider = get_odds_provider()
+        return build_week_odds_payload(provider, now=datetime.now(timezone.utc))
+    except OddsApiError as exc:
+        return error_response(503, "odds_unavailable", str(exc))

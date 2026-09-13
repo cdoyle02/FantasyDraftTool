@@ -8,6 +8,7 @@ import { AvailablePlayers } from './pool/AvailablePlayers'
 import { rosterEntriesForTeam, keptPlayerIds, roundForPick, teamForPick, useDraftStore } from './store/draftStore'
 import { assignRosterSlots, SLOT_LABELS } from './store/rosterSlots'
 import type { DraftPick, LeagueSettings, Player, Recommendation } from './types'
+import { WeekDstView } from './week/WeekDstView'
 
 function SetupDialog({ close }: { close: () => void }) {
   const settings = useDraftStore((state) => state.settings)
@@ -602,6 +603,7 @@ export default function App() {
   const [modal, setModal] = useState<'setup' | 'import' | null>(null)
   const [correctionId, setCorrectionId] = useState<string>()
   const [online, setOnline] = useState(navigator.onLine)
+  const [shellView, setShellView] = useState<'draft' | 'week-dst'>('draft')
   useEffect(() => { void hydrate() }, [hydrate])
   useEffect(() => {
     const update = () => {
@@ -631,6 +633,27 @@ export default function App() {
   return <div className="min-h-screen bg-ink text-slate-100">
     <header className="sticky top-0 z-20 border-b border-line bg-ink/95 backdrop-blur">
       <div className="mx-auto flex max-w-[1600px] items-center gap-3 px-4 py-3 sm:px-6"><div className="grid h-9 w-9 place-items-center rounded-lg bg-mint font-black text-ink">F</div><div className="mr-auto"><h1 className="text-sm font-bold sm:text-base">Fantasy Draft Tool</h1><p className="hidden text-[10px] text-muted sm:block">{settings.name} · {settings.scoring.replace('_', ' ')} · Snake</p></div>
+        <div className="flex items-center gap-1 rounded-lg border border-line bg-ink/70 p-0.5" role="tablist" aria-label="App section">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={shellView === 'draft'}
+            className={`rounded-md px-2.5 py-1.5 text-xs font-semibold ${shellView === 'draft' ? 'bg-mint text-ink' : 'text-muted hover:text-white'}`}
+            onClick={() => setShellView('draft')}
+          >
+            Draft
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={shellView === 'week-dst'}
+            data-testid="week-dst-tab"
+            className={`rounded-md px-2.5 py-1.5 text-xs font-semibold ${shellView === 'week-dst' ? 'bg-mint text-ink' : 'text-muted hover:text-white'}`}
+            onClick={() => setShellView('week-dst')}
+          >
+            Week D/ST
+          </button>
+        </div>
         <div data-testid="offline-status" data-ready={offlineReady} className={`flex items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${offlineReady ? 'border-mint/30 text-mint' : 'border-amber-300/30 text-amber-200'}`}><span className={`h-1.5 w-1.5 rounded-full ${offlineReady ? 'bg-mint' : 'bg-amber-300'}`} /><span className="hidden sm:inline">{online ? (offlineReady ? 'ONLINE · OFFLINE READY' : 'ONLINE · PREPARING OFFLINE') : (offlineReady ? 'OFFLINE READY' : 'OFFLINE NOT READY')}</span><span className="sm:hidden">{offlineReady ? 'READY' : 'SETUP'}</span></div>
         <button
           className="button-secondary"
@@ -651,15 +674,21 @@ export default function App() {
       </div>
     </header>
     <main className="mx-auto max-w-[1600px] p-4 sm:p-6">
-      <section className="mb-5 grid gap-3 rounded-2xl border border-line bg-gradient-to-r from-panel to-ink p-4 shadow-glow lg:grid-cols-[1fr_auto] lg:items-center">
-        <div><div className="mb-2 flex items-center gap-3"><span className="rounded-md bg-lime px-2 py-1 text-[10px] font-black tracking-wider text-ink">{correctionId ? 'CORRECT PICK' : 'LIVE DRAFT'}</span><span className="text-xs text-muted">Round {round} · Pick {currentPick}</span></div><PickSearch correctionId={correctionId} onCorrectionDone={() => setCorrectionId(undefined)} /></div>
-        <div className="flex items-center gap-5 lg:px-4"><div><p className="text-[10px] uppercase tracking-wider text-muted">Engine</p><p className="text-xs font-semibold text-mint">{engineMode === 'online-api' ? 'Cloud DVS' : engineMode === 'offline-python' ? 'Offline Python DVS' : 'Dev fallback'}</p></div><div className="h-8 w-px bg-line" /><div><p className="text-[10px] uppercase tracking-wider text-muted">Next turn</p><p className="text-xs font-semibold">{picksUntilTurn === 0 ? 'On the clock' : `${picksUntilTurn} picks away`}</p></div></div>
-      </section>
-      {engineWarning && <div role="status" className="mb-4 rounded-lg border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-xs text-amber-100">{engineWarning}</div>}
-      <div className="grid gap-4 lg:grid-cols-12">
-        <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><div className="flex flex-col items-end gap-2"><ActiveFormulaBadge /><DvsRecommendationsHeading /></div></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 10).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
-        <AvailablePlayers /><Rosters /><div className="lg:col-span-8"><PickHistory onCorrect={setCorrectionId} onReset={() => setCorrectionId(undefined)} /></div>
-      </div>
+      {shellView === 'week-dst' ? (
+        <WeekDstView />
+      ) : (
+        <>
+          <section className="mb-5 grid gap-3 rounded-2xl border border-line bg-gradient-to-r from-panel to-ink p-4 shadow-glow lg:grid-cols-[1fr_auto] lg:items-center">
+            <div><div className="mb-2 flex items-center gap-3"><span className="rounded-md bg-lime px-2 py-1 text-[10px] font-black tracking-wider text-ink">{correctionId ? 'CORRECT PICK' : 'LIVE DRAFT'}</span><span className="text-xs text-muted">Round {round} · Pick {currentPick}</span></div><PickSearch correctionId={correctionId} onCorrectionDone={() => setCorrectionId(undefined)} /></div>
+            <div className="flex items-center gap-5 lg:px-4"><div><p className="text-[10px] uppercase tracking-wider text-muted">Engine</p><p className="text-xs font-semibold text-mint">{engineMode === 'online-api' ? 'Cloud DVS' : engineMode === 'offline-python' ? 'Offline Python DVS' : 'Dev fallback'}</p></div><div className="h-8 w-px bg-line" /><div><p className="text-[10px] uppercase tracking-wider text-muted">Next turn</p><p className="text-xs font-semibold">{picksUntilTurn === 0 ? 'On the clock' : `${picksUntilTurn} picks away`}</p></div></div>
+          </section>
+          {engineWarning && <div role="status" className="mb-4 rounded-lg border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-xs text-amber-100">{engineWarning}</div>}
+          <div className="grid gap-4 lg:grid-cols-12">
+            <section className="panel lg:col-span-4 lg:row-span-2"><div className="panel-heading"><div><p className="eyebrow">DVS engine</p><h2>Recommended now</h2></div><div className="flex flex-col items-end gap-2"><ActiveFormulaBadge /><DvsRecommendationsHeading /></div></div><div className="max-h-[720px] space-y-3 overflow-auto p-3">{recommendations.slice(0, 10).map((recommendation, index) => <RecommendationCard key={recommendation.playerId} recommendation={recommendation} rank={index} />)}</div></section>
+            <AvailablePlayers /><Rosters /><div className="lg:col-span-8"><PickHistory onCorrect={setCorrectionId} onReset={() => setCorrectionId(undefined)} /></div>
+          </div>
+        </>
+      )}
     </main>
     {modal === 'setup' && <SetupDialog close={() => setModal(null)} />}{modal === 'import' && <ImportDialog close={() => setModal(null)} />}
   </div>
