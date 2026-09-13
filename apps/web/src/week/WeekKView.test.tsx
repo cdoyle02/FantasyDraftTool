@@ -95,6 +95,20 @@ describe('WeekKView', () => {
     expect(screen.getByText(/Week 1 K/)).toBeInTheDocument()
   })
 
+  it('auto-selects the first league and loads available kickers', async () => {
+    mockApiFetch()
+
+    render(<WeekKView />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('jared-league-select')).toHaveValue('1216398267')
+    })
+    await waitFor(() => {
+      expect(screen.getByTestId('jared-available-table')).toBeInTheDocument()
+    })
+    expect(within(screen.getByTestId('jared-available-table')).getByText('Evan McPherson')).toBeInTheDocument()
+  })
+
   it('maps available kickers for the selected league', async () => {
     const user = userEvent.setup()
     mockApiFetch()

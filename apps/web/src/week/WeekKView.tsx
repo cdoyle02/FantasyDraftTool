@@ -39,6 +39,9 @@ export function WeekKView() {
       ])
       setLeagues(leaguePayload.leagues)
       setRankings(rankingPayload)
+      if (!leagueId && leaguePayload.leagues[0]) {
+        setLeagueId(leaguePayload.leagues[0].id)
+      }
     } catch (err) {
       setRankings(null)
       setError(err instanceof Error ? err.message : 'Could not load Jared K rankings.')
