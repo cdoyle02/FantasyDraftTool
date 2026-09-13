@@ -39,7 +39,7 @@ def cross_ref_available(
             by_team[team] = row
             alias = TEAM_ALIASES.get(team)
             if alias:
-                by_team.setdefault(alias, row)
+                by_team[alias] = row
 
     out: list[dict[str, Any]] = []
     for rank_row in rankings:

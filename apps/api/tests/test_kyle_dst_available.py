@@ -35,6 +35,28 @@ def test_cross_ref_available_preserves_kyle_order():
     assert rows[1]["percentOwned"] == 4.0
 
 
+def test_cross_ref_available_alias_overwrite_keeps_bidirectional_consistent():
+    """Both abbrevs must track the last-wins row (setdefault left WAS stale)."""
+    rankings = [
+        {
+            "rank": 1,
+            "team": "WAS",
+            "teamName": "Washington Commanders",
+            "opponent": "vs. PHI",
+            "ecr": 8,
+            "vsEcr": "-2",
+        },
+    ]
+    available = [
+        {"team": "WAS", "status": "FREEAGENT", "percentOwned": 1.0, "name": "Commanders D/ST"},
+        {"team": "WSH", "status": "WAIVERS", "percentOwned": 99.0, "name": "Commanders D/ST"},
+    ]
+    rows = cross_ref_available(rankings, available)
+    assert len(rows) == 1
+    assert rows[0]["status"] == "WAIVERS"
+    assert rows[0]["percentOwned"] == 99.0
+
+
 def test_build_kyle_available_payload():
     payload = build_kyle_available_payload(
         rankings_payload={
