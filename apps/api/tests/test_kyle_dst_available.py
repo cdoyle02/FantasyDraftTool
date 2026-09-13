@@ -2,15 +2,22 @@ from draft_api.espn_leagues import get_league, leagues_payload, load_espn_league
 from draft_api.kyle_dst_available import build_kyle_available_payload, cross_ref_available, teams_match
 
 
-def test_load_espn_leagues_includes_girls_who_ball():
+def test_load_espn_leagues_includes_known_leagues():
+    load_espn_leagues.cache_clear()
     leagues = load_espn_leagues()
-    assert any(league["id"] == "1216398267" for league in leagues)
+    by_id = {league["id"]: league["name"] for league in leagues}
+    assert by_id["1216398267"] == "Girls Who Ball"
+    assert by_id["169429"] == "Florida Football Federation"
+    assert by_id["853476190"] == "Two Flex Too Furious"
+    assert by_id["886805"] == "Just The Tip"
     assert leagues_payload()["leagues"] == leagues
 
 
 def test_get_league():
+    load_espn_leagues.cache_clear()
     league = get_league("1216398267")
     assert league["name"] == "Girls Who Ball"
+    assert get_league("886805")["name"] == "Just The Tip"
 
 
 def test_teams_match_aliases():
