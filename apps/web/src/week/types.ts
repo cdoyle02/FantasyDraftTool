@@ -31,3 +31,39 @@ export type WeekOddsSortKey =
   | 'total'
   | 'commenceTime'
   | 'dstPlayTeam'
+
+export interface EspnLeague {
+  id: string
+  name: string
+}
+
+export interface EspnLeaguesResponse {
+  leagues: EspnLeague[]
+}
+
+export interface KyleDstRanking {
+  rank: number
+  team: string
+  teamName: string
+  opponent: string
+  ecr: number | null
+  vsEcr: string
+}
+
+export interface KyleDstRankingsResponse {
+  week: number | null
+  fetchedAt: string
+  sourceUrl: string
+  rankings: KyleDstRanking[]
+}
+
+export interface KyleDstAvailableRow extends KyleDstRanking {
+  status: string
+  percentOwned: number | null
+}
+
+export interface KyleDstAvailableResponse extends KyleDstRankingsResponse {
+  leagueId: string
+  leagueName: string
+  available: KyleDstAvailableRow[]
+}

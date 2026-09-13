@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { draftApi } from '../api/client'
-import type { WeekOddsGame, WeekOddsResponse, WeekOddsSortKey } from './types'
+import type {
+  EspnLeague,
+  KyleDstAvailableResponse,
+  KyleDstRankingsResponse,
+  WeekOddsGame,
+  WeekOddsResponse,
+  WeekOddsSortKey
+} from './types'
+
+const LEAGUE_STORAGE_KEY = 'week-dst-espn-league-id'
 
 function formatKickoff(iso: string): string {
   try {
@@ -29,6 +38,11 @@ function formatSpread(spread: number, favorite: string): string {
   const mag = Math.abs(spread)
   const signed = spread === 0 ? 'PK' : `-${mag}`
   return `${favorite} ${signed}`
+}
+
+function formatOwned(value: number | null | undefined): string {
+  if (typeof value !== 'number') return '—'
+  return value.toFixed(1)
 }
 
 function sortGames(games: WeekOddsGame[], key: WeekOddsSortKey, dir: 'asc' | 'desc'): WeekOddsGame[] {
@@ -106,6 +120,223 @@ function DstPlayCard({ game, rank }: { game: WeekOddsGame; rank: number }) {
         </div>
       </div>
     </article>
+  )
+}
+
+function KyleDstSection() {
+  const [leagues, setLeagues] = useState<EspnLeague[]>([])
+  const [leagueId, setLeagueId] = useState(() => {
+    try {
+      return localStorage.getItem(LEAGUE_STORAGE_KEY) ?? ''
+    } catch {
+      return ''
+    }
+  })
+  const [rankings, setRankings] = useState<KyleDstRankingsResponse | null>(null)
+  const [available, setAvailable] = useState<KyleDstAvailableResponse | null>(null)
+  const [error, setError] = useState('')
+  const [availableError, setAvailableError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [availableLoading, setAvailableLoading] = useState(false)
+
+  const loadRankings = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const [leaguePayload, rankingPayload] = await Promise.all([
+        draftApi.espnLeagues(),
+        draftApi.kyleDstRankings()
+      ])
+      setLeagues(leaguePayload.leagues)
+      setRankings(rankingPayload)
+      if (!leagueId && leaguePayload.leagues[0]) {
+        setLeagueId(leaguePayload.leagues[0].id)
+      }
+    } catch (err) {
+      setRankings(null)
+      setError(err instanceof Error ? err.message : 'Could not load Kyle DST rankings.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadAvailable = async (id: string) => {
+    if (!id) {
+      setAvailable(null)
+      setAvailableError('')
+      return
+    }
+    setAvailableLoading(true)
+    setAvailableError('')
+    try {
+      const payload = await draftApi.kyleDstAvailable(id)
+      setAvailable(payload)
+    } catch (err) {
+      setAvailable(null)
+      setAvailableError(err instanceof Error ? err.message : 'Could not load available defenses.')
+    } finally {
+      setAvailableLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    void loadRankings()
+  }, [])
+
+  useEffect(() => {
+    try {
+      if (leagueId) localStorage.setItem(LEAGUE_STORAGE_KEY, leagueId)
+    } catch {
+      // ignore quota / private mode
+    }
+    void loadAvailable(leagueId)
+  }, [leagueId])
+
+  const weekLabel = rankings?.week != null ? `Week ${rankings.week}` : 'current week'
+
+  return (
+    <section className="space-y-4" data-testid="kyle-dst-section">
+      <div className="grid gap-3 rounded-2xl border border-line bg-gradient-to-r from-panel to-ink p-4 lg:grid-cols-[1fr_auto_auto] lg:items-center">
+        <div>
+          <p className="eyebrow">Expert board</p>
+          <h2 className="text-lg font-semibold">Kyle Krajewski · {weekLabel} DST</h2>
+          <p className="mt-1 text-xs text-muted">
+            FantasyPros weekly ranks · map to FREEAGENT / WAIVERS in your ESPN league
+          </p>
+        </div>
+        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-muted">
+          League
+          <select
+            data-testid="kyle-league-select"
+            className="rounded-lg border border-line bg-ink px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-100"
+            value={leagueId}
+            onChange={(event) => setLeagueId(event.target.value)}
+          >
+            <option value="">Select a league…</option>
+            {leagues.map((league) => (
+              <option key={league.id} value={league.id}>
+                {league.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          className="button-secondary"
+          type="button"
+          data-testid="kyle-refresh"
+          onClick={() => {
+            void loadRankings()
+            void loadAvailable(leagueId)
+          }}
+          disabled={loading || availableLoading}
+        >
+          {loading || availableLoading ? 'Loading…' : 'Refresh Kyle'}
+        </button>
+      </div>
+
+      {error && (
+        <div role="alert" data-testid="kyle-error" className="rounded-lg border border-rose-300/30 bg-rose-300/5 px-4 py-3 text-sm text-rose-200">
+          {error}
+        </div>
+      )}
+
+      {!error && loading && !rankings && (
+        <p className="text-sm text-muted">Loading Kyle DST rankings…</p>
+      )}
+
+      {rankings && (
+        <div className="grid gap-4 lg:grid-cols-12">
+          <section className="panel lg:col-span-7">
+            <div className="panel-heading">
+              <div>
+                <p className="eyebrow">Full board</p>
+                <h2>Kyle rankings</h2>
+              </div>
+              <span className="text-[10px] text-muted">{rankings.rankings.length} DSTs</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table data-testid="kyle-rankings-table" className="w-full min-w-[560px] text-left text-sm">
+                <thead className="border-b border-line bg-ink/50">
+                  <tr className="[&>th]:px-3 [&>th]:py-2">
+                    <th className="text-[10px] font-bold uppercase tracking-wider text-muted">Rank</th>
+                    <th className="text-[10px] font-bold uppercase tracking-wider text-muted">Team</th>
+                    <th className="text-[10px] font-bold uppercase tracking-wider text-muted">Opp</th>
+                    <th className="text-[10px] font-bold uppercase tracking-wider text-muted">ECR</th>
+                    <th className="text-[10px] font-bold uppercase tracking-wider text-muted">vs ECR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rankings.rankings.map((row) => (
+                    <tr key={`${row.rank}-${row.team}`} className="border-b border-line/60 bg-ink/30 last:border-0">
+                      <td className="px-3 py-2 font-semibold text-mint">{row.rank}</td>
+                      <td className="px-3 py-2">
+                        <span className="font-semibold">{row.team}</span>
+                        <span className="ml-2 text-xs text-muted">{row.teamName}</span>
+                      </td>
+                      <td className="px-3 py-2 text-muted">{row.opponent}</td>
+                      <td className="px-3 py-2">{row.ecr ?? '—'}</td>
+                      <td className="px-3 py-2">{row.vsEcr}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="panel lg:col-span-5">
+            <div className="panel-heading">
+              <div>
+                <p className="eyebrow">Waiver map</p>
+                <h2>Available in league</h2>
+              </div>
+              <span className="text-[10px] text-muted">
+                {available ? `${available.available.length} open` : '—'}
+              </span>
+            </div>
+            {!leagueId && (
+              <p className="p-4 text-xs text-muted">Select a league to map Kyle’s ranks to FREEAGENT / WAIVERS.</p>
+            )}
+            {availableError && (
+              <div role="alert" data-testid="kyle-available-error" className="m-3 rounded-lg border border-rose-300/30 bg-rose-300/5 px-3 py-2 text-sm text-rose-200">
+                {availableError}
+              </div>
+            )}
+            {leagueId && !availableError && availableLoading && !available && (
+              <p className="p-4 text-xs text-muted">Loading available defenses…</p>
+            )}
+            {available && (
+              <div className="overflow-x-auto">
+                <table data-testid="kyle-available-table" className="w-full min-w-[420px] text-left text-sm">
+                  <thead className="border-b border-line bg-ink/50">
+                    <tr className="[&>th]:px-3 [&>th]:py-2">
+                      <th className="text-[10px] font-bold uppercase tracking-wider text-muted">Rank</th>
+                      <th className="text-[10px] font-bold uppercase tracking-wider text-muted">Team</th>
+                      <th className="text-[10px] font-bold uppercase tracking-wider text-muted">Opp</th>
+                      <th className="text-[10px] font-bold uppercase tracking-wider text-muted">Status</th>
+                      <th className="text-[10px] font-bold uppercase tracking-wider text-muted">% Own</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {available.available.map((row) => (
+                      <tr key={`${row.rank}-${row.team}`} className="border-b border-line/60 bg-ink/30 last:border-0">
+                        <td className="px-3 py-2 font-semibold text-mint">{row.rank}</td>
+                        <td className="px-3 py-2 font-semibold">{row.team}</td>
+                        <td className="px-3 py-2 text-muted">{row.opponent}</td>
+                        <td className="px-3 py-2 text-xs">{row.status}</td>
+                        <td className="px-3 py-2">{formatOwned(row.percentOwned)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {!available.available.length && (
+                  <p className="p-4 text-xs text-muted">No Kyle-ranked DSTs are on FREEAGENT / WAIVERS in this league.</p>
+                )}
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+    </section>
   )
 }
 
@@ -212,7 +443,7 @@ export function WeekDstView() {
               </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
+              <table data-testid="week-odds-table" className="w-full min-w-[720px] text-left text-sm">
                 <thead className="border-b border-line bg-ink/50">
                   <tr className="[&>th]:px-3 [&>th]:py-2">
                     <th><SortHeader label="Fav" active={sortKey === 'dstPlayTeam'} dir={sortDir} onClick={() => onSort('dstPlayTeam')} /></th>
@@ -265,6 +496,8 @@ export function WeekDstView() {
           </section>
         </div>
       )}
+
+      <KyleDstSection />
     </div>
   )
 }

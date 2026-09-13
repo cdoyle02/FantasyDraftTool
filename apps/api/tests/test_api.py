@@ -235,3 +235,83 @@ def test_week_odds_ranks_favorite_dst_by_underdog_implied(monkeypatch):
     finally:
         set_odds_provider(None)
 
+
+def test_espn_leagues_endpoint():
+    response = client.get("/api/v1/espn/leagues")
+    assert response.status_code == 200
+    body = response.json()
+    assert any(league["id"] == "1216398267" for league in body["leagues"])
+
+
+def test_kyle_dst_rankings_endpoint(tmp_path):
+    from pathlib import Path
+
+    from draft_api.main import set_kyle_dst_http_get
+
+    fixture = Path(__file__).parent / "fixtures" / "kyle_dst_week1.html"
+    html = fixture.read_text(encoding="utf-8")
+    set_kyle_dst_http_get(lambda url: html)
+    try:
+        response = client.get("/api/v1/nfl/kyle-dst-rankings")
+        assert response.status_code == 200
+        body = response.json()
+        assert body["week"] == 1
+        assert body["rankings"][0]["team"] == "JAX"
+    finally:
+        set_kyle_dst_http_get(None)
+
+
+def test_kyle_dst_available_unknown_league():
+    response = client.get("/api/v1/nfl/kyle-dst-available", params={"leagueId": "999"})
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "league_not_found"
+
+
+def test_kyle_dst_available_cross_ref():
+    from pathlib import Path
+
+    from draft_api.main import set_espn_available_http_json, set_kyle_dst_http_get
+
+    fixture = Path(__file__).parent / "fixtures" / "kyle_dst_week1.html"
+    html = fixture.read_text(encoding="utf-8")
+    set_kyle_dst_http_get(lambda url: html)
+
+    def fake_espn(url: str, headers: dict) -> dict:
+        assert "1216398267" in url
+        return {
+            "players": [
+                {
+                    "status": "FREEAGENT",
+                    "player": {
+                        "fullName": "Jaguars D/ST",
+                        "proTeamId": 30,
+                        "ownership": {"percentOwned": 11.0},
+                    },
+                },
+                {
+                    "status": "WAIVERS",
+                    "player": {
+                        "fullName": "Titans D/ST",
+                        "proTeamId": 10,
+                        "ownership": {"percentOwned": 3.0},
+                    },
+                },
+            ]
+        }
+
+    set_espn_available_http_json(fake_espn)
+    try:
+        response = client.get(
+            "/api/v1/nfl/kyle-dst-available",
+            params={"leagueId": "1216398267"},
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["leagueName"] == "Girls Who Ball"
+        assert body["rankings"][0]["team"] == "JAX"
+        assert [row["team"] for row in body["available"]] == ["JAX", "TEN"]
+        assert body["available"][0]["status"] == "FREEAGENT"
+    finally:
+        set_kyle_dst_http_get(None)
+        set_espn_available_http_json(None)
+

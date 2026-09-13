@@ -27,7 +27,15 @@ from pydantic import BaseModel, Field
 from starlette.middleware.base import RequestResponseEndpoint
 
 from . import __version__
+from .espn_available_dst import (
+    EspnAvailableError,
+    espn_credentials_from_env,
+    fetch_available_dst,
+)
+from .espn_leagues import LeagueNotFoundError, get_league, leagues_payload
 from .implied_totals import GameLine
+from .kyle_dst import KyleDstError, fetch_kyle_dst_rankings
+from .kyle_dst_available import build_kyle_available_payload
 from .odds import OddsApiError, OddsProvider, TheOddsApiProvider, TtlCache
 from .week_odds import build_week_odds_payload
 
@@ -145,6 +153,38 @@ _odds_provider_override: OddsProvider | None = None
 _odds_cache: TtlCache[list[GameLine]] = TtlCache(
     ttl_seconds=float(os.getenv("ODDS_CACHE_TTL_SECONDS", "1800"))
 )
+
+# Kyle DST scrape cache (HTML is slower / more fragile than odds).
+_kyle_dst_cache: TtlCache[dict[str, Any]] = TtlCache(
+    ttl_seconds=float(os.getenv("KYLE_DST_CACHE_TTL_SECONDS", "1800"))
+)
+_kyle_dst_http_get_override: Any | None = None
+_espn_available_http_json_override: Any | None = None
+
+
+def set_kyle_dst_http_get(http_get: Any | None) -> None:
+    """Test hook: override FantasyPros HTML fetcher (None restores default)."""
+    global _kyle_dst_http_get_override
+    _kyle_dst_http_get_override = http_get
+    _kyle_dst_cache.clear()
+
+
+def set_espn_available_http_json(http_json: Any | None) -> None:
+    """Test hook: override ESPN JSON fetcher (None restores default)."""
+    global _espn_available_http_json_override
+    _espn_available_http_json_override = http_json
+
+
+def get_kyle_dst_rankings_cached(*, week: int | None = None) -> dict[str, Any]:
+    # Cache key is week-agnostic for “current” requests; explicit week skips shared cache.
+    if week is None:
+        cached = _kyle_dst_cache.get()
+        if cached is not None:
+            return cached
+    payload = fetch_kyle_dst_rankings(week=week, http_get=_kyle_dst_http_get_override)
+    if week is None:
+        _kyle_dst_cache.set(payload)
+    return payload
 
 
 class _CachingOddsProvider:
@@ -303,3 +343,50 @@ def week_odds() -> dict[str, Any] | JSONResponse:
     except (OddsApiError, ValueError) as exc:
         # OddsApiError: provider/key failures. ValueError: bad NFL_SEASON_WEEK1_TUESDAY.
         return error_response(503, "odds_unavailable", str(exc))
+
+
+@app.get("/api/v1/espn/leagues", response_model=None)
+def espn_leagues() -> dict[str, Any]:
+    """Committed ESPN league directory for the Week D/ST picker."""
+    return leagues_payload()
+
+
+@app.get("/api/v1/nfl/kyle-dst-rankings", response_model=None)
+def kyle_dst_rankings() -> dict[str, Any] | JSONResponse:
+    """Kyle Krajewski weekly DST rankings scraped from FantasyPros."""
+    try:
+        return get_kyle_dst_rankings_cached()
+    except KyleDstError as exc:
+        return error_response(503, "kyle_rankings_unavailable", str(exc))
+
+
+@app.get("/api/v1/nfl/kyle-dst-available", response_model=None)
+def kyle_dst_available(leagueId: str) -> dict[str, Any] | JSONResponse:
+    """Kyle DST rankings plus FREEAGENT/WAIVERS defenses for a configured league."""
+    try:
+        league = get_league(leagueId)
+    except LeagueNotFoundError as exc:
+        return error_response(404, "league_not_found", str(exc))
+
+    try:
+        rankings_payload = get_kyle_dst_rankings_cached()
+    except KyleDstError as exc:
+        return error_response(503, "kyle_rankings_unavailable", str(exc))
+
+    try:
+        espn_s2, swid, season = espn_credentials_from_env()
+        available = fetch_available_dst(
+            league_id=league["id"],
+            season=season,
+            espn_s2=espn_s2,
+            swid=swid,
+            http_json=_espn_available_http_json_override,
+        )
+    except EspnAvailableError as exc:
+        return error_response(503, "espn_unavailable", str(exc))
+
+    return build_kyle_available_payload(
+        rankings_payload=rankings_payload,
+        available=available,
+        league=league,
+    )

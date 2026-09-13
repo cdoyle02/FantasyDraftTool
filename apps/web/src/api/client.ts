@@ -7,7 +7,12 @@ import type {
   Recommendation,
   UserAdjustment
 } from '../types'
-import type { WeekOddsResponse } from '../week/types'
+import type {
+  EspnLeaguesResponse,
+  KyleDstAvailableResponse,
+  KyleDstRankingsResponse,
+  WeekOddsResponse
+} from '../week/types'
 
 export interface RecommendationRequest {
   players: Player[]
@@ -257,6 +262,27 @@ export class DraftApiClient {
       '/api/v1/nfl/week-odds',
       { method: 'GET' },
       15_000
+    )
+  }
+
+  espnLeagues() {
+    return this.request<EspnLeaguesResponse>('/api/v1/espn/leagues', { method: 'GET' })
+  }
+
+  kyleDstRankings() {
+    return this.request<KyleDstRankingsResponse>(
+      '/api/v1/nfl/kyle-dst-rankings',
+      { method: 'GET' },
+      20_000
+    )
+  }
+
+  kyleDstAvailable(leagueId: string) {
+    const query = new URLSearchParams({ leagueId }).toString()
+    return this.request<KyleDstAvailableResponse>(
+      `/api/v1/nfl/kyle-dst-available?${query}`,
+      { method: 'GET' },
+      20_000
     )
   }
 }
