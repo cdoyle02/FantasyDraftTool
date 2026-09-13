@@ -23,7 +23,12 @@ class FantasyWeekWindow:
 def _parse_season_week1(value: str | None) -> date:
     if not value:
         return DEFAULT_SEASON_WEEK1_TUESDAY
-    return date.fromisoformat(value)
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise ValueError(
+            f"NFL_SEASON_WEEK1_TUESDAY must be an ISO date (YYYY-MM-DD), got {value!r}"
+        ) from exc
 
 
 def season_week1_tuesday_from_env() -> date:

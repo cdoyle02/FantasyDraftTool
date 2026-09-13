@@ -300,5 +300,6 @@ def week_odds() -> dict[str, Any] | JSONResponse:
     try:
         provider = get_odds_provider()
         return build_week_odds_payload(provider, now=datetime.now(timezone.utc))
-    except OddsApiError as exc:
+    except (OddsApiError, ValueError) as exc:
+        # OddsApiError: provider/key failures. ValueError: bad NFL_SEASON_WEEK1_TUESDAY.
         return error_response(503, "odds_unavailable", str(exc))

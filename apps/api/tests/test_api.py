@@ -134,6 +134,40 @@ def test_week_odds_requires_api_key_when_no_provider_override(monkeypatch):
     assert response.json()["error"]["code"] == "odds_unavailable"
 
 
+def test_week_odds_invalid_season_week1_env_returns_503(monkeypatch):
+    from datetime import datetime, timezone
+
+    from draft_api.implied_totals import GameLine
+    from draft_api.main import set_odds_provider
+    from draft_api.odds.fake import FakeOddsProvider
+
+    set_odds_provider(
+        FakeOddsProvider(
+            [
+                GameLine(
+                    home_team="KC",
+                    away_team="LV",
+                    commence_time=datetime(2026, 9, 13, 17, 0, tzinfo=timezone.utc),
+                    spread=-7.0,
+                    total=42.0,
+                    favorite_team="KC",
+                    underdog_team="LV",
+                    bookmaker="consensus",
+                )
+            ]
+        )
+    )
+    monkeypatch.setenv("NFL_SEASON_WEEK1_TUESDAY", "not-a-date")
+    try:
+        response = client.get("/api/v1/nfl/week-odds")
+        assert response.status_code == 503
+        body = response.json()
+        assert body["error"]["code"] == "odds_unavailable"
+        assert "NFL_SEASON_WEEK1_TUESDAY" in body["error"]["message"]
+    finally:
+        set_odds_provider(None)
+
+
 def test_week_odds_ranks_favorite_dst_by_underdog_implied(monkeypatch):
     from datetime import datetime, timezone
     from zoneinfo import ZoneInfo
