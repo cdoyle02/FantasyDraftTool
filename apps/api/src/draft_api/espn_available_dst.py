@@ -11,6 +11,7 @@ from typing import Any, Callable
 
 ESPN_READ_HOST = "https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl"
 DST_SLOT_ID = 16
+K_SLOT_ID = 17
 
 PRO_TEAM_IDS: dict[int, str] = {
     0: "FA",
@@ -70,21 +71,23 @@ def default_http_json(url: str, headers: dict[str, str]) -> Any:
         raise EspnAvailableError("ESPN returned invalid JSON") from exc
 
 
-def fetch_available_dst(
+def fetch_available_players(
     *,
     league_id: str,
     season: int,
+    slot_id: int,
     espn_s2: str | None = None,
     swid: str | None = None,
     statuses: list[str] | None = None,
     http_json: HttpJsonGetter | None = None,
+    user_agent: str = "FantasyDraftTool-espn-available/1.0",
 ) -> list[dict[str, Any]]:
-    """Return DST players with FREEAGENT / WAIVERS status for a league."""
+    """Return players for a lineup slot with FREEAGENT / WAIVERS status."""
     status_list = list(statuses or ["FREEAGENT", "WAIVERS"])
     fantasy_filter = {
         "players": {
             "filterStatus": {"value": status_list},
-            "filterSlotIds": {"value": [DST_SLOT_ID]},
+            "filterSlotIds": {"value": [slot_id]},
             "limit": 50,
             "offset": 0,
             "sortPercOwned": {"sortPriority": 1, "sortAsc": False},
@@ -93,7 +96,7 @@ def fetch_available_dst(
     query = urllib.parse.urlencode([("view", "kona_player_info")])
     url = f"{ESPN_READ_HOST}/seasons/{season}/segments/0/leagues/{league_id}?{query}"
     headers = {
-        "User-Agent": "FantasyDraftTool-kyle-dst/1.0",
+        "User-Agent": user_agent,
         "Accept": "application/json",
         "X-Fantasy-Filter": json.dumps(fantasy_filter),
     }
@@ -133,6 +136,50 @@ def fetch_available_dst(
         )
     )
     return rows
+
+
+def fetch_available_dst(
+    *,
+    league_id: str,
+    season: int,
+    espn_s2: str | None = None,
+    swid: str | None = None,
+    statuses: list[str] | None = None,
+    http_json: HttpJsonGetter | None = None,
+) -> list[dict[str, Any]]:
+    """Return DST players with FREEAGENT / WAIVERS status for a league."""
+    return fetch_available_players(
+        league_id=league_id,
+        season=season,
+        slot_id=DST_SLOT_ID,
+        espn_s2=espn_s2,
+        swid=swid,
+        statuses=statuses,
+        http_json=http_json,
+        user_agent="FantasyDraftTool-kyle-dst/1.0",
+    )
+
+
+def fetch_available_k(
+    *,
+    league_id: str,
+    season: int,
+    espn_s2: str | None = None,
+    swid: str | None = None,
+    statuses: list[str] | None = None,
+    http_json: HttpJsonGetter | None = None,
+) -> list[dict[str, Any]]:
+    """Return kickers with FREEAGENT / WAIVERS status for a league."""
+    return fetch_available_players(
+        league_id=league_id,
+        season=season,
+        slot_id=K_SLOT_ID,
+        espn_s2=espn_s2,
+        swid=swid,
+        statuses=statuses,
+        http_json=http_json,
+        user_agent="FantasyDraftTool-jared-k/1.0",
+    )
 
 
 def espn_credentials_from_env() -> tuple[str | None, str | None, int]:

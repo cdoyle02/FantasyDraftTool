@@ -9,6 +9,8 @@ import type {
 } from '../types'
 import type {
   EspnLeaguesResponse,
+  JaredKAvailableResponse,
+  JaredKRankingsResponse,
   KyleDstAvailableResponse,
   KyleDstRankingsResponse,
   WeekOddsResponse
@@ -281,6 +283,23 @@ export class DraftApiClient {
     const query = new URLSearchParams({ leagueId }).toString()
     return this.request<KyleDstAvailableResponse>(
       `/api/v1/nfl/kyle-dst-available?${query}`,
+      { method: 'GET' },
+      20_000
+    )
+  }
+
+  jaredKRankings() {
+    return this.request<JaredKRankingsResponse>(
+      '/api/v1/nfl/jared-k-rankings',
+      { method: 'GET' },
+      20_000
+    )
+  }
+
+  jaredKAvailable(leagueId: string) {
+    const query = new URLSearchParams({ leagueId }).toString()
+    return this.request<JaredKAvailableResponse>(
+      `/api/v1/nfl/jared-k-available?${query}`,
       { method: 'GET' },
       20_000
     )

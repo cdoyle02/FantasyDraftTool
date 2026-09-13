@@ -315,3 +315,79 @@ def test_kyle_dst_available_cross_ref():
         set_kyle_dst_http_get(None)
         set_espn_available_http_json(None)
 
+
+def test_jared_k_rankings_endpoint():
+    from pathlib import Path
+
+    from draft_api.main import set_jared_k_http_get
+
+    fixture = Path(__file__).parent / "fixtures" / "jared_k_week1.html"
+    html = fixture.read_text(encoding="utf-8")
+    set_jared_k_http_get(lambda url: html)
+    try:
+        response = client.get("/api/v1/nfl/jared-k-rankings")
+        assert response.status_code == 200
+        body = response.json()
+        assert body["week"] == 1
+        assert body["rankings"][0]["player"] == "Brandon Aubrey"
+        assert body["rankings"][0]["team"] == "DAL"
+    finally:
+        set_jared_k_http_get(None)
+
+
+def test_jared_k_available_unknown_league():
+    response = client.get("/api/v1/nfl/jared-k-available", params={"leagueId": "999"})
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "league_not_found"
+
+
+def test_jared_k_available_cross_ref():
+    from pathlib import Path
+
+    from draft_api.main import set_espn_available_http_json, set_jared_k_http_get
+
+    fixture = Path(__file__).parent / "fixtures" / "jared_k_week1.html"
+    html = fixture.read_text(encoding="utf-8")
+    set_jared_k_http_get(lambda url: html)
+
+    def fake_espn(url: str, headers: dict) -> dict:
+        assert "1216398267" in url
+        filter_header = headers.get("X-Fantasy-Filter") or ""
+        assert "17" in filter_header  # K slot
+        return {
+            "players": [
+                {
+                    "status": "FREEAGENT",
+                    "player": {
+                        "fullName": "Evan McPherson",
+                        "proTeamId": 4,
+                        "ownership": {"percentOwned": 21.6},
+                    },
+                },
+                {
+                    "status": "FREEAGENT",
+                    "player": {
+                        "fullName": "Jake Elliott",
+                        "proTeamId": 21,
+                        "ownership": {"percentOwned": 8.7},
+                    },
+                },
+            ]
+        }
+
+    set_espn_available_http_json(fake_espn)
+    try:
+        response = client.get(
+            "/api/v1/nfl/jared-k-available",
+            params={"leagueId": "1216398267"},
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["leagueName"] == "Girls Who Ball"
+        assert body["rankings"][0]["player"] == "Brandon Aubrey"
+        assert [row["player"] for row in body["available"]] == ["Evan McPherson", "Jake Elliott"]
+        assert body["available"][0]["status"] == "FREEAGENT"
+    finally:
+        set_jared_k_http_get(None)
+        set_espn_available_http_json(None)
+

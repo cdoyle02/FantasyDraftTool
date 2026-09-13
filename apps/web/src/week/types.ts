@@ -67,3 +67,30 @@ export interface KyleDstAvailableResponse extends KyleDstRankingsResponse {
   leagueName: string
   available: KyleDstAvailableRow[]
 }
+
+export interface JaredKRanking {
+  rank: number
+  player: string
+  team: string
+  opponent: string
+  ecr: number | null
+  vsEcr: string
+}
+
+export interface JaredKRankingsResponse {
+  week: number | null
+  fetchedAt: string
+  sourceUrl: string
+  rankings: JaredKRanking[]
+}
+
+export interface JaredKAvailableRow extends JaredKRanking {
+  status: string
+  percentOwned: number | null
+}
+
+export interface JaredKAvailableResponse extends JaredKRankingsResponse {
+  leagueId: string
+  leagueName: string
+  available: JaredKAvailableRow[]
+}

@@ -9,6 +9,7 @@ import { rosterEntriesForTeam, keptPlayerIds, roundForPick, teamForPick, useDraf
 import { assignRosterSlots, SLOT_LABELS } from './store/rosterSlots'
 import type { DraftPick, LeagueSettings, Player, Recommendation } from './types'
 import { WeekDstView } from './week/WeekDstView'
+import { WeekKView } from './week/WeekKView'
 
 function SetupDialog({ close }: { close: () => void }) {
   const settings = useDraftStore((state) => state.settings)
@@ -603,7 +604,7 @@ export default function App() {
   const [modal, setModal] = useState<'setup' | 'import' | null>(null)
   const [correctionId, setCorrectionId] = useState<string>()
   const [online, setOnline] = useState(navigator.onLine)
-  const [shellView, setShellView] = useState<'draft' | 'week-dst'>('draft')
+  const [shellView, setShellView] = useState<'draft' | 'week-dst' | 'week-k'>('draft')
   useEffect(() => { void hydrate() }, [hydrate])
   useEffect(() => {
     const update = () => {
@@ -653,6 +654,16 @@ export default function App() {
           >
             Week D/ST
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={shellView === 'week-k'}
+            data-testid="week-k-tab"
+            className={`rounded-md px-2.5 py-1.5 text-xs font-semibold ${shellView === 'week-k' ? 'bg-mint text-ink' : 'text-muted hover:text-white'}`}
+            onClick={() => setShellView('week-k')}
+          >
+            Week K
+          </button>
         </div>
         <div data-testid="offline-status" data-ready={offlineReady} className={`flex items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${offlineReady ? 'border-mint/30 text-mint' : 'border-amber-300/30 text-amber-200'}`}><span className={`h-1.5 w-1.5 rounded-full ${offlineReady ? 'bg-mint' : 'bg-amber-300'}`} /><span className="hidden sm:inline">{online ? (offlineReady ? 'ONLINE · OFFLINE READY' : 'ONLINE · PREPARING OFFLINE') : (offlineReady ? 'OFFLINE READY' : 'OFFLINE NOT READY')}</span><span className="sm:hidden">{offlineReady ? 'READY' : 'SETUP'}</span></div>
         <button
@@ -676,6 +687,8 @@ export default function App() {
     <main className="mx-auto max-w-[1600px] p-4 sm:p-6">
       {shellView === 'week-dst' ? (
         <WeekDstView />
+      ) : shellView === 'week-k' ? (
+        <WeekKView />
       ) : (
         <>
           <section className="mb-5 grid gap-3 rounded-2xl border border-line bg-gradient-to-r from-panel to-ink p-4 shadow-glow lg:grid-cols-[1fr_auto] lg:items-center">

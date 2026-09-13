@@ -31,9 +31,12 @@ from .espn_available_dst import (
     EspnAvailableError,
     espn_credentials_from_env,
     fetch_available_dst,
+    fetch_available_k,
 )
 from .espn_leagues import LeagueNotFoundError, get_league, leagues_payload
 from .implied_totals import GameLine
+from .jared_k import JaredKError, fetch_jared_k_rankings
+from .jared_k_available import build_jared_available_payload
 from .kyle_dst import KyleDstError, fetch_kyle_dst_rankings
 from .kyle_dst_available import build_kyle_available_payload
 from .odds import OddsApiError, OddsProvider, TheOddsApiProvider, TtlCache
@@ -161,12 +164,25 @@ _kyle_dst_cache: TtlCache[dict[str, Any]] = TtlCache(
 _kyle_dst_http_get_override: Any | None = None
 _espn_available_http_json_override: Any | None = None
 
+# Jared Smola weekly K scrape cache.
+_jared_k_cache: TtlCache[dict[str, Any]] = TtlCache(
+    ttl_seconds=float(os.getenv("JARED_K_CACHE_TTL_SECONDS", "1800"))
+)
+_jared_k_http_get_override: Any | None = None
+
 
 def set_kyle_dst_http_get(http_get: Any | None) -> None:
     """Test hook: override FantasyPros HTML fetcher (None restores default)."""
     global _kyle_dst_http_get_override
     _kyle_dst_http_get_override = http_get
     _kyle_dst_cache.clear()
+
+
+def set_jared_k_http_get(http_get: Any | None) -> None:
+    """Test hook: override Jared FantasyPros HTML fetcher (None restores default)."""
+    global _jared_k_http_get_override
+    _jared_k_http_get_override = http_get
+    _jared_k_cache.clear()
 
 
 def set_espn_available_http_json(http_json: Any | None) -> None:
@@ -184,6 +200,17 @@ def get_kyle_dst_rankings_cached(*, week: int | None = None) -> dict[str, Any]:
     payload = fetch_kyle_dst_rankings(week=week, http_get=_kyle_dst_http_get_override)
     if week is None:
         _kyle_dst_cache.set(payload)
+    return payload
+
+
+def get_jared_k_rankings_cached(*, week: int | None = None) -> dict[str, Any]:
+    if week is None:
+        cached = _jared_k_cache.get()
+        if cached is not None:
+            return cached
+    payload = fetch_jared_k_rankings(week=week, http_get=_jared_k_http_get_override)
+    if week is None:
+        _jared_k_cache.set(payload)
     return payload
 
 
@@ -386,6 +413,47 @@ def kyle_dst_available(leagueId: str) -> dict[str, Any] | JSONResponse:
         return error_response(503, "espn_unavailable", str(exc))
 
     return build_kyle_available_payload(
+        rankings_payload=rankings_payload,
+        available=available,
+        league=league,
+    )
+
+
+@app.get("/api/v1/nfl/jared-k-rankings", response_model=None)
+def jared_k_rankings() -> dict[str, Any] | JSONResponse:
+    """Jared Smola weekly K rankings scraped from FantasyPros."""
+    try:
+        return get_jared_k_rankings_cached()
+    except JaredKError as exc:
+        return error_response(503, "jared_rankings_unavailable", str(exc))
+
+
+@app.get("/api/v1/nfl/jared-k-available", response_model=None)
+def jared_k_available(leagueId: str) -> dict[str, Any] | JSONResponse:
+    """Jared K rankings plus FREEAGENT/WAIVERS kickers for a configured league."""
+    try:
+        league = get_league(leagueId)
+    except LeagueNotFoundError as exc:
+        return error_response(404, "league_not_found", str(exc))
+
+    try:
+        rankings_payload = get_jared_k_rankings_cached()
+    except JaredKError as exc:
+        return error_response(503, "jared_rankings_unavailable", str(exc))
+
+    try:
+        espn_s2, swid, season = espn_credentials_from_env()
+        available = fetch_available_k(
+            league_id=league["id"],
+            season=season,
+            espn_s2=espn_s2,
+            swid=swid,
+            http_json=_espn_available_http_json_override,
+        )
+    except EspnAvailableError as exc:
+        return error_response(503, "espn_unavailable", str(exc))
+
+    return build_jared_available_payload(
         rankings_payload=rankings_payload,
         available=available,
         league=league,
