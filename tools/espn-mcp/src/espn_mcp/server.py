@@ -13,7 +13,6 @@ from .client import (
     EspnError,
     fetch,
     league_url,
-    load_config,
     season_meta_url,
     season_players_url,
 )
@@ -30,6 +29,7 @@ from .players import (
     pagination_fields,
     validate_free_agent_query,
 )
+from .profiles import active_config, current_profile
 from .reference import (
     LINEUP_SLOT_IDS,
     POSITION_IDS,
@@ -50,7 +50,22 @@ Normalized tools:
 - espn_free_agents — league free agents and waiver players with paging, sort, and search
 
 Season defaults to ESPN_SEASON (2026 when unset). League id defaults to ESPN_LEAGUE_ID.
-Credentials come from ESPN_S2 and ESPN_SWID and are never accepted as tool arguments.
+Credentials come from the active profile (ESPN_S2 and ESPN_SWID, or Katie's pair on
+her hosted login) and are never accepted as tool arguments.
+
+Roster and show tools:
+- espn_league_rosters — live rosters for every team in a configured league. Pass a
+  league name or id for opponents as well as the caller. Katie's login defaults to
+  her own team when no league or owner is given. Pass mine=true for the cookie owner's
+  teams only.
+- espn_league_directory — the configured league names and ids.
+- kyle_dst_available / jared_k_available — weekly DST and kicker rankings crossed
+  with free agents in one league.
+- week_odds — current-week NFL spreads and implied totals.
+- ballers_latest — newest Fantasy Footballers episode summary, plus YouTube captions
+  when they are published.
+
+Girls Who Ball is Katie Doyle's league. Use owner "Katie" or her login to get her team.
 """
 
 server: MCPServer[Any] = MCPServer(
@@ -61,7 +76,7 @@ server: MCPServer[Any] = MCPServer(
 
 
 def _resolve(season: int | None, league_id: str | None) -> tuple[EspnConfig, str | None]:
-    config = load_config()
+    config = active_config()
     if season is not None:
         config = EspnConfig(
             season=season,
@@ -88,7 +103,7 @@ def _require_league(league_id: str | None) -> str:
     )
 )
 def espn_reference(season: int | None = None) -> str:
-    config = load_config()
+    config = active_config()
     return json.dumps(reference_document(season or config.season), indent=2)
 
 
@@ -592,7 +607,8 @@ async def _player_lookup(config: EspnConfig, ids: set[Any]) -> dict[int, dict[st
     )
 )
 async def espn_status() -> str:
-    config = load_config()
+    config = active_config()
+    profile = current_profile()
     reachable: Any
     try:
         meta = await fetch(season_meta_url(config.season), config=config)
@@ -605,12 +621,192 @@ async def espn_status() -> str:
 
     return json.dumps(
         {
+            "profile": profile.name if profile is not None else "env",
             "season": config.season,
             "league_id": config.league_id,
             "cookies_present": config.authenticated,
             "espn_reachable": reachable,
         },
         indent=2,
+    )
+
+
+@server.tool(
+    description=(
+        "Live ESPN rosters for the configured leagues. Returns every team when a league "
+        "or owner is given, including opponents. Omit both to list team names only, except "
+        "on Katie's login, which defaults to her own team. mine=true limits the result to "
+        "the authenticated ESPN account's teams."
+    )
+)
+async def espn_league_rosters(
+    league: str | None = None,
+    owner: str | None = None,
+    mine: bool | None = None,
+    season: int | None = None,
+) -> str:
+    """Return compact live rosters.
+
+    Args:
+        league: League id or part of a league name. Omit to search every configured league.
+        owner: Case-insensitive match on owner display name or real name, such as "Katie".
+        mine: When true, only teams owned by the authenticated ESPN account.
+        season: Season year. Defaults to the active profile's season.
+    """
+    from .rosters import (
+        bye_map,
+        configured_leagues,
+        normalize_teams,
+        resolve_roster_query,
+        select_leagues,
+    )
+
+    config, _league_id = _resolve(season, None)
+    if not config.authenticated:
+        raise EspnError("ESPN cookies are not configured for this profile.")
+    profile = current_profile()
+    restrict_to_owner, include_players = resolve_roster_query(
+        profile_name=profile.name if profile is not None else None,
+        league=league,
+        owner=owner,
+        mine=mine,
+    )
+    leagues = select_leagues(configured_leagues(), league)
+    season_meta = await fetch(
+        season_meta_url(config.season),
+        config=config,
+        views=["proTeamSchedules_wl"],
+    )
+    bye_weeks = bye_map(season_meta if isinstance(season_meta, dict) else {})
+    teams: list[dict[str, Any]] = []
+    scoring_period = None
+    for item in leagues:
+        payload = await fetch(
+            league_url(config.season, item["id"]),
+            config=config,
+            views=["mTeam", "mRoster", "mStatus"],
+        )
+        if not isinstance(payload, dict):
+            raise EspnError(f"Unexpected ESPN payload for league {item['id']}")
+        scoring_period = payload.get("scoringPeriodId", scoring_period)
+        teams.extend(
+            normalize_teams(
+                payload,
+                league_id=item["id"],
+                league_name=item["name"],
+                bye_weeks=bye_weeks,
+                owner_swid=config.swid if restrict_to_owner else None,
+                owner_query=owner,
+                include_players=include_players,
+            )
+        )
+    return json.dumps(
+        {
+            "profile": profile.name if profile is not None else "env",
+            "season": config.season,
+            "scoring_period": scoring_period,
+            "include_players": include_players,
+            "team_count": len(teams),
+            "teams": teams,
+        },
+        indent=2,
+    )
+
+
+@server.tool(description="Configured ESPN league names and ids.")
+def espn_league_directory() -> str:
+    from .draft_bridge import league_directory
+
+    return league_directory()
+
+
+@server.tool(
+    description=(
+        "Kyle Krajewski weekly DST rankings crossed with FREEAGENT and WAIVERS defenses "
+        "in one configured league. Uses the authenticated profile's ESPN cookies."
+    )
+)
+def kyle_dst_available(league: str) -> str:
+    """Args: league: League id or part of a league name."""
+    from .draft_bridge import kyle_dst_available as _available
+
+    return _available(league)
+
+
+@server.tool(
+    description=(
+        "Jared Smola weekly kicker rankings crossed with FREEAGENT and WAIVERS kickers "
+        "in one configured league. Uses the authenticated profile's ESPN cookies."
+    )
+)
+def jared_k_available(league: str) -> str:
+    """Args: league: League id or part of a league name."""
+    from .draft_bridge import jared_k_available as _available
+
+    return _available(league)
+
+
+@server.tool(
+    description="Current fantasy-week NFL spreads, totals, and ranked favorite D/ST plays."
+)
+def week_odds() -> str:
+    from .draft_bridge import week_odds as _week_odds
+
+    return _week_odds()
+
+
+@server.tool(
+    description=(
+        "Newest Fantasy Footballers podcast episode: title, date, summary, and YouTube "
+        "captions when the episode page publishes a video id and captions are available."
+    )
+)
+async def ballers_latest() -> str:
+    from .ballers import latest_episode
+
+    try:
+        return json.dumps(await latest_episode(), indent=2)
+    except Exception as exc:  # network and parse failures stay in the tool result
+        return json.dumps({"error": str(exc)})
+
+
+@server.prompt(
+    description="Pull Katie Doyle's current Girls Who Ball roster, including bench and IR."
+)
+def katie_roster() -> str:
+    return (
+        "Call espn_league_rosters with league 'Girls Who Ball' and owner 'Katie'. "
+        "Report starters, bench, and IR with lineup slot, NFL team, injury, and fantasy points. "
+        "Do not invent players that are absent from the tool result."
+    )
+
+
+@server.prompt(description="Pull every team's current roster in one configured ESPN league.")
+def league_rosters(league: str) -> str:
+    return (
+        f"Call espn_league_rosters with league {league!r} and no owner filter so opponents "
+        "are included. Summarize each team, then answer the user's question from those rows."
+    )
+
+
+@server.prompt(
+    description="Read the latest Fantasy Footballers episode and compare it to a roster."
+)
+def ballers_and_roster(league: str = "Girls Who Ball", owner: str = "Katie") -> str:
+    return (
+        "Call ballers_latest, then espn_league_rosters with "
+        f"league {league!r} and owner {owner!r}. "
+        "Use the episode summary and transcript only when the tool returned them. "
+        "Tie show notes to players actually on that roster."
+    )
+
+
+@server.prompt(description="Weekly DST and kicker availability for one ESPN league.")
+def week_dst_k(league: str) -> str:
+    return (
+        f"Call kyle_dst_available and jared_k_available with league {league!r}. "
+        "Also call week_odds when the question is about game script or implied totals. "
+        "Recommend only defenses and kickers the tools mark available."
     )
 
 

@@ -57,6 +57,9 @@ htmlcov/
 *.swo
 *~
 
+# Firecrawl scrape cache
+.firecrawl/
+
 # OS
 .DS_Store
 Thumbs.db

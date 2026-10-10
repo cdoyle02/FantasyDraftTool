@@ -1,4 +1,8 @@
-"""Committed ESPN league directory for Week D/ST league picker."""
+"""Committed ESPN league directory for Week D/ST league picker.
+
+The same `{id, name}` list is the league set for
+`tools/espn-mcp/scripts/export_my_rosters.py`.
+"""
 
 from __future__ import annotations
 

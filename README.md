@@ -13,6 +13,8 @@ the browser when a draft loses internet access.
 - `apps/web` — live-draft PWA, browser persistence, and offline engine adapter
 - `apps/api` — stateless FastAPI service
 - `packages/dvs-engine` — deterministic Draft Value Score domain package
+- `tools/espn-mcp` — ESPN fantasy API research MCP and roster export
+- `data/rosters` — current ESPN roster snapshots (JSON + CSV)
 - `docs` — architecture, deployment, and draft-day readiness
 
 ## Prerequisites
