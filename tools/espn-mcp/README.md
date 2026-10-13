@@ -58,23 +58,27 @@ Private-league cookies are required (`ESPN_S2` and `ESPN_SWID` in this
 directory's `.env`). The script never prints cookie values. It includes:
 
 - every team owned by the ESPN account in `.env`
-- plus Michael Doyle (`Doyle.m`) when that member is in the same league, so a
-  household session still exports both accounts
+- plus **Michael Doyle** (`Doyle.m`) and **Katie Doyle** when those members are
+  in a reachable league (household export)
+- with `--full-leagues` (default): every team in each reachable league under
+  `data/rosters/leagues/`
 
 From this directory:
 
 ```bash
-uv run python scripts/export_my_rosters.py
+uv run python scripts/export_my_rosters.py --full-leagues
 ```
 
 Optional `--out-dir` overrides the default output folder. Files written:
 
 | File | Contents |
 | --- | --- |
-| [`data/rosters/current-teams.json`](../../data/rosters/current-teams.json) | Season, scoring period, owners, and nested per-team player lists |
-| [`data/rosters/current-teams.csv`](../../data/rosters/current-teams.csv) | One row per rostered player (lineup slot, NFL team, bye, injury, points) |
+| [`data/rosters/current-teams.json`](../../data/rosters/current-teams.json) | Household teams (Michael + Katie) |
+| [`data/rosters/current-teams.csv`](../../data/rosters/current-teams.csv) | One row per rostered player on those teams |
+| `data/rosters/leagues/<id>-<name>.json` | Full league dumps for leagues the cookie can access |
 
-Re-run the script to refresh; the files are overwritten in place.
+Leagues the session cannot open (e.g. Just The Tip on a Girls Who Ball cookie)
+are skipped with a printed note. Re-run to refresh; files are overwritten in place.
 
 ## Registration
 

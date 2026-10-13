@@ -1,66 +1,51 @@
 league_id,league_name,team_id,team_name,abbrev,owner_display_name,owner_name,record,espn_player_id,player_name,position,nfl_team,bye_week,lineup_slot,injury_status,acquisition_type,percent_owned,percent_started,fantasy_points
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,3916387,Lamar Jackson,QB,BAL,13,QB,QUESTIONABLE,DRAFT,99.86,92.09,20.44
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4259545,D'Andre Swift,RB,CHI,10,RB,ACTIVE,DRAFT,96.53,78.46,10.8
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4035538,David Montgomery,RB,HOU,8,RB,ACTIVE,DRAFT,95.01,67.46,6.8
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4832800,Denzel Boston,WR,CLE,11,WR,ACTIVE,DRAFT,69.68,17.29,8.1
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4258173,Nico Collins,WR,HOU,8,WR,QUESTIONABLE,DRAFT,98.85,45.07,0.0
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4572680,Tucker Kraft,TE,GB,11,TE,ACTIVE,DRAFT,86.38,45.78,6.6
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,5083315,Kenyon Sadiq,TE,NYJ,13,FLEX,QUESTIONABLE,ADD,56.85,16.39,23.5
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,2973405,Kalif Raymond,WR,CHI,10,FLEX,ACTIVE,ADD,44.09,10.49,21.0
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,-16002,Bills D/ST,DST,BUF,7,DST,NORMAL,ADD,35.34,32.27,5.0
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,2473037,Jason Myers,K,SEA,11,K,ACTIVE,DRAFT,93.77,89.69,9.0
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,-16025,49ers D/ST,DST,SF,8,BENCH,NORMAL,ADD,53.02,42.22,0.0
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4429096,Blake Corum,RB,LAR,11,BENCH,ACTIVE,DRAFT,72.48,6.4,3.5
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4887558,Emanuel Wilson,RB,SEA,11,BENCH,ACTIVE,ADD,28.54,5.82,1.4
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4038815,Rico Dowdle,RB,PIT,9,BENCH,OUT,DRAFT,72.4,2.74,0.0
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4428557,Tyjae Spears,RB,TEN,9,BENCH,QUESTIONABLE,DRAFT,42.86,2.2,0.5
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4871023,Carnell Tate,WR,TEN,9,BENCH,ACTIVE,DRAFT,85.36,25.05,11.8
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4869961,Chris Bell,WR,MIA,6,BENCH,QUESTIONABLE,ADD,4.36,0.21,10.7
-1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-2,4429160,De'Von Achane,RB,MIA,6,IR,INJURY_RESERVE,DRAFT,59.32,31.66,1.7
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,3916387,Lamar Jackson,QB,BAL,13,QB,QUESTIONABLE,DRAFT,99.86,92.09,20.44
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,4241416,Chuba Hubbard,RB,CAR,5,RB,ACTIVE,DRAFT,93.21,73.76,15.0
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,4685382,Omarion Hampton,RB,LAC,7,RB,ACTIVE,DRAFT,98.8,73.59,5.6
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,4374302,Amon-Ra St. Brown,WR,DET,6,WR,ACTIVE,DRAFT,99.93,99.68,11.9
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,4688813,Josh Downs,WR,IND,13,WR,ACTIVE,DRAFT,81.75,38.1,12.7
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,3117256,Dalton Schultz,TE,HOU,8,TE,ACTIVE,ADD,59.85,28.48,6.0
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,16800,Davante Adams,WR,LAR,11,FLEX,ACTIVE,DRAFT,99.04,90.34,21.7
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,-16012,Chiefs D/ST,DST,KC,5,DST,NORMAL,ADD,61.15,53.6,7.0
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,2473037,Jason Myers,K,SEA,11,K,ACTIVE,DRAFT,93.77,89.69,9.0
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,4685247,Braelon Allen,RB,NYJ,13,BENCH,ACTIVE,ADD,68.64,35.62,4.7
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,4429023,MarShawn Lloyd,RB,GB,11,BENCH,ACTIVE,DRAFT,53.52,5.42,3.8
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,4239996,Travis Etienne Jr.,RB,NO,8,BENCH,OUT,DRAFT,93.49,24.1,9.0
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,4572680,Tucker Kraft,TE,GB,11,BENCH,ACTIVE,DRAFT,86.38,45.78,6.6
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,3126486,Deebo Samuel Sr.,WR,SF,8,BENCH,ACTIVE,DRAFT,84.8,36.53,15.4
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,2973405,Kalif Raymond,WR,CHI,10,BENCH,ACTIVE,ADD,44.09,10.49,21.0
-169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,2-1,2976212,Stefon Diggs,WR,WSH,7,BENCH,ACTIVE,DRAFT,86.05,29.81,7.3
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,3918298,Josh Allen,QB,BUF,7,QB,ACTIVE,DRAFT,99.92,98.18,17.46
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,3117251,Christian McCaffrey,RB,SF,8,RB,ACTIVE,DRAFT,99.92,99.54,21.6
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,4430737,Kyren Williams,RB,LAR,11,RB,ACTIVE,DRAFT,98.49,84.29,21.8
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,4372016,Jaylen Waddle,WR,DEN,10,WR,ACTIVE,DRAFT,94.91,54.36,6.4
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,4685472,Tetairoa McMillan,WR,CAR,5,WR,ACTIVE,DRAFT,97.97,84.55,3.7
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,4432665,Brock Bowers,TE,LV,13,TE,ACTIVE,DRAFT,99.83,86.39,27.6
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,4432710,TreVeyon Henderson,RB,NE,11,FLEX,ACTIVE,DRAFT,89.8,29.35,3.9
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,4832800,Denzel Boston,WR,CLE,11,FLEX,ACTIVE,ADD,69.68,17.29,8.1
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,-16025,49ers D/ST,DST,SF,8,DST,NORMAL,ADD,53.02,42.22,0.0
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,4696044,Kaelon Black,RB,SF,8,BENCH,ACTIVE,DRAFT,37.07,1.12,1.7
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,4608686,Kyle Monangai,RB,CHI,10,BENCH,ACTIVE,DRAFT,77.02,9.28,3.1
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,4697815,Rachaad White,RB,WSH,7,BENCH,QUESTIONABLE,DRAFT,67.0,6.42,11.1
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,4569173,Rhamondre Stevenson,RB,NE,11,BENCH,ACTIVE,DRAFT,89.71,38.13,6.8
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,5083315,Kenyon Sadiq,TE,NYJ,13,BENCH,QUESTIONABLE,ADD,56.85,16.39,23.5
-853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,2-1,2973405,Kalif Raymond,WR,CHI,10,BENCH,ACTIVE,ADD,44.09,10.49,21.0
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,3918298,Josh Allen,QB,BUF,7,QB,ACTIVE,DRAFT,99.92,98.18,17.46
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,3043078,Derrick Henry,RB,BAL,13,RB,ACTIVE,DRAFT,99.87,99.14,21.9
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,4430737,Kyren Williams,RB,LAR,11,RB,ACTIVE,DRAFT,98.49,84.29,21.8
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,4612826,Ladd McConkey,WR,LAC,7,WR,QUESTIONABLE,DRAFT,96.52,57.51,10.6
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,4428331,Rashee Rice,WR,KC,5,WR,ACTIVE,DRAFT,98.94,86.08,15.8
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,15847,Travis Kelce,TE,KC,5,TE,ACTIVE,ADD,95.07,78.13,13.9
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,4426515,Puka Nacua,WR,LAR,11,FLEX,QUESTIONABLE,DRAFT,99.89,59.97,0.0
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,-16029,Panthers D/ST,DST,CAR,5,DST,NORMAL,ADD,20.11,14.31,6.0
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,3953687,Brandon Aubrey,K,DAL,14,K,ACTIVE,DRAFT,99.48,98.21,10.0
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,3054850,Alvin Kamara,RB,NO,8,BENCH,ACTIVE,ADD,59.37,14.45,5.1
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,4035538,David Montgomery,RB,HOU,8,BENCH,ACTIVE,DRAFT,95.01,67.46,6.8
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,4241985,J.K. Dobbins,RB,DEN,10,BENCH,ACTIVE,ADD,78.77,15.91,6.3
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,3117256,Dalton Schultz,TE,HOU,8,BENCH,ACTIVE,ADD,59.85,28.48,6.0
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,4832800,Denzel Boston,WR,CLE,11,BENCH,ACTIVE,ADD,69.68,17.29,8.1
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,2973405,Kalif Raymond,WR,CHI,10,BENCH,ACTIVE,ADD,44.09,10.49,21.0
-886805,Just The Tip,3,Team Murder Boner,mike,Doyle.m,michael doyle,3-0,16737,Mike Evans,WR,SF,8,BENCH,QUESTIONABLE,DRAFT,91.9,34.28,12.4
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,8439,Aaron Rodgers,QB,PIT,9,QB,ACTIVE,ADD,19.11,10.96,22.0
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4259545,D'Andre Swift,RB,CHI,10,RB,ACTIVE,DRAFT,96.49,81.92,17.3
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4887558,Emanuel Wilson,RB,SEA,11,RB,ACTIVE,ADD,81.47,67.54,13.2
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4871023,Carnell Tate,WR,TEN,9,WR,ACTIVE,DRAFT,88.69,48.0,1.6
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4258173,Nico Collins,WR,HOU,8,WR,ACTIVE,DRAFT,99.34,91.82,10.6
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4572680,Tucker Kraft,TE,GB,11,TE,ACTIVE,ADD,86.63,58.77,11.6
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4429096,Blake Corum,RB,LAR,11,FLEX,ACTIVE,DRAFT,65.08,12.9,16.2
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4832800,Denzel Boston,WR,CLE,11,FLEX,ACTIVE,DRAFT,76.4,42.2,13.6
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,-16004,Bengals D/ST,DST,CIN,6,DST,NORMAL,ADD,52.31,42.34,9.0
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,5082424,Dominic Zvada,K,NYG,8,K,ACTIVE,ADD,4.18,3.75,10.0
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,3916387,Lamar Jackson,QB,BAL,13,BENCH,QUESTIONABLE,DRAFT,99.03,25.62,0.0
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4035538,David Montgomery,RB,HOU,8,BENCH,DOUBTFUL,DRAFT,92.64,46.13,1.1
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4428557,Tyjae Spears,RB,TEN,9,BENCH,ACTIVE,DRAFT,33.69,3.73,9.8
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4373626,Tyler Allgeier,RB,ARI,14,BENCH,ACTIVE,ADD,37.59,8.97,3.6
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,2573401,Tyler Higbee,TE,LAR,11,BENCH,ACTIVE,ADD,3.25,1.33,13.3
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4384852,Dohnte Meyers,WR,CIN,6,BENCH,ACTIVE,ADD,10.54,1.87,3.2
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4431492,Roman Wilson,WR,PIT,9,BENCH,OUT,ADD,32.14,9.43,0.0
+1216398267,Girls Who Ball,11,BIG TDs,BT,Katie40890,Katie Doyle,1-4,4429160,De'Von Achane,RB,MIA,6,IR,INJURY_RESERVE,DRAFT,41.08,12.64,0.0
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,2578570,Jacoby Brissett,QB,ARI,14,QB,ACTIVE,ADD,48.65,30.36,24.28
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,4685247,Braelon Allen,RB,NYJ,13,RB,ACTIVE,ADD,76.18,43.56,19.6
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,4685382,Omarion Hampton,RB,LAC,7,RB,ACTIVE,DRAFT,97.66,67.04,4.9
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,4374302,Amon-Ra St. Brown,WR,DET,6,WR,ACTIVE,DRAFT,99.84,73.27,12.9
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,3126486,Deebo Samuel Sr.,WR,SF,8,WR,OUT,DRAFT,85.23,32.58,2.5
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,4572680,Tucker Kraft,TE,GB,11,TE,ACTIVE,DRAFT,86.63,58.77,11.6
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,16800,Davante Adams,WR,LAR,11,FLEX,ACTIVE,DRAFT,99.04,91.24,22.1
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,-16028,Commanders D/ST,DST,WSH,7,DST,NORMAL,ADD,22.34,20.01,3.0
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,2473037,Jason Myers,K,SEA,11,K,ACTIVE,DRAFT,86.97,81.38,23.0
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,3916387,Lamar Jackson,QB,BAL,13,BENCH,QUESTIONABLE,DRAFT,99.03,25.62,0.0
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,4241416,Chuba Hubbard,RB,CAR,5,BENCH,ACTIVE,DRAFT,93.47,31.09,0.0
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,4429023,MarShawn Lloyd,RB,GB,11,BENCH,ACTIVE,DRAFT,48.8,15.0,16.7
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,4431545,Will Shipley,RB,PHI,10,BENCH,DOUBTFUL,ADD,40.61,13.75,8.3
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,4688813,Josh Downs,WR,IND,13,BENCH,ACTIVE,DRAFT,81.03,33.92,7.7
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,2973405,Kalif Raymond,WR,CHI,10,BENCH,ACTIVE,ADD,33.82,5.52,3.4
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,2976212,Stefon Diggs,WR,WSH,7,BENCH,QUESTIONABLE,DRAFT,82.85,10.02,0.0
+169429,Florida Football Federation,6,Team ReapMode,Mike,Doyle.m,michael doyle,3-2,4239996,Travis Etienne Jr.,RB,NO,8,IR,INJURY_RESERVE,DRAFT,85.51,9.78,0.0
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,3918298,Josh Allen,QB,BUF,7,QB,ACTIVE,DRAFT,99.89,98.15,30.5
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,3117251,Christian McCaffrey,RB,SF,8,RB,ACTIVE,DRAFT,99.86,99.42,17.3
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4569173,Rhamondre Stevenson,RB,NE,11,RB,ACTIVE,DRAFT,89.28,54.32,17.5
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4047650,DK Metcalf,WR,PIT,9,WR,ACTIVE,ADD,89.62,50.69,5.3
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4372016,Jaylen Waddle,WR,DEN,10,WR,ACTIVE,DRAFT,93.78,54.44,4.8
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4432665,Brock Bowers,TE,LV,13,TE,ACTIVE,DRAFT,99.82,95.61,23.0
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4430737,Kyren Williams,RB,LAR,11,FLEX,ACTIVE,DRAFT,99.19,94.67,19.6
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4832800,Denzel Boston,WR,CLE,11,FLEX,ACTIVE,ADD,76.4,42.2,13.6
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,-16030,Jaguars D/ST,DST,JAX,7,DST,NORMAL,ADD,64.15,56.85,4.0
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4035538,David Montgomery,RB,HOU,8,BENCH,DOUBTFUL,ADD,92.64,46.13,1.1
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4608686,Kyle Monangai,RB,CHI,10,BENCH,QUESTIONABLE,DRAFT,79.64,8.79,0.0
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4711533,Ollie Gordon II,RB,MIA,6,BENCH,ACTIVE,ADD,73.45,24.76,14.8
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4697815,Rachaad White,RB,WSH,7,BENCH,ACTIVE,DRAFT,59.27,6.84,3.0
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4432710,TreVeyon Henderson,RB,NE,11,BENCH,DOUBTFUL,DRAFT,87.0,30.38,4.8
+853476190,Two Flex Too Furious,5,Candice Flex Fit,Mike,Doyle.m,michael doyle,3-2,4685472,Tetairoa McMillan,WR,CAR,5,BENCH,ACTIVE,DRAFT,98.02,39.73,0.0

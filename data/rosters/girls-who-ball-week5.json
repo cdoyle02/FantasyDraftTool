@@ -1,0 +1,1187 @@
+{
+  "season": 2026,
+  "scoring_period": 5,
+  "as_of": "2026-10-11",
+  "source": "comet-profile-3-live",
+  "league": {
+    "id": "1216398267",
+    "name": "Girls Who Ball"
+  },
+  "teams": [
+    {
+      "team_id": 1,
+      "team_name": "Longest Balls in the League ",
+      "abbrev": "LBL",
+      "owner_display_name": "espn37244493",
+      "owner_name": "Lauren Schroeder",
+      "record": "2-2",
+      "players": [
+        {
+          "name": "Jahmyr Gibbs",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Chris Olave",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "A.J. Brown",
+          "position": "WR",
+          "lineup_slot_id": 21
+        },
+        {
+          "name": "Bucky Irving",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Colston Loveland",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Tony Pollard",
+          "position": "RB",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Stefon Diggs",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "J.K. Dobbins",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Josh Downs",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Makai Lemon",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Ravens D/ST",
+          "position": "DST",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Baker Mayfield",
+          "position": "QB",
+          "lineup_slot_id": 21
+        },
+        {
+          "name": "Harrison Butker",
+          "position": "K",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Sam Darnold",
+          "position": "QB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Malik Washington",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Spencer Shrader",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Keon Coleman",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Jacoby Brissett",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Cowboys D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        }
+      ]
+    },
+    {
+      "team_id": 2,
+      "team_name": "Vicctorious",
+      "abbrev": "VST",
+      "owner_display_name": "ESPNFAN3406686018",
+      "owner_name": "Victoria Stow",
+      "record": "4-0",
+      "players": [
+        {
+          "name": "Ja'Marr Chase",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Ashton Jeanty",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Josh Allen",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Zay Flowers",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Tee Higgins",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Mike Evans",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "DK Metcalf",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Justin Herbert",
+          "position": "QB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Chris Godwin Jr.",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Jake Ferguson",
+          "position": "TE",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Mark Andrews",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Tank Dell",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Alvin Kamara",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Lions D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        },
+        {
+          "name": "Tyler Loop",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Keaton Mitchell",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Chiefs D/ST",
+          "position": "DST",
+          "lineup_slot_id": 20
+        }
+      ]
+    },
+    {
+      "team_id": 3,
+      "team_name": "Emily's Excellent Team",
+      "abbrev": "EET",
+      "owner_display_name": "ESPNFAN2177599007",
+      "owner_name": "Emily Griffith",
+      "record": "1-3",
+      "players": [
+        {
+          "name": "Jonathan Taylor",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Drake London",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Javonte Williams",
+          "position": "RB",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Quinshon Judkins",
+          "position": "RB",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Davante Adams",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Rome Odunze",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Dak Prescott",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Wan'Dale Robinson",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Chuba Hubbard",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Brian Thomas Jr.",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Isaiah Likely",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Zach Charbonnet",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Harrison Mevis",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Patriots D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        },
+        {
+          "name": "Dylan Sampson",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Tyler Shough",
+          "position": "QB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Dalton Schultz",
+          "position": "TE",
+          "lineup_slot_id": 20
+        }
+      ]
+    },
+    {
+      "team_id": 4,
+      "team_name": "hurts different",
+      "abbrev": "AAT",
+      "owner_display_name": "ESPNFAN1303339747",
+      "owner_name": "alex parquette",
+      "record": "1-3",
+      "players": [
+        {
+          "name": "Puka Nacua",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Saquon Barkley",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Kyren Williams",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Jalen Hurts",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Jaylen Waddle",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Harold Fannin Jr.",
+          "position": "TE",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Christian Watson",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Rams D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        },
+        {
+          "name": "Cameron Dicker",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Kyle Monangai",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "KC Concepcion",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Dalton Kincaid",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Devaughn Vele",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Antonio Williams",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Bryce Young",
+          "position": "QB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Tyreek Hill",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Woody Marks",
+          "position": "RB",
+          "lineup_slot_id": 2
+        }
+      ]
+    },
+    {
+      "team_id": 5,
+      "team_name": "Melissa's Magnificent Team",
+      "abbrev": "MMT",
+      "owner_display_name": "missymartin36",
+      "owner_name": "Melissa Campanotta",
+      "record": "2-2",
+      "players": [
+        {
+          "name": "Christian McCaffrey",
+          "position": "RB",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Rashee Rice",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Garrett Wilson",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Bhayshul Tuten",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Trevor Lawrence",
+          "position": "QB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Travis Kelce",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Parker Washington",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Alec Pierce",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Aaron Jones Sr.",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Chase McLaughlin",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Steelers D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        },
+        {
+          "name": "Kyler Murray",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "T.J. Hockenson",
+          "position": "TE",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Jerry Jeudy",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Chris Brooks",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Nick Folk",
+          "position": "K",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Jordyn Tyson",
+          "position": "WR",
+          "lineup_slot_id": 20
+        }
+      ]
+    },
+    {
+      "team_id": 6,
+      "team_name": "Amon-Ra Roll",
+      "abbrev": "CCT",
+      "owner_display_name": "ESPNFAN90935585",
+      "owner_name": "Cara Schimmenti",
+      "record": "2-2",
+      "players": [
+        {
+          "name": "Amon-Ra St. Brown",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Chase Brown",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "George Pickens",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Emeka Egbuka",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Jadarian Price",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Luther Burden III",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "George Kittle",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Jonathon Brooks",
+          "position": "RB",
+          "lineup_slot_id": 21
+        },
+        {
+          "name": "Rachaad White",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Matthew Golden",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Bo Nix",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Cam Little",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Jordan Love",
+          "position": "QB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Dontayvion Wicks",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Romeo Doubs",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Jonah Coleman",
+          "position": "RB",
+          "lineup_slot_id": 21
+        },
+        {
+          "name": "Ollie Gordon II",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Vikings D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        }
+      ]
+    },
+    {
+      "team_id": 7,
+      "team_name": "Courtney's Cun*y Crew",
+      "abbrev": "CCC",
+      "owner_display_name": "espn85410914",
+      "owner_name": "courtney foster",
+      "record": "4-0",
+      "players": [
+        {
+          "name": "James Cook III",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Kenneth Walker III",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "DeVonta Smith",
+          "position": "WR",
+          "lineup_slot_id": 21
+        },
+        {
+          "name": "Tetairoa McMillan",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Tyler Warren",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "TreVeyon Henderson",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Jacory Croskey-Merritt",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Seahawks D/ST",
+          "position": "DST",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Eddy Pineiro",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Quentin Johnston",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Deebo Samuel Sr.",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Jared Goff",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Rashid Shaheed",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Juwan Johnson",
+          "position": "TE",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Rashod Bateman",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Chris Boswell",
+          "position": "K",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Jets D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        },
+        {
+          "name": "Will Shipley",
+          "position": "RB",
+          "lineup_slot_id": 23
+        }
+      ]
+    },
+    {
+      "team_id": 8,
+      "team_name": "Katie the OG",
+      "abbrev": "KT",
+      "owner_display_name": "ESPNFAN8431165735",
+      "owner_name": "Kathleen Shields",
+      "record": "2-2",
+      "players": [
+        {
+          "name": "CeeDee Lamb",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Derrick Henry",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Kyle Pitts Sr.",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Joe Burrow",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Jameson Williams",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Rhamondre Stevenson",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Texans D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        },
+        {
+          "name": "Kenny Gainwell",
+          "position": "RB",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Dallas Goedert",
+          "position": "TE",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Ka'imi Fairbairn",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Patrick Mahomes",
+          "position": "QB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "De'Zhaun Stribling",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Keenan Allen",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Mike Washington Jr.",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Tank Bigsby",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Adonai Mitchell",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Will Reichard",
+          "position": "K",
+          "lineup_slot_id": 20
+        }
+      ]
+    },
+    {
+      "team_id": 9,
+      "team_name": "Kelly\u2019s Ain\u2019t First You\u2019re Last",
+      "abbrev": "KLN",
+      "owner_display_name": "klshields62",
+      "owner_name": "Kelly Shields",
+      "record": "1-3",
+      "players": [
+        {
+          "name": "Bijan Robinson",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Breece Hall",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Trey McBride",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Ladd McConkey",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Drake Maye",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Courtland Sutton",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Michael Pittman Jr.",
+          "position": "WR",
+          "lineup_slot_id": 21
+        },
+        {
+          "name": "MarShawn Lloyd",
+          "position": "RB",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Broncos D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        },
+        {
+          "name": "Xavier Worthy",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Jordan Addison",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Justice Hill",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Kayshon Boutte",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Tre Tucker",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Jake Bates",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Jauan Jennings",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Kendre Miller",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Khalil Shakir",
+          "position": "WR",
+          "lineup_slot_id": 20
+        }
+      ]
+    },
+    {
+      "team_id": 10,
+      "team_name": "Christina's Calculated Team",
+      "abbrev": "CCT",
+      "owner_display_name": "ESPNFAN3642482023",
+      "owner_name": "Christina Schrage",
+      "record": "1-3",
+      "players": [
+        {
+          "name": "Justin Jefferson",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Omarion Hampton",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Malik Nabers",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Travis Etienne Jr.",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Terry McLaurin",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "DJ Moore",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Jaylen Warren",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Sam LaPorta",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Travis Hunter",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Jakobi Meyers",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Brock Purdy",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Matthew Stafford",
+          "position": "QB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Jalen McMillan",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Isiah Pacheco",
+          "position": "RB",
+          "lineup_slot_id": 21
+        },
+        {
+          "name": "Hunter Henry",
+          "position": "TE",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Browns D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        },
+        {
+          "name": "Cairo Santos",
+          "position": "K",
+          "lineup_slot_id": 17
+        }
+      ]
+    },
+    {
+      "team_id": 11,
+      "team_name": "BIG TDs",
+      "abbrev": "BT",
+      "owner_display_name": "Katie40890",
+      "owner_name": "Katie Doyle",
+      "record": "1-3",
+      "players": [
+        {
+          "name": "De'Von Achane",
+          "position": "RB",
+          "lineup_slot_id": 21
+        },
+        {
+          "name": "Nico Collins",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "D'Andre Swift",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Lamar Jackson",
+          "position": "QB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Carnell Tate",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "David Montgomery",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Blake Corum",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Tyjae Spears",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Denzel Boston",
+          "position": "WR",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Emanuel Wilson",
+          "position": "RB",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Tyler Allgeier",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Tyler Higbee",
+          "position": "TE",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Bengals D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        },
+        {
+          "name": "Roman Wilson",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Aaron Rodgers",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Tucker Kraft",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Dominic Zvada",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Dohnte Meyers",
+          "position": "WR",
+          "lineup_slot_id": 20
+        }
+      ]
+    },
+    {
+      "team_id": 12,
+      "team_name": "Cease and Defense",
+      "abbrev": "CD",
+      "owner_display_name": "espn29145013",
+      "owner_name": "Lauren Dalton",
+      "record": "3-1",
+      "players": [
+        {
+          "name": "Jaxon Smith-Njigba",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Jeremiyah Love",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Brock Bowers",
+          "position": "TE",
+          "lineup_slot_id": 6
+        },
+        {
+          "name": "Cam Skattebo",
+          "position": "RB",
+          "lineup_slot_id": 2
+        },
+        {
+          "name": "Jayden Daniels",
+          "position": "QB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Marvin Harrison Jr.",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Brandon Aubrey",
+          "position": "K",
+          "lineup_slot_id": 17
+        },
+        {
+          "name": "Michael Wilson",
+          "position": "WR",
+          "lineup_slot_id": 4
+        },
+        {
+          "name": "Jordan Mason",
+          "position": "RB",
+          "lineup_slot_id": 21
+        },
+        {
+          "name": "RJ Harvey",
+          "position": "RB",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Jalen Coker",
+          "position": "WR",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Kaelon Black",
+          "position": "RB",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Braelon Allen",
+          "position": "RB",
+          "lineup_slot_id": 23
+        },
+        {
+          "name": "Brenton Strange",
+          "position": "TE",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "Chargers D/ST",
+          "position": "DST",
+          "lineup_slot_id": 20
+        },
+        {
+          "name": "C.J. Stroud",
+          "position": "QB",
+          "lineup_slot_id": 0
+        },
+        {
+          "name": "Saints D/ST",
+          "position": "DST",
+          "lineup_slot_id": 16
+        },
+        {
+          "name": "Brian Robinson Jr.",
+          "position": "RB",
+          "lineup_slot_id": 20
+        }
+      ]
+    }
+  ]
+}
