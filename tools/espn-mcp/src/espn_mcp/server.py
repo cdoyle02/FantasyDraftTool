@@ -636,7 +636,9 @@ async def espn_status() -> str:
         "Live ESPN rosters for the configured leagues. Returns every team when a league "
         "or owner is given, including opponents. Omit both to list team names only, except "
         "on Katie's login, which defaults to her own team. mine=true limits the result to "
-        "the authenticated ESPN account's teams."
+        "the authenticated ESPN account's teams. When scanning every configured league, "
+        "inaccessible/private leagues are listed under skipped_leagues instead of failing "
+        "the whole call."
     )
 )
 async def espn_league_rosters(
@@ -679,15 +681,41 @@ async def espn_league_rosters(
     )
     bye_weeks = bye_map(season_meta if isinstance(season_meta, dict) else {})
     teams: list[dict[str, Any]] = []
+    skipped: list[dict[str, str]] = []
     scoring_period = None
+    # When the caller names a league, failures stay hard. Across the full directory,
+    # skip private/inaccessible leagues (e.g. Just The Tip for Katie, GWB for Michael)
+    # the same way export_my_rosters does.
     for item in leagues:
-        payload = await fetch(
-            league_url(config.season, item["id"]),
-            config=config,
-            views=["mTeam", "mRoster", "mStatus"],
-        )
+        try:
+            payload = await fetch(
+                league_url(config.season, item["id"]),
+                config=config,
+                views=["mTeam", "mRoster", "mStatus"],
+            )
+        except EspnError as error:
+            if league is not None:
+                raise
+            skipped.append(
+                {
+                    "league_id": item["id"],
+                    "league_name": item["name"],
+                    "error": str(error),
+                }
+            )
+            continue
         if not isinstance(payload, dict):
-            raise EspnError(f"Unexpected ESPN payload for league {item['id']}")
+            message = f"Unexpected ESPN payload for league {item['id']}"
+            if league is not None:
+                raise EspnError(message)
+            skipped.append(
+                {
+                    "league_id": item["id"],
+                    "league_name": item["name"],
+                    "error": message,
+                }
+            )
+            continue
         scoring_period = payload.get("scoringPeriodId", scoring_period)
         teams.extend(
             normalize_teams(
@@ -700,17 +728,17 @@ async def espn_league_rosters(
                 include_players=include_players,
             )
         )
-    return json.dumps(
-        {
-            "profile": profile.name if profile is not None else "env",
-            "season": config.season,
-            "scoring_period": scoring_period,
-            "include_players": include_players,
-            "team_count": len(teams),
-            "teams": teams,
-        },
-        indent=2,
-    )
+    result: dict[str, Any] = {
+        "profile": profile.name if profile is not None else "env",
+        "season": config.season,
+        "scoring_period": scoring_period,
+        "include_players": include_players,
+        "team_count": len(teams),
+        "teams": teams,
+    }
+    if skipped:
+        result["skipped_leagues"] = skipped
+    return json.dumps(result, indent=2)
 
 
 @server.tool(description="Configured ESPN league names and ids.")

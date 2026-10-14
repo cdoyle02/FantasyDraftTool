@@ -107,3 +107,112 @@ async def test_fetch_http_status_errors(status_code: int, match: str) -> None:
 
         with pytest.raises(EspnError, match=match):
             await fetch("https://example.com", config=config)
+
+
+@pytest.mark.asyncio
+async def test_espn_league_rosters_skips_inaccessible_leagues_when_scanning_all() -> None:
+    """Private leagues (e.g. Just The Tip for Katie) must not fail the whole directory scan."""
+    from espn_mcp.profiles import EspnProfile, reset_profile, set_profile
+    from espn_mcp.server import espn_league_rosters
+
+    profile = EspnProfile(
+        name="katie",
+        token="katie-token",
+        config=EspnConfig(
+            season=2026,
+            league_id="1216398267",
+            espn_s2="katie-s2",
+            swid="{katie-swid}",
+        ),
+    )
+    token = set_profile(profile)
+    leagues = [
+        {"id": "1216398267", "name": "Girls Who Ball"},
+        {"id": "886805", "name": "Just The Tip"},
+    ]
+    ok_payload = {
+        "scoringPeriodId": 6,
+        "members": [
+            {
+                "id": "{katie-swid}",
+                "displayName": "Katie40890",
+                "firstName": "Katie",
+                "lastName": "Doyle",
+            }
+        ],
+        "teams": [
+            {
+                "id": 11,
+                "name": "BIG TDs",
+                "abbrev": "BT",
+                "primaryOwner": "{katie-swid}",
+                "owners": ["{katie-swid}"],
+                "record": {"overall": {"wins": 1, "losses": 0, "pointsFor": 100}},
+                "roster": {"entries": []},
+            }
+        ],
+    }
+
+    async def fake_fetch(url: str, **kwargs: object) -> object:
+        if "/leagues/" in url:
+            if "/leagues/886805" in url:
+                raise EspnError("ESPN returned 401. This league is private.")
+            if "/leagues/1216398267" in url:
+                return ok_payload
+            raise AssertionError(f"unexpected league url {url}")
+        # season meta (no /leagues/ segment)
+        return {}
+
+    try:
+        with (
+            patch("espn_mcp.server.fetch", new=AsyncMock(side_effect=fake_fetch)),
+            patch("espn_mcp.rosters.configured_leagues", return_value=leagues),
+        ):
+            # Tool imports configured_leagues from .rosters inside the function.
+            result = json.loads(await espn_league_rosters())
+    finally:
+        reset_profile(token)
+
+    assert result["team_count"] == 1
+    assert result["teams"][0]["team_name"] == "BIG TDs"
+    assert result["skipped_leagues"] == [
+        {
+            "league_id": "886805",
+            "league_name": "Just The Tip",
+            "error": "ESPN returned 401. This league is private.",
+        }
+    ]
+
+
+@pytest.mark.asyncio
+async def test_espn_league_rosters_still_raises_for_named_inaccessible_league() -> None:
+    from espn_mcp.profiles import EspnProfile, reset_profile, set_profile
+    from espn_mcp.server import espn_league_rosters
+
+    profile = EspnProfile(
+        name="katie",
+        token="katie-token",
+        config=EspnConfig(
+            season=2026,
+            league_id="1216398267",
+            espn_s2="katie-s2",
+            swid="{katie-swid}",
+        ),
+    )
+    token = set_profile(profile)
+    leagues = [{"id": "886805", "name": "Just The Tip"}]
+
+    async def fake_fetch(url: str, **kwargs: object) -> object:
+        if "/leagues/" in url:
+            raise EspnError("ESPN returned 401. This league is private.")
+        return {}
+
+    try:
+        with (
+            patch("espn_mcp.server.fetch", new=AsyncMock(side_effect=fake_fetch)),
+            patch("espn_mcp.rosters.configured_leagues", return_value=leagues),
+        ):
+            with pytest.raises(EspnError, match="401"):
+                await espn_league_rosters(league="Just The Tip")
+    finally:
+        reset_profile(token)
