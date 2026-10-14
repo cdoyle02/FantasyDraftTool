@@ -33,6 +33,10 @@
 | **Perplexity project + Deep Research harness** | [Perplexity project Fantasy Draft Tool - ESPN NFL](https://www.perplexity.ai/projects/fantasy-draft-tool-espn-nfl-7i.qF9HERduncme832PrEw); Deep Research builder notes; project activity (Clay shadow, injury/matchup research) | Ongoing | External (Perplexity); not wired into apps/MCP | skill / MCP / docs / Perplexity automation | Perplexity project context + ESPN MCP when available; FantasyDraftTool remains SoT for live rosters | P1 |
 | **Sunday morning / gameday player-status research routine** | Perplexity Computer task; Katie team player-notes research; checklist (inactives, elevations) + automations: retry Katie BIG TDs roster, official inactive lists, replacement if starter out | Weekly Sunday habit | Chat/Perplexity only | skill / MCP / Perplexity automation / web | Live ESPN roster (Katie); NFL inactive lists; injury news; optional week tools for replacements | P0 |
 | **Player intelligence dashboard** (unified per-player view) | User ask (2026-10-11): after Clay shadow, show WR matchup F/R Diff/Score tied to that player plus news, Ballers mentions, SoS, roster/FA, expert ranks | Weekly (lineup + waiver) | None (data in silos) | web (primary) / API / MCP | Player identity join; Clay F/R; FootClan SoS; Ballers notes; news/status; ESPN roster/FA; optional expert boards | P0 |
+| **Injury impact model (same-team context)** | Apple Note “Fantasy Ideas”: how injuries change points — same-position teammates, stars (e.g. Saquon / DeVonta / Goedert-style), starters vs handcuffs; snap %, attempts, opportunities, game script; upward/downward alerts | Product concept (recurring ops need) | None | web / API / MCP / skill | Injury/status feeds; teammate graph; snap/opportunity stats; game script | P1 |
+| **Player attribute ledger + “why this week?”** | Apple Note “Fantasy Ideas”: tracked attributes (gameflow, injuries, …); position-weighted importance; explain past weeks (targets/attempts); map attributes onto upcoming games (season history + roster/opponent factors) | Product concept | None | web / API / MCP / skill | Attribute store; weekly stats; schedule/opponent; roster changes | P1 |
+| **RB starter/handcuff relationship graph** | Apple Note “Fantasy Ideas”: explicit starter↔handcuff pairs; paired alerts on status/workload changes | Overlaps Thorman RB / handcuff chat patterns | Skill glue only (no first-class product) | web / API / MCP / skill | Depth charts; ESPN roster/injury; RB expert boards | P1 |
+| **Shared research inbox / triage queue (Katie ↔ Michael)** | Shared iCloud Apple Note [Fantasy](https://www.icloud.com/notes/0ecG24yXNqS8c_wABa8cMsgVA#Fantasy); week-of 2026-10-10 examples: Tate injury/replacement; Meyers↔Chase/Higgins; Allgeier game environment; E. Wilson backfield share | Weekly household ops | Chat-only (Apple Notes + ask Michael/Cursor) | MCP / skill / web | ESPN roster/injury; teammate context; schedule/environment; FA replacements | P0 |
 
 ---
 
@@ -52,6 +56,20 @@ User-requested expansions beyond the original Cursor-transcript mine. Still wish
 - **Join siloed signals** onto one card: Clay shadow F/R Diff/Score, FootClan SoS positional rank, Ballers transcript hits, Sunday/news status, ESPN roster/FA, expert cross-refs when available.
 - **Entry points (unranked):** team board → player drill-down; or “Katie starters this week” with columns per signal.
 - **Hard problem:** name/team identity matching across ESPN, Clay PDF, Ballers text, and news — not solved here.
+
+---
+
+## Addendum (2026-10-13) — Apple Notes evidence
+
+Still wishlist-only; no Apple Notes sync or injury-model implementation in this pass.
+
+### Fantasy Ideas (product concepts)
+
+From the personal “Fantasy Ideas” note: injury impact in same-team context; attribute ledger with “why this week?” explanations; RB starter/handcuff graph with paired alerts. Exact attribute schemas deferred.
+
+### Shared Katie ↔ Michael ops inbox
+
+Shared note [Fantasy](https://www.icloud.com/notes/0ecG24yXNqS8c_wABa8cMsgVA#Fantasy) acts as a triage queue (example week 2026-10-10: Tate, Meyers/Chase-Higgins, Allgeier, E. Wilson). Desired capability: capture questions and research/triage them in-app or via MCP/skill, eventually replacing or syncing from Apple Notes.
 
 ---
 
@@ -92,6 +110,8 @@ Workflows repeated or strongly desired in K with **no** equivalent first-class M
 12. **Sunday morning inactive / elevation checklist** — Perplexity Computer / chat only.
 13. **Player intelligence dashboard** — no unified UI; signals stay siloed.
 14. **Perplexity Deep Research harness** — project exists outside the repo.
+15. **Shared Apple Notes Fantasy triage with Katie** — inbox in iCloud Notes only.
+16. **Injury impact / attribute ledger / RB handcuff graph** — Fantasy Ideas concepts only.
 
 ---
 

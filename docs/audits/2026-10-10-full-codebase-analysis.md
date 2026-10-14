@@ -244,11 +244,13 @@ Cursor transcripts (~31 sessions) show a strong **Katie / Girls Who Ball weekly 
 - **Player intelligence dashboard** — unify Clay shadow F/R, FootClan SoS, Ballers notes, news/Sunday status, ESPN roster/FA on one player view  
 - **Sunday morning inactive checklist** automation  
 - FootClan SoS chart + Mike Clay WR shadow ingest  
-- Perplexity project / Deep Research as complementary research surface (not a replacement for live MCP)
+- Perplexity project / Deep Research as complementary research surface (not a replacement for live MCP)  
+- **Apple Notes “Fantasy Ideas”** — injury impact model, attribute ledger / “why this week?”, RB starter↔handcuff graph  
+- **Shared Katie↔Michael research inbox** — triage queue beyond Apple Notes
 
 DST/K/odds/rosters are **already** on API/MCP/web; chats still use skills for glue.
 
-→ Full table + 2026-10-11 addendum: [2026-10-10-desired-features-from-chats.md](./2026-10-10-desired-features-from-chats.md)
+→ Full table + addenda: [2026-10-10-desired-features-from-chats.md](./2026-10-10-desired-features-from-chats.md)
 
 ---
 
