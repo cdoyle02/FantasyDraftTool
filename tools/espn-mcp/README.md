@@ -21,6 +21,7 @@ small set of normalized read tools.
 | `espn_status` | Reports the resolved season, league, profile, and credential state, and confirms ESPN is reachable. |
 | `espn_league_rosters` | Live rosters for every team in a configured league, or one owner. Katie's hosted login defaults to her team. |
 | `espn_league_directory` | Configured league names and ids. |
+| `espn_transactions` | Waiver / add-drop / roster / trade history (`mTransactions2`) with player names, pending claims, waiver ranks, and team counters. |
 | `kyle_dst_available` | Kyle Krajewski weekly DST ranks crossed with free-agent defenses in one league. |
 | `jared_k_available` | Jared Smola weekly kicker ranks crossed with free-agent kickers in one league. |
 | `week_odds` | Current-week NFL spreads, totals, and ranked favorite D/ST plays. |

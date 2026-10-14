@@ -48,6 +48,8 @@ Normalized tools:
 - espn_league_settings — roster slots and scoring
 - espn_players — draft id map (preserves availability metadata when a league is set)
 - espn_free_agents — league free agents and waiver players with paging, sort, and search
+- espn_transactions — waiver / add-drop / roster / trade history from mTransactions2,
+  with team waiver ranks and counters
 
 Season defaults to ESPN_SEASON (2026 when unset). League id defaults to ESPN_LEAGUE_ID.
 Credentials come from the active profile (ESPN_S2 and ESPN_SWID, or Katie's pair on
@@ -59,6 +61,8 @@ Roster and show tools:
   her own team when no league or owner is given. Pass mine=true for the cookie owner's
   teams only.
 - espn_league_directory — the configured league names and ids.
+- espn_transactions — in-depth transaction and waiver log for one league (pending +
+  executed), including player names when resolve_names is true.
 - kyle_dst_available / jared_k_available — weekly DST and kicker rankings crossed
   with free agents in one league.
 - week_odds — current-week NFL spreads and implied totals.
@@ -581,23 +585,163 @@ async def espn_players(
 
 
 async def _player_lookup(config: EspnConfig, ids: set[Any]) -> dict[int, dict[str, Any]]:
+    wanted = {int(value) for value in ids if value is not None}
+    if not wanted:
+        return {}
+    # filterIds returns exactly the requested players; unfiltered players_wl is capped ~50.
     payload = await fetch(
         season_players_url(config.season),
         config=config,
         views=["players_wl"],
         params={"scoringPeriodId": 0},
+        fantasy_filter={"filterIds": {"value": sorted(wanted)}},
     )
     raw = payload if isinstance(payload, list) else payload.get("players") or []
-    wanted = {value for value in ids if value is not None}
     lookup: dict[int, dict[str, Any]] = {}
     for player in raw:
-        if player.get("id") in wanted:
-            lookup[player["id"]] = {
-                "player_name": player.get("fullName"),
-                "position": POSITION_IDS.get(player.get("defaultPositionId"), "UNKNOWN"),
-                "pro_team": PRO_TEAM_IDS.get(player.get("proTeamId"), "UNK"),
-            }
+        player_id = player.get("id")
+        if player_id not in wanted:
+            continue
+        lookup[int(player_id)] = {
+            "player_name": player.get("fullName"),
+            "position": POSITION_IDS.get(player.get("defaultPositionId"), "UNKNOWN"),
+            "pro_team": PRO_TEAM_IDS.get(player.get("proTeamId"), "UNK"),
+        }
     return lookup
+
+
+@server.tool(
+    description=(
+        "In-depth ESPN transaction and waiver history for one configured league from "
+        "view=mTransactions2. Returns pending and executed waivers, add/drops, roster "
+        "moves, and trades when present, with player names, team/owner context, waiver "
+        "process timestamps, and per-team waiver ranks / acquisition counters."
+    )
+)
+async def espn_transactions(
+    league: str | None = None,
+    owner: str | None = None,
+    mine: bool | None = None,
+    team_id: int | None = None,
+    types: list[str] | None = None,
+    statuses: list[str] | None = None,
+    scoring_period_id: int | None = None,
+    pending_only: bool = False,
+    limit: int = 50,
+    offset: int = 0,
+    resolve_names: bool = True,
+    include_team_summaries: bool = True,
+    season: int | None = None,
+) -> str:
+    """Return normalized waiver and transaction history.
+
+    Args:
+        league: League id or part of a league name. Katie defaults to Girls Who Ball.
+        owner: Case-insensitive owner display/real name filter (e.g. "Katie").
+        mine: When true, only the authenticated ESPN account's team activity.
+        team_id: Optional ESPN team id filter.
+        types: Optional WAIVER, ROSTER, TRADE, FREEAGENT, and/or DRAFT.
+        statuses: Optional PENDING, EXECUTED, CANCELED, and/or FAILED.
+        scoring_period_id: Limit to one fantasy week / scoring period.
+        pending_only: When true, only unfinished claims / moves.
+        limit: Max transactions to return (1-200).
+        offset: Match-list offset after filtering/sorting newest-first.
+        resolve_names: Look up player names/positions for move items.
+        include_team_summaries: Include waiver ranks and season acquisition counters.
+        season: Season year. Defaults to the active profile's season.
+    """
+    from .rosters import configured_leagues, select_leagues
+    from .transactions import (
+        collect_player_ids,
+        normalize_transactions_payload,
+        parse_status_filters,
+        parse_type_filters,
+    )
+
+    config, _league_id = _resolve(season, None)
+    if not config.authenticated:
+        raise EspnError("ESPN cookies are not configured for this profile.")
+    profile = current_profile()
+    resolved_league = league
+    if not resolved_league and profile is not None and profile.name == "katie":
+        resolved_league = "Girls Who Ball"
+    if not resolved_league:
+        raise EspnError(
+            "Pass league (id or name). Katie's login defaults to Girls Who Ball when omitted."
+        )
+    leagues = select_leagues(configured_leagues(), resolved_league)
+    if len(leagues) != 1:
+        names = ", ".join(item["name"] for item in leagues)
+        raise EspnError(f"league must resolve to one league, got: {names}")
+    item = leagues[0]
+    restrict_to_owner = bool(mine)
+
+    payload = await fetch(
+        league_url(config.season, item["id"]),
+        config=config,
+        views=["mTransactions2", "mTeam", "mStatus"],
+    )
+    if not isinstance(payload, dict):
+        raise EspnError(f"Unexpected ESPN payload for league {item['id']}")
+
+    type_filters = parse_type_filters(types)
+    status_filters = parse_status_filters(statuses)
+    # Pre-filter without names to bound the player lookup set to the returned page.
+    preview = normalize_transactions_payload(
+        payload,
+        league_id=item["id"],
+        league_name=item["name"],
+        players={},
+        types=type_filters,
+        statuses=status_filters,
+        scoring_period_id=scoring_period_id,
+        pending_only=pending_only,
+        team_id=team_id,
+        owner_swid=config.swid if restrict_to_owner else None,
+        owner_query=owner,
+        limit=limit,
+        offset=offset,
+        include_team_summaries=False,
+    )
+    players: dict[int, dict[str, Any]] = {}
+    if resolve_names:
+        # Look up players for the page we will return, plus any remaining filtered ids
+        # when the page is small — still bounded by matched txs on this page.
+        page_ids: set[int] = set()
+        raw_txs = payload.get("transactions") or []
+        # Recompute the same filtered window's player ids from preview rows.
+        for tx in preview.get("transactions") or []:
+            for move in tx.get("items") or []:
+                pid = move.get("espn_player_id")
+                if pid is not None:
+                    page_ids.add(int(pid))
+        if not page_ids:
+            # Fallback: ids from raw txs that would match filters (full set can be large;
+            # only used when page items somehow lack ids).
+            page_ids = collect_player_ids(
+                [tx for tx in raw_txs if isinstance(tx, dict)][: max(limit + offset, limit)]
+            )
+        players = await _player_lookup(config, page_ids)
+
+    result = normalize_transactions_payload(
+        payload,
+        league_id=item["id"],
+        league_name=item["name"],
+        players=players,
+        types=type_filters,
+        statuses=status_filters,
+        scoring_period_id=scoring_period_id,
+        pending_only=pending_only,
+        team_id=team_id,
+        owner_swid=config.swid if restrict_to_owner else None,
+        owner_query=owner,
+        limit=limit,
+        offset=offset,
+        include_team_summaries=include_team_summaries,
+    )
+    result["profile"] = profile.name if profile is not None else "env"
+    result["season"] = config.season
+    return json.dumps(result, indent=2)
 
 
 @server.tool(

@@ -97,6 +97,15 @@ VIEWS: list[dict[str, str]] = [
         "use": "Season state, current scoring period and transaction counts.",
     },
     {
+        "view": "mTransactions2",
+        "returns": "transactions[]",
+        "use": (
+            "League transaction log: waivers, add/drops, roster moves and trades with "
+            "status (PENDING/EXECUTED/CANCELED), items (ADD/DROP/LINEUP), bidAmount and "
+            "proposedDate. Prefer espn_transactions for a normalized view."
+        ),
+    },
+    {
         "view": "kona_player_info",
         "returns": "players[]",
         "use": (
