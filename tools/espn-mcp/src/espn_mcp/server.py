@@ -988,7 +988,8 @@ async def ballers_latest() -> str:
 def katie_roster() -> str:
     return (
         "Call espn_league_rosters with league 'Girls Who Ball' and owner 'Katie'. "
-        "Report starters, bench, and IR with lineup slot, NFL team, injury, and fantasy points. "
+        "Report starters, bench, and IR with lineup slot, NFL team, injury, and "
+        "weekly_actual_points for this week (null means not played yet). "
         "Do not invent players that are absent from the tool result."
     )
 
