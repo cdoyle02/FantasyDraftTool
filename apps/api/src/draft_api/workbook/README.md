@@ -3,7 +3,7 @@
 This is the source of truth for every number the Workbook Net Matchups board,
 feeders, and explain panel compute. It mirrors `draft_api/sos/README.md`'s
 role for the SoS tab: when the service layer's output and this file
-disagree, this file is wrong and should be fixed (not the other way around).
+disagree, this README is authoritative and the service should be fixed.
 
 **Attribution:** methodology is inspired by Majesstik / OWS "#TheWorkbook"
 (see the design spec), but every number here is computed by FantasyDraftTool
@@ -217,6 +217,6 @@ and `net` are `null` and only `off` is returned.
   reason (no INT column in `stats_player_week`). Fantasy points are
   therefore a slight overestimate for INT-prone QBs.
 - **Packaged `workbook_{season}.json` snapshot** is intentionally slim
-  synthetic data (Task 6) and currently has an empty `games` list, so the
-  stale-snapshot path returns `stale: true` with no games until the snapshot
-  is refreshed from a live `load_workbook_dataset` run.
+  synthetic data (Task 6), but it must include at least one `games` entry that
+  lines up with its team/week rates so the stale-snapshot path can still
+  return `stale: true` with a usable board shape.

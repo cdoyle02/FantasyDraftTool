@@ -79,6 +79,7 @@ def test_read_packaged_snapshot_loads_slim_2026_dataset() -> None:
     assert dataset.season == 2026
     assert dataset.teams
     assert dataset.schedule
+    assert dataset.games
 
 
 def test_dataset_from_dict_rejects_non_object_payload() -> None:

@@ -11,6 +11,14 @@
       "KC": "BUF"
     }
   },
+  "games": [
+    {
+      "week": 5,
+      "home": "BUF",
+      "away": "KC",
+      "kickoff": "2026-10-04T17:00:00Z"
+    }
+  ],
   "drives": [
     {
       "team": "KC",

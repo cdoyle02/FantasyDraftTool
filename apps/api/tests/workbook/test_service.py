@@ -256,11 +256,29 @@ def test_stale_snapshot_fallback_when_loader_fails() -> None:
 
     set_workbook_http_get(_boom)
 
+    # Regression coverage for the packaged fallback: the slim snapshot has
+    # week-5 BUF/KC rates, so stale mode should still return a usable board.
     body = build_matchups_response(
-        week=WEEK, window="l4", scoring="ppr", slate="all", season=SEASON
+        week=5,
+        window="custom",
+        scoring="ppr",
+        slate="all",
+        season=SEASON,
+        custom_start_week=5,
+        custom_end_week=5,
     )
     assert body["source"] == "snapshot"
     assert body["stale"] is True
+    assert body["games"]
+    game = body["games"][0]
+    assert (game["home"], game["away"], game["kickoff"]) == (
+        "BUF",
+        "KC",
+        "2026-10-04T17:00:00Z",
+    )
+    assert {row["team"] for row in game["rows"]} == {"BUF", "KC"}
+    kc_row = next(row for row in game["rows"] if row["team"] == "KC")
+    assert kc_row["allWr"]["fpG"] == pytest.approx(9.75)
 
 
 def test_feeder_response_reports_off_and_def_legs() -> None:
