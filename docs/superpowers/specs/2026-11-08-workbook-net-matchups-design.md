@@ -16,7 +16,7 @@ Ship a living weekly Workbook in FantasyDraftTool: Game Environment + positional
 | Approach | Shared weekly **Net engine**; multiple surfaces (web Workbook, ESPN overlay, DFS overlay, MCP). Not a Google Sheet clone UI and not sheet-sync. |
 | Scope | Full Workbook product goal, delivered in phases P0–P3 (below). |
 | Audience | Season-long (Katie / Michael ESPN) **and** DFS; season-long overlay before DFS salary/pool polish. |
-| Out / Slot WR | **Full fidelity** via nflverse PBP + alignment; Slot counts **WR only** (no TE/RB lined up inside). |
+| Out / Slot WR | **Full fidelity when an alignment-bearing source is wired**; Slot counts **WR only** (no TE/RB lined up inside). Public nflverse `ftn_charting` has no per-target slot/outside field (verified 2026-11-08). Until a source is chosen, Out/Slot may be `null` + `insufficient_alignment_sample`; join/classifier stay ready. **Follow-up:** research task to pick a durable alignment source (FTN Participation, NGS, supplemental CSV, etc.) and wire it. |
 | Rolling window | UI toggle: **L4 (default)** / season-to-date / custom range (same week-window idea as SoS). |
 | Scoring | Toggle: **PPR** (season-long default) / **Half-PPR** (DFS default). |
 | Net math | Rate stats: `Net = (OFF + OppDEF) / 2` on a common scale. Volume (plays, targets/G): average of offense-for and defense-allowed. Document per-metric in code + README. |

@@ -14,7 +14,7 @@
 - Do **not** scrape Majesstik’s Google Sheet; compute from nflverse + `week_odds`
 - Net rate stats: `(OFF + OppDEF) / 2`; Comb Net DSR = mean of both teams’ Net DSR; Diff = team − opponent
 - Window default **L4**; scoring default **PPR** (Half-PPR toggle); slate `main` | `all` as defined in spec
-- Out/Slot: WR-only alignment; TE/RB in slot excluded; thin sample → `null` + `insufficient_alignment_sample`
+- Out/Slot: WR-only alignment; TE/RB in slot excluded; thin sample or missing source → `null` + `insufficient_alignment_sample`. Public FTN charting lacks alignment — Task 5.5 finds a source; do not invent Out/Slot from `pass_location`
 - Never read/print/commit `.env`, ESPN cookies, or Odds API keys
 - Pattern-match `draft_api/sos/` (TtlCache 6h, snapshot `stale: true`, `error_response` codes)
 - P0 only — no ESPN overlay, MCP, TOP/Pace/Injuries/Matrix/DFS pool (P1–P3)
@@ -220,6 +220,29 @@ EOF
 
 ---
 
+### Task 5.5: Find Out/Slot WR alignment data source
+
+**Files:**
+- Create: `docs/superpowers/specs/2026-11-08-workbook-alignment-source-research.md` (decision record)
+- Modify (only if a source is chosen and wireable in this task): `apps/api/src/draft_api/workbook/nflverse.py`, `README.md`, fixtures/tests
+- Modify: `docs/superpowers/specs/2026-11-08-workbook-net-matchups-design.md` (lock chosen source in Decisions table)
+
+**Goal:** Replace the public-FTN gap with a concrete, household-viable source so Out/Slot can be full fidelity — or document that P0 ships with null Out/Slot and name the P1 wire-up.
+
+**Interfaces:**
+- Research deliverable must answer: source name, license/cost, refresh cadence, join keys to nflverse PBP (`game_id`/`play_id` or equivalent), WR-only filter feasibility, and recommended next implementation step.
+- Candidates to evaluate (non-exhaustive): FTN Participation Feed (`skp_pos`), Next Gen Stats / nflverse NGS, Sports Info Solutions / PFF (paid), household-maintained supplemental CSV matching `ALIGNMENT_COLUMN=receiver_alignment`, other open nflverse releases.
+- Do **not** approximate from `pass_location` unless the decision record explicitly accepts degraded fidelity and UI labels it.
+- Do **not** scrape Majesstik’s sheet.
+- Never commit secrets / paid API keys.
+
+- [ ] **Step 1: Survey** each candidate (availability 2025–2026, columns, cost, join path) — use Exa/web + nflverse docs; optional one-time public sample inspect
+- [ ] **Step 2: Write decision record** at the path above with ranked options + recommendation
+- [ ] **Step 3: If a free/wireable source exists** — implement loader hook + fixture test in the same commit series; else stop after the decision record and amend the design Decisions row to name the deferred source
+- [ ] **Step 4: Commit** docs (and code only if wired)
+
+---
+
 ### Task 6: Snapshot + refresh CLI
 
 **Files:**
@@ -376,7 +399,8 @@ pnpm test -- WeekWorkbookView
 | Spec item | Task |
 |-----------|------|
 | Net Matchups board columns | 4, 7, 9 |
-| Out/Slot full fidelity + WR-only | 3, 5 |
+| Out/Slot WR-only classifier + join-ready loader | 3, 5 |
+| Out/Slot alignment **source** research / wire | 5.5 |
 | L4 / season / custom window | 4, 7 |
 | PPR / half-PPR | 1, 7, 9 |
 | Slate main/all | 4, 7, 9 |
