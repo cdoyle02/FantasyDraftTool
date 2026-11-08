@@ -60,6 +60,9 @@ async def test_free_agents_envelope_has_schema_version() -> None:
     assert result["schema_version"] == 1
     assert result["returned"] == 1
     assert result["players"][0]["is_available"] is True
+    assert result["include_projections"] is False
+    assert "espn_projections" not in result
+    assert "espn_projection" not in result["players"][0]
     assert "fetched_at" in result
 
 
@@ -211,8 +214,8 @@ async def test_espn_league_rosters_still_raises_for_named_inaccessible_league() 
         with (
             patch("espn_mcp.server.fetch", new=AsyncMock(side_effect=fake_fetch)),
             patch("espn_mcp.rosters.configured_leagues", return_value=leagues),
+            pytest.raises(EspnError, match="401"),
         ):
-            with pytest.raises(EspnError, match="401"):
-                await espn_league_rosters(league="Just The Tip")
+            await espn_league_rosters(league="Just The Tip")
     finally:
         reset_profile(token)

@@ -105,12 +105,14 @@ def normalize_entries(
     *,
     season: int,
     effective_scoring_period: int | None,
+    include_projections: bool = False,
 ) -> list[dict[str, Any]]:
     return [
         normalize_player_entry(
             entry,
             season=season,
             scoring_period_id=effective_scoring_period,
+            include_projection_reference=include_projections,
         )
         for entry in entries
     ]

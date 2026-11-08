@@ -24,9 +24,11 @@ from .free_agents import (
     scan_for_search_matches,
 )
 from .players import (
+    PROJECTION_FLAG_TEXT,
     normalize_player_entry,
     normalize_position_alias,
     pagination_fields,
+    projection_envelope,
     validate_free_agent_query,
 )
 from .profiles import active_config, current_profile
@@ -70,6 +72,14 @@ Roster and show tools:
   when they are published.
 
 Girls Who Ball is Katie Doyle's league. Use owner "Katie" or her login to get her team.
+
+Pass include_projections=true only when the user asks for ESPN projections.
+Omitting it means those figures were not requested, not that ESPN has none.
+When espn_projections is present, follow its note. A weekly answer quotes
+espn_projection.espn_projected_weekly_points and week. A season answer quotes
+espn_projection.espn_projected_season_points. null means ESPN sent no number.
+Do not add player projections into a team total. Quote espn_team_projection
+when the user asks for a team total and say which of its fields you used.
 """
 
 server: MCPServer[Any] = MCPServer(
@@ -296,6 +306,7 @@ async def free_agents(
     search: str | None = None,
     scoring_period_id: int | None = None,
     season: int | None = None,
+    include_projections: bool = False,
 ) -> str:
     """Fetch and normalize league free agents with an explicit configuration."""
     resolved_season = season if season is not None else config.season
@@ -356,6 +367,7 @@ async def free_agents(
         raw_entries,
         season=resolved_season,
         effective_scoring_period=effective_period,
+        include_projections=include_projections,
     )
 
     page = pagination_fields(offset=query.offset, limit=query.limit, returned=len(players))
@@ -370,9 +382,12 @@ async def free_agents(
         "position": query.position,
         "sort_by": query.sort_by,
         "sort_asc": query.sort_asc,
+        "include_projections": include_projections,
         **page,
         "players": players,
     }
+    if include_projections:
+        envelope["espn_projections"] = projection_envelope(effective_period)
     if search_meta is not None:
         envelope["search"] = search_meta
     return json.dumps(envelope, indent=2)
@@ -382,7 +397,7 @@ async def free_agents(
     description=(
         "Normalized league free agents and waiver players from kona_player_info with "
         "server-side status/position filters, percent-owned sort, paging, and optional "
-        "multi-page name search."
+        "multi-page name search. " + PROJECTION_FLAG_TEXT
     )
 )
 async def espn_free_agents(
@@ -396,6 +411,7 @@ async def espn_free_agents(
     sort_asc: bool = False,
     search: str | None = None,
     scoring_period_id: int | None = None,
+    include_projections: bool = False,
 ) -> str:
     """Return available players for a league.
 
@@ -410,6 +426,7 @@ async def espn_free_agents(
         sort_asc: Sort percent owned ascending when true.
         search: Case-insensitive name substring with bounded multi-page scan.
         scoring_period_id: Optional scoringPeriodId for weekly stat splits.
+        include_projections: Attach ESPN projections only when the user asked for them.
     """
     config, resolved_league = _resolve(season, league_id)
     return await free_agents(
@@ -424,6 +441,7 @@ async def espn_free_agents(
         search=search,
         scoring_period_id=scoring_period_id,
         season=season,
+        include_projections=include_projections,
     )
 
 
@@ -500,8 +518,9 @@ def _reception_points(scoring: dict[str, Any]) -> float | None:
 
 @server.tool(
     description=(
-        "Player pool with ESPN player ids, positions, pro teams and optional projections. "
-        "Use this to build the id map that draft picks and rosters require."
+        "Player pool with ESPN player ids, positions, and pro teams. "
+        + PROJECTION_FLAG_TEXT
+        + " Use this to build the id map that draft picks and rosters require."
     )
 )
 async def espn_players(
@@ -510,7 +529,7 @@ async def espn_players(
     limit: int = 50,
     position: str | None = None,
     search: str | None = None,
-    include_projections: bool = True,
+    include_projections: bool = False,
 ) -> str:
     """Return a slice of the player universe.
 
@@ -521,7 +540,7 @@ async def espn_players(
         limit: Maximum players to return.
         position: Filter to QB, RB, WR, TE, K or DST.
         search: Case-insensitive substring match on the player name.
-        include_projections: Attach the projected season total when available.
+        include_projections: Attach ESPN projections only when the user asked for them.
     """
     config, resolved_league = _resolve(season, league_id)
     wanted = normalize_position_alias(position) if position else None
@@ -560,6 +579,7 @@ async def espn_players(
             scoring_period_id=None,
             include_legacy_projections=include_projections,
             include_full_stats=False,
+            include_projection_reference=include_projections,
         )
 
         name = normalized["name"]
@@ -573,15 +593,15 @@ async def espn_players(
         if len(results) >= limit:
             break
 
-    return json.dumps(
-        {
-            "season": config.season,
-            "source": "kona_player_info" if resolved_league else "players_wl",
-            "returned": len(results),
-            "players": results,
-        },
-        indent=2,
-    )
+    payload_out: dict[str, Any] = {
+        "season": config.season,
+        "source": "kona_player_info" if resolved_league else "players_wl",
+        "returned": len(results),
+        "players": results,
+    }
+    if include_projections:
+        payload_out["espn_projections"] = projection_envelope(None)
+    return json.dumps(payload_out, indent=2)
 
 
 async def _player_lookup(config: EspnConfig, ids: set[Any]) -> dict[int, dict[str, Any]]:
@@ -782,7 +802,7 @@ async def espn_status() -> str:
         "on Katie's login, which defaults to her own team. mine=true limits the result to "
         "the authenticated ESPN account's teams. When scanning every configured league, "
         "inaccessible/private leagues are listed under skipped_leagues instead of failing "
-        "the whole call."
+        "the whole call. " + PROJECTION_FLAG_TEXT
     )
 )
 async def espn_league_rosters(
@@ -790,6 +810,7 @@ async def espn_league_rosters(
     owner: str | None = None,
     mine: bool | None = None,
     season: int | None = None,
+    include_projections: bool = False,
 ) -> str:
     """Return compact live rosters.
 
@@ -798,12 +819,14 @@ async def espn_league_rosters(
         owner: Case-insensitive match on owner display name or real name, such as "Katie".
         mine: When true, only teams owned by the authenticated ESPN account.
         season: Season year. Defaults to the active profile's season.
+        include_projections: Attach ESPN projections only when the user asked for them.
     """
     from .rosters import (
         bye_map,
         configured_leagues,
         normalize_teams,
         resolve_roster_query,
+        scoring_period_id,
         select_leagues,
     )
 
@@ -832,10 +855,13 @@ async def espn_league_rosters(
     # the same way export_my_rosters does.
     for item in leagues:
         try:
+            views = ["mTeam", "mRoster", "mStatus"]
+            if include_projections:
+                views.append("mMatchupScore")
             payload = await fetch(
                 league_url(config.season, item["id"]),
                 config=config,
-                views=["mTeam", "mRoster", "mStatus"],
+                views=views,
             )
         except EspnError as error:
             if league is not None:
@@ -860,7 +886,8 @@ async def espn_league_rosters(
                 }
             )
             continue
-        scoring_period = payload.get("scoringPeriodId", scoring_period)
+        period = scoring_period_id(payload)
+        scoring_period = period if period is not None else scoring_period
         teams.extend(
             normalize_teams(
                 payload,
@@ -870,6 +897,9 @@ async def espn_league_rosters(
                 owner_swid=config.swid if restrict_to_owner else None,
                 owner_query=owner,
                 include_players=include_players,
+                season=config.season,
+                scoring_period=period,
+                include_projections=include_projections,
             )
         )
     result: dict[str, Any] = {
@@ -877,9 +907,12 @@ async def espn_league_rosters(
         "season": config.season,
         "scoring_period": scoring_period,
         "include_players": include_players,
+        "include_projections": include_projections,
         "team_count": len(teams),
         "teams": teams,
     }
+    if include_projections:
+        result["espn_projections"] = projection_envelope(scoring_period)
     if skipped:
         result["skipped_leagues"] = skipped
     return json.dumps(result, indent=2)

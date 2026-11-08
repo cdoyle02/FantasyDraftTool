@@ -39,14 +39,29 @@ def test_select_stat_requires_season() -> None:
 
 
 def test_normalize_waiver_entry() -> None:
-    row = normalize_player_entry(WAIVER_ENTRY, season=2020, scoring_period_id=16)
+    row = normalize_player_entry(
+        WAIVER_ENTRY,
+        season=2020,
+        scoring_period_id=16,
+        include_projection_reference=True,
+    )
     assert row["status"] == "WAIVERS"
     assert row["on_team_id"] == 0
     assert row["is_available"] is True
     assert row["position"] == "WR"
     assert row["season_actual_points"] == 134.8
-    assert row["season_projected_points"] == 169.5
     assert row["weekly_actual_points"] == 12.4
+    assert "season_projected_points" not in row
+    assert "weekly_projected_points" not in row
+    assert "projected_points" not in row
+    assert row["espn_projection"]["label"] == "ESPN projection, reference only"
+    assert row["espn_projection"]["espn_projected_season_points"] == 169.5
+    assert row["espn_projection"]["espn_projected_weekly_points"] is None
+    assert row["espn_projection"]["week"] == 16
+    assert row["espn_projection"]["injury_status"] == "ACTIVE"
+    assert "bye_week" not in row["espn_projection"]
+    omitted = normalize_player_entry(WAIVER_ENTRY, season=2020, scoring_period_id=16)
+    assert "espn_projection" not in omitted
     assert row["waiver_process_timestamp_ms"] == 1615993200000
     assert row["waiver_process_at"] is not None
 

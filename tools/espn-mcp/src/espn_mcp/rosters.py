@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from .client import EspnError
+from .players import espn_projection_reference
 from .reference import LINEUP_SLOT_IDS, POSITION_IDS, PRO_TEAM_IDS
 
 # Starter slots first, then bench/IR, then any unknown ESPN slot ids.
@@ -58,7 +59,62 @@ def bye_map(season_meta: dict[str, Any]) -> dict[int, int]:
     }
 
 
-def normalize_player(entry: dict[str, Any], *, bye_weeks: dict[int, int]) -> dict[str, Any]:
+def scoring_period_id(payload: dict[str, Any]) -> int | None:
+    """Return the league's current scoring period when ESPN sent one."""
+    raw = payload.get("scoringPeriodId")
+    if isinstance(raw, int) and raw >= 1:
+        return raw
+    status = payload.get("status") if isinstance(payload.get("status"), dict) else {}
+    current = status.get("currentMatchupPeriod")
+    if isinstance(current, int) and current >= 1:
+        return current
+    period = status.get("currentScoringPeriod")
+    if isinstance(period, dict):
+        nested = period.get("id")
+        if isinstance(nested, int) and nested >= 1:
+            return nested
+    return None
+
+
+def matchup_projection_totals(payload: dict[str, Any]) -> dict[int, dict[str, Any]]:
+    """ESPN's own weekly team totals for the current matchup period.
+
+    These are the matchup fields totalProjectedPoints and totalProjectedPointsLive.
+    They are not a sum of the player rows.
+    """
+    week = scoring_period_id(payload)
+    totals: dict[int, dict[str, Any]] = {}
+    for item in payload.get("schedule") or []:
+        if week is not None and item.get("matchupPeriodId") != week:
+            continue
+        for side in ("home", "away"):
+            block = item.get(side) if isinstance(item.get(side), dict) else None
+            if not block:
+                continue
+            team_id = block.get("teamId")
+            if not isinstance(team_id, int):
+                continue
+            totals[team_id] = {
+                "label": "ESPN team projection, reference only",
+                "week": week,
+                "espn_total_projected_points": round_stat(block.get("totalProjectedPoints")),
+                "espn_total_projected_points_live": round_stat(
+                    block.get("totalProjectedPointsLive")
+                ),
+            }
+    return totals
+
+
+def normalize_player(
+    entry: dict[str, Any],
+    *,
+    bye_weeks: dict[int, int],
+    season: int | None = None,
+    scoring_period: int | None = None,
+    include_projections: bool = False,
+    team_name: str | None = None,
+    league_name: str | None = None,
+) -> dict[str, Any]:
     pool = entry.get("playerPoolEntry") or {}
     player = pool.get("player") or {}
     ownership = player.get("ownership") or {}
@@ -69,7 +125,7 @@ def normalize_player(entry: dict[str, Any], *, bye_weeks: dict[int, int]) -> dic
     raw_player_id = entry.get("playerId")
     if raw_player_id is None:
         raw_player_id = player.get("id") or 0
-    return {
+    row = {
         "espn_player_id": int(raw_player_id),
         "name": str(player.get("fullName") or ""),
         "position": POSITION_IDS.get(position_id, str(position_id)),
@@ -84,6 +140,18 @@ def normalize_player(entry: dict[str, Any], *, bye_weeks: dict[int, int]) -> dic
         "percent_started": round_stat(ownership.get("percentStarted")),
         "fantasy_points": round_stat(pool.get("appliedStatTotal")),
     }
+    if include_projections and season is not None:
+        stats = player.get("stats") if isinstance(player.get("stats"), list) else None
+        row["espn_projection"] = espn_projection_reference(
+            stats,
+            season=season,
+            scoring_period=scoring_period,
+            injury_status=row["injury_status"] or None,
+            bye_week=row["bye_week"] if isinstance(row["bye_week"], int) else None,
+            team_name=team_name,
+            league_name=league_name,
+        )
+    return row
 
 
 def sort_players(players: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -211,8 +279,12 @@ def normalize_teams(
     owner_swid: str | None,
     owner_query: str | None,
     include_players: bool,
+    season: int | None = None,
+    scoring_period: int | None = None,
+    include_projections: bool = False,
 ) -> list[dict[str, Any]]:
     members = member_index(payload.get("members") or [])
+    team_totals = matchup_projection_totals(payload) if include_projections else {}
     teams_out: list[dict[str, Any]] = []
     for team in payload.get("teams") or []:
         if owner_swid and not team_owned_by(team, owner_swid):
@@ -222,7 +294,15 @@ def normalize_teams(
             continue
         players = sort_players(
             [
-                normalize_player(entry, bye_weeks=bye_weeks)
+                normalize_player(
+                    entry,
+                    bye_weeks=bye_weeks,
+                    season=season,
+                    scoring_period=scoring_period,
+                    include_projections=include_projections,
+                    team_name=str(team.get("name") or "").strip(),
+                    league_name=league_name,
+                )
                 for entry in ((team.get("roster") or {}).get("entries") or [])
             ]
         )
@@ -242,6 +322,10 @@ def normalize_teams(
             "waiver_rank": team.get("waiverRank"),
             "player_count": len(players),
         }
+        if include_projections:
+            team_id = int(team.get("id") or 0)
+            if team_id in team_totals:
+                row["espn_team_projection"] = team_totals[team_id]
         if include_players:
             row["players"] = players
         teams_out.append(row)

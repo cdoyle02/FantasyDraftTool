@@ -42,6 +42,86 @@ def is_available(status: str | None) -> bool:
     return status in AVAILABLE_STATUSES
 
 
+ESPN_PROJECTION_LABEL = "ESPN projection, reference only"
+ESPN_PROJECTION_NOTE = (
+    "ESPN projections are reference only. "
+    "A weekly answer quotes espn_projection.espn_projected_weekly_points and week. "
+    "A season answer quotes espn_projection.espn_projected_season_points. "
+    "null means ESPN sent no projection; do not invent one. "
+    "0 is a real ESPN projection. Use injury_status on this object. "
+    "Mention bye_week only when that key is present, because then it is this week. "
+    "A team-total answer quotes espn_team_projection.espn_total_projected_points "
+    "or espn_team_projection.espn_total_projected_points_live and names which field. "
+    "Do not add player projections into a team total. "
+    "Do not turn a higher projection into a start, sit, or add recommendation. "
+    "Comparing two ESPN projection fields is allowed when the user asks which ESPN "
+    "projection is higher; say the comparison is ESPN's projection. "
+    "Do not combine these figures with Ballers, DST or kicker rankings, or odds. "
+    "Name team_name from this same espn_projection object with the player. "
+    "fantasy_points, weekly_actual_points, and season_actual_points are not projections."
+)
+PROJECTION_FLAG_TEXT = (
+    "Pass include_projections=true only when the user asks for ESPN projections. "
+    "Omitting it means the figures were not requested, not that ESPN has none."
+)
+
+
+def espn_projection_reference(
+    stats: list[dict[str, Any]] | None,
+    *,
+    season: int,
+    scoring_period: int | None,
+    injury_status: str | None = None,
+    bye_week: int | None = None,
+    team_name: str | None = None,
+    league_name: str | None = None,
+) -> dict[str, Any]:
+    """Quote ESPN's projected points without deriving a new number from them.
+
+    statSourceId 1 is ESPN's projection. Split 0 is the season total. Split 1
+    for the current scoring period is that week's projection. bye_week is included
+    only when it is the same week as the projection.
+    """
+    season_row = select_stat(stats, season=season, source=1, split=0, scoring_period=0)
+    week = scoring_period if scoring_period is not None and scoring_period >= 1 else None
+    week_row = None
+    if week is not None:
+        week_row = select_stat(stats, season=season, source=1, split=1, scoring_period=week)
+    quoted: dict[str, Any] = {
+        "label": ESPN_PROJECTION_LABEL,
+        "week": week,
+        "espn_projected_weekly_points": _quoted_points(week_row),
+        "espn_projected_season_points": _quoted_points(season_row),
+        "injury_status": injury_status or None,
+    }
+    if week is not None and bye_week == week:
+        quoted["bye_week"] = bye_week
+    if team_name:
+        quoted["team_name"] = team_name
+    if league_name:
+        quoted["league_name"] = league_name
+    return quoted
+
+
+def projection_envelope(week: int | None) -> dict[str, Any]:
+    """One statement per tool result so the projection rule is not only on each player."""
+    return {
+        "source": "ESPN",
+        "use": "reference_only",
+        "week": week,
+        "note": ESPN_PROJECTION_NOTE,
+    }
+
+
+def _quoted_points(stat: dict[str, Any] | None) -> float | None:
+    if not stat or "appliedTotal" not in stat:
+        return None
+    value = stat.get("appliedTotal")
+    if not isinstance(value, (int, float)):
+        return None
+    return round(float(value), 2)
+
+
 def select_stat(
     stats: list[dict[str, Any]] | None,
     *,
@@ -84,6 +164,7 @@ def normalize_player_entry(
     scoring_period_id: int | None,
     include_legacy_projections: bool = False,
     include_full_stats: bool = True,
+    include_projection_reference: bool = False,
 ) -> dict[str, Any]:
     """Normalize a kona_player_info outer player-pool entry."""
     player = entry.get("player") or entry
@@ -100,28 +181,16 @@ def normalize_player_entry(
     stats = player.get("stats") or []
 
     season_actual = None
-    season_projected = None
     weekly_actual = None
-    weekly_projected = None
     if include_full_stats:
         season_actual = select_stat(
             stats, season=season, source=0, split=0, scoring_period=0
-        )
-        season_projected = select_stat(
-            stats, season=season, source=1, split=0, scoring_period=0
         )
         if effective_period is not None and effective_period >= 1:
             weekly_actual = select_stat(
                 stats,
                 season=season,
                 source=0,
-                split=1,
-                scoring_period=effective_period,
-            )
-            weekly_projected = select_stat(
-                stats,
-                season=season,
-                source=1,
                 split=1,
                 scoring_period=effective_period,
             )
@@ -153,20 +222,21 @@ def normalize_player_entry(
                 "season_average_points": season_actual.get("appliedAverage")
                 if season_actual
                 else None,
-                "season_projected_points": season_projected.get("appliedTotal")
-                if season_projected
-                else None,
                 "weekly_actual_points": weekly_actual.get("appliedTotal")
                 if weekly_actual
-                else None,
-                "weekly_projected_points": weekly_projected.get("appliedTotal")
-                if weekly_projected
                 else None,
             }
         )
 
+    # Quoted from ESPN's projection split. Nothing here is summed or scored again.
+    if include_projection_reference:
+        normalized["espn_projection"] = espn_projection_reference(
+            stats,
+            season=season,
+            scoring_period=effective_period,
+            injury_status=player.get("injuryStatus"),
+        )
     if include_legacy_projections:
-        normalized["projected_points"] = normalized["season_projected_points"]
         ranks = player.get("draftRanksByRankType") or {}
         normalized["ppr_draft_rank"] = (ranks.get("PPR") or {}).get("rank")
 
