@@ -1,0 +1,3 @@
+ftn_game_id,nflverse_game_id,season,week,ftn_play_id,nflverse_play_id,is_motion,is_play_action,receiver_alignment
+9001,2026_05_KC_BUF,2026,5,500001,101,FALSE,FALSE,wide
+9001,2026_05_KC_BUF,2026,5,500002,201,TRUE,FALSE,slot

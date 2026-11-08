@@ -1,0 +1,6 @@
+season,season_type,week,game_id,play_id,posteam,defteam,drive,qb_kneel,pass_attempt,rush_attempt,yards_gained,epa,xpass,series_success,touchdown,complete_pass,receiver_player_id,passer_player_id,rusher_player_id
+2026,REG,5,2026_05_KC_BUF,101,KC,BUF,1,0,1,0,20,0.5,0.6,1,0,1,WR1,QB1,
+2026,REG,5,2026_05_KC_BUF,102,KC,BUF,1,0,0,1,12,0.2,0.4,0,0,0,,QB1,RB1
+2026,REG,5,2026_05_KC_BUF,201,KC,BUF,2,0,1,0,3,-0.1,0.55,0,0,1,WR2,QB1,
+2026,REG,5,2026_05_KC_BUF,202,KC,BUF,2,0,0,1,2,-0.05,0.5,0,0,0,,QB1,RB1
+2026,REG,5,2026_05_KC_BUF,301,KC,BUF,3,1,0,1,-1,-0.01,,0,0,0,,QB1,QB1
