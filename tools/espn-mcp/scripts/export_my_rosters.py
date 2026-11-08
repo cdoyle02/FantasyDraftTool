@@ -124,10 +124,17 @@ def _normalize_team_row(
     team: dict[str, Any],
     owner: dict[str, str],
     bye_weeks: dict[int, int],
+    season: int | None = None,
+    scoring_period: int | None = None,
 ) -> dict[str, Any]:
     players = _sort_players(
         [
-            _normalize_player(entry, bye_weeks=bye_weeks)
+            _normalize_player(
+                entry,
+                bye_weeks=bye_weeks,
+                season=season,
+                scoring_period=scoring_period,
+            )
             for entry in ((team.get("roster") or {}).get("entries") or [])
         ]
     )
@@ -251,7 +258,12 @@ async def export_rosters(out_dir: Path, *, full_leagues: bool = True) -> dict[st
                 "last_name": "",
             }
             row = _normalize_team_row(
-                league=league, team=team, owner=owner, bye_weeks=bye_weeks
+                league=league,
+                team=team,
+                owner=owner,
+                bye_weeks=bye_weeks,
+                season=config.season,
+                scoring_period=scoring_period if isinstance(scoring_period, int) else None,
             )
             league_teams.append(row)
             # Household snapshot: cookie owner + Michael/Katie Doyle.

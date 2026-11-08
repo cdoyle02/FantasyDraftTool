@@ -173,7 +173,9 @@ def test_roster_quotes_espn_projections_without_changing_points() -> None:
         include_projections=True,
     )
     player = teams[0]["players"][0]
-    assert player["fantasy_points"] == 20.4
+    # Week-10 actual from stats (99), not appliedStatTotal (20.4).
+    assert player["weekly_actual_points"] == 99.0
+    assert player["fantasy_points"] == 99.0
     assert player["espn_projection"] == {
         "label": "ESPN projection, reference only",
         "week": 10,
@@ -296,3 +298,149 @@ def test_explicit_league_includes_every_team_even_for_katie() -> None:
     )
     assert restrict is False
     assert include_players is True
+
+
+def test_roster_weekly_actual_ignores_stale_applied_stat_total() -> None:
+    """appliedStatTotal can be last week or last+this week; use the week split only."""
+    payload = _payload()
+    payload["scoringPeriodId"] = 9
+    player = payload["teams"][0]["roster"]["entries"][0]["playerPoolEntry"]
+    # Stale/wrong ESPN roster field (Josh Allen case: still showing week 8).
+    player["appliedStatTotal"] = 26.56
+    player["player"]["stats"] = [
+        {
+            "seasonId": 2026,
+            "statSourceId": 0,
+            "statSplitTypeId": 1,
+            "scoringPeriodId": 8,
+            "appliedTotal": 26.56,
+        },
+        {
+            "seasonId": 2026,
+            "statSourceId": 1,
+            "statSplitTypeId": 1,
+            "scoringPeriodId": 9,
+            "appliedTotal": 19.94,
+        },
+    ]
+    teams = normalize_teams(
+        payload,
+        league_id="1",
+        league_name="League",
+        bye_weeks={},
+        owner_swid=None,
+        owner_query="Katie",
+        include_players=True,
+        season=2026,
+        scoring_period=9,
+    )
+    row = teams[0]["players"][0]
+    assert row["weekly_actual_points"] is None
+    assert row["fantasy_points"] is None
+
+
+def test_roster_weekly_actual_uses_current_week_stat_not_prior_sum() -> None:
+    """Henry case: appliedStatTotal was week8+week9; quote week 9 only."""
+    payload = _payload()
+    payload["scoringPeriodId"] = 9
+    player = payload["teams"][0]["roster"]["entries"][0]["playerPoolEntry"]
+    player["appliedStatTotal"] = 19.58
+    player["player"]["stats"] = [
+        {
+            "seasonId": 2026,
+            "statSourceId": 0,
+            "statSplitTypeId": 1,
+            "scoringPeriodId": 8,
+            "appliedTotal": 14.0,
+        },
+        {
+            "seasonId": 2026,
+            "statSourceId": 0,
+            "statSplitTypeId": 1,
+            "scoringPeriodId": 9,
+            "appliedTotal": 5.58,
+        },
+    ]
+    teams = normalize_teams(
+        payload,
+        league_id="1",
+        league_name="League",
+        bye_weeks={},
+        owner_swid=None,
+        owner_query="Katie",
+        include_players=True,
+        season=2026,
+        scoring_period=9,
+    )
+    row = teams[0]["players"][0]
+    assert row["weekly_actual_points"] == 5.58
+    assert row["fantasy_points"] == 5.58
+
+
+def test_roster_weekly_actual_preserves_zero() -> None:
+    payload = _payload()
+    payload["scoringPeriodId"] = 9
+    player = payload["teams"][0]["roster"]["entries"][0]["playerPoolEntry"]
+    player["appliedStatTotal"] = 12.0
+    player["player"]["stats"] = [
+        {
+            "seasonId": 2026,
+            "statSourceId": 0,
+            "statSplitTypeId": 1,
+            "scoringPeriodId": 9,
+            "appliedTotal": 0.0,
+        }
+    ]
+    teams = normalize_teams(
+        payload,
+        league_id="1",
+        league_name="League",
+        bye_weeks={},
+        owner_swid=None,
+        owner_query=None,
+        include_players=True,
+        season=2026,
+        scoring_period=9,
+    )
+    assert teams[0]["players"][0]["weekly_actual_points"] == 0.0
+
+
+def test_team_live_score_comes_from_matchup_not_player_sum() -> None:
+    payload = _payload()
+    payload["scoringPeriodId"] = 9
+    payload["schedule"] = [
+        {
+            "matchupPeriodId": 9,
+            "home": {
+                "teamId": 1,
+                "totalPoints": 0.0,
+                "totalPointsLive": 5.58,
+                "pointsByScoringPeriod": {"9": 5.58},
+                "totalProjectedPoints": 128.865,
+                "totalProjectedPointsLive": 120.393,
+            },
+            "away": {
+                "teamId": 2,
+                "totalPointsLive": 10.0,
+                "pointsByScoringPeriod": {"9": 10.0},
+            },
+        }
+    ]
+    teams = normalize_teams(
+        payload,
+        league_id="1",
+        league_name="League",
+        bye_weeks={},
+        owner_swid=None,
+        owner_query="Katie",
+        include_players=True,
+        season=2026,
+        scoring_period=9,
+        include_projections=True,
+    )
+    assert teams[0]["espn_team_score"] == {
+        "label": "ESPN team score, current week",
+        "week": 9,
+        "espn_total_points_live": 5.58,
+        "espn_points_for_scoring_period": 5.58,
+    }

@@ -79,7 +79,11 @@ When espn_projections is present, follow its note. A weekly answer quotes
 espn_projection.espn_projected_weekly_points and week. A season answer quotes
 espn_projection.espn_projected_season_points. null means ESPN sent no number.
 Do not add player projections into a team total. Quote espn_team_projection
-when the user asks for a team total and say which of its fields you used.
+when the user asks for a team projection and say which of its fields you used.
+For points scored this week, quote weekly_actual_points on each player and
+espn_team_score for the team total. null weekly_actual_points means the player
+has no ESPN actual for this week yet (game not played) — do not substitute
+fantasy_points from a prior week or sum appliedStatTotal.
 """
 
 server: MCPServer[Any] = MCPServer(
@@ -856,7 +860,10 @@ async def espn_league_rosters(
     for item in leagues:
         try:
             views = ["mTeam", "mRoster", "mStatus"]
-            if include_projections:
+            # Matchup block carries ESPN team projection totals and live week
+            # scores. Need it whenever we return player rows or projections so
+            # agents do not invent team totals from stale player appliedStatTotal.
+            if include_projections or include_players:
                 views.append("mMatchupScore")
             payload = await fetch(
                 league_url(config.season, item["id"]),
