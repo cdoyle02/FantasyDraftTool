@@ -707,12 +707,19 @@ def _explain_metric(
     )
     off_value = off_metrics.get(headline)
 
+    alignment_gated = group in ("out_wr", "slot_wr")
+    if alignment_gated and off_games < _MIN_ALIGNMENT_SAMPLE_GAMES:
+        return None, None, None
+
     if opponent is None:
         return off_value, None, None
 
     def_summed, def_games = _sum_group_rates(
         dataset, side="def", group=group, team=opponent, weeks=weeks
     )
+    if alignment_gated and def_games < _MIN_ALIGNMENT_SAMPLE_GAMES:
+        return None, None, None
+
     def_total_targets = _team_total_targets(dataset, side="def", team=opponent, weeks=weeks)
     def_metrics = _rate_metrics(
         def_summed, def_games, group=group, scoring=scoring, total_targets=def_total_targets

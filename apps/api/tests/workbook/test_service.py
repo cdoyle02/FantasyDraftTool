@@ -297,6 +297,20 @@ def test_feeder_response_rejects_unknown_group() -> None:
         build_feeder_response(group="bogus", window="l4", scoring="ppr", week=WEEK, season=SEASON)
 
 
+def test_explain_slot_wr_all_none_when_alignment_sample_thin() -> None:
+    explain = build_explain_response(
+        team="AAA", week=WEEK, metric="slot_wr_fp", window="l4", scoring="ppr", season=SEASON
+    )
+    assert explain["off"] is None
+    assert explain["def"] is None
+    assert explain["net"] is None
+
+    matchups = build_matchups_response(
+        week=WEEK, window="l4", scoring="ppr", slate="all", season=SEASON
+    )
+    assert _aaa_row(matchups)["slotWr"] == {"fpG": None, "reason": "insufficient_alignment_sample"}
+
+
 def test_explain_response_net_matches_matchups_net() -> None:
     explain = build_explain_response(
         team="AAA", week=WEEK, metric="wr_fp", window="l4", scoring="ppr", season=SEASON
