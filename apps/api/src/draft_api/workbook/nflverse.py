@@ -17,9 +17,10 @@ import urllib.error
 import urllib.request
 from collections import defaultdict
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Literal
+from zoneinfo import ZoneInfo
 
 from draft_api.sos.calculate import WEEKS
 from draft_api.sos.nflverse import SCHEDULES_URL, STATS_URL, parse_schedule_csv
@@ -144,6 +145,14 @@ _SCHEDULE_REQUIRED_HEADERS: tuple[str, ...] = (
     "home_team",
 )
 
+# nflverse `games.csv` ships `gameday` (YYYY-MM-DD) + `gametime` (HH:MM, documented
+# as Eastern per the nflreadr schedules dictionary). Both are optional columns from
+# this loader's perspective: when absent (e.g. the minimal fixture CSV used in
+# tests), `parse_scheduled_games` still returns one `ScheduledGame` per matchup with
+# `kickoff=None` rather than failing, and the service layer treats unknown kickoff
+# as not-main-slate (see `workbook/README.md`).
+_SCHEDULE_KICKOFF_TZ = ZoneInfo("America/New_York")
+
 
 class WorkbookNflverseError(RuntimeError):
     """Raised when Workbook nflverse downloads or parsing fail."""
@@ -166,6 +175,22 @@ class PositionalWeekRate:
 
 
 @dataclass(frozen=True, slots=True)
+class ScheduledGame:
+    """One week's home/away pairing plus kickoff (UTC ISO8601, None if unknown).
+
+    Unlike ``schedule`` (symmetric team→opponent, used for stat aggregation),
+    this carries the directional home/away + kickoff info the Workbook service
+    layer (Task 7) needs to build the matchups board's game list and apply the
+    main/all slate filter.
+    """
+
+    week: int
+    home: str
+    away: str
+    kickoff: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class WorkbookDataset:
     """Normalized season data ready for the Workbook calculators."""
 
@@ -179,6 +204,7 @@ class WorkbookDataset:
     team_env_def: list[TeamRateSlice]
     positional_off: dict[str, dict[tuple[str, int], PositionalWeekRate]]
     positional_def: dict[str, dict[tuple[str, int], PositionalWeekRate]]
+    games: list[ScheduledGame] = field(default_factory=list)
 
 
 def default_http_get(url: str) -> bytes:
@@ -604,6 +630,45 @@ def _validate_schedule_headers(text: str) -> None:
     _ensure_csv_headers(reader.fieldnames, _SCHEDULE_REQUIRED_HEADERS, source="schedules")
 
 
+def _parse_kickoff_utc(gameday: str | None, gametime: str | None) -> str | None:
+    """Combine nflverse `gameday` + Eastern `gametime` into a UTC ISO8601 string."""
+    if not gameday or not gametime:
+        return None
+    try:
+        local_naive = datetime.strptime(f"{gameday} {gametime}", "%Y-%m-%d %H:%M")
+    except ValueError:
+        return None
+    local_aware = local_naive.replace(tzinfo=_SCHEDULE_KICKOFF_TZ)
+    return local_aware.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
+def parse_scheduled_games(text: str, *, season: int) -> list[ScheduledGame]:
+    """Build one `ScheduledGame` per regular-season matchup (home/away + kickoff).
+
+    `gameday`/`gametime` are read opportunistically: when a schedule CSV lacks
+    them (e.g. the minimal test fixture), every game still comes back with
+    `kickoff=None` instead of raising.
+    """
+    reader = csv.DictReader(io.StringIO(text))
+    games: list[ScheduledGame] = []
+    for row in reader:
+        row_season = _parse_int(row.get("season", ""))
+        if row_season is not None and row_season != season:
+            continue
+        if (row.get("game_type") or "").upper() not in ("REG", "REGULAR"):
+            continue
+        week = _parse_int(row.get("week", ""))
+        if week is None or week < 1 or week > 18:
+            continue
+        home = normalize_team(row.get("home_team") or "")
+        away = normalize_team(row.get("away_team") or "")
+        if not home or not away:
+            continue
+        kickoff = _parse_kickoff_utc(row.get("gameday"), row.get("gametime"))
+        games.append(ScheduledGame(week=week, home=home, away=away, kickoff=kickoff))
+    return games
+
+
 def _invert_schedule(
     team_week: dict[str, dict[int, str | None]],
 ) -> dict[int, dict[str, str | None]]:
@@ -665,6 +730,7 @@ def load_workbook_dataset(
         team_week_schedule = parse_schedule_csv(schedule_text, season=season)
         schedule = _invert_schedule(team_week_schedule)
         teams = sorted(team_week_schedule.keys()) or list(NFL_TEAMS)
+        scheduled_games = parse_scheduled_games(schedule_text, season=season)
     except WorkbookNflverseError:
         raise
     except Exception as exc:  # noqa: BLE001 - surface parse failures uniformly
@@ -681,4 +747,5 @@ def load_workbook_dataset(
         team_env_def=team_env_def,
         positional_off=positional_off,
         positional_def=positional_def,
+        games=scheduled_games,
     )

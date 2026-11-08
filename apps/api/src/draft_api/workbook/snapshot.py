@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from draft_api.workbook.calculate import DriveOutcome, PassPlay, TeamRateSlice
-from draft_api.workbook.nflverse import PositionalWeekRate, WorkbookDataset
+from draft_api.workbook.nflverse import PositionalWeekRate, ScheduledGame, WorkbookDataset
 
 SNAPSHOT_NAME = "workbook_{season}.json"
 
@@ -111,6 +111,19 @@ def _team_rate_from_dict(payload: dict[str, Any]) -> TeamRateSlice:
     )
 
 
+def _scheduled_game_to_dict(game: ScheduledGame) -> dict[str, Any]:
+    return {"week": game.week, "home": game.home, "away": game.away, "kickoff": game.kickoff}
+
+
+def _scheduled_game_from_dict(payload: dict[str, Any]) -> ScheduledGame:
+    return ScheduledGame(
+        week=int(payload["week"]),
+        home=str(payload["home"]),
+        away=str(payload["away"]),
+        kickoff=(None if payload.get("kickoff") is None else str(payload["kickoff"])),
+    )
+
+
 def dataset_to_dict(dataset: WorkbookDataset) -> dict[str, Any]:
     return {
         "season": dataset.season,
@@ -120,6 +133,7 @@ def dataset_to_dict(dataset: WorkbookDataset) -> dict[str, Any]:
             str(week): {team: opponent for team, opponent in teams.items()}
             for week, teams in sorted(dataset.schedule.items())
         },
+        "games": [_scheduled_game_to_dict(game) for game in dataset.games],
         "drives": [
             {"team": drive.team, "week": drive.week, "success": drive.success}
             for drive in dataset.drives
@@ -157,6 +171,7 @@ def dataset_from_dict(payload: Any) -> WorkbookDataset:
             fetched_at=str(payload.get("fetchedAt") or ""),
             teams=list(payload.get("teams") or []),
             schedule=schedule,
+            games=[_scheduled_game_from_dict(row) for row in payload.get("games") or []],
             drives=[
                 DriveOutcome(
                     team=str(row["team"]),
