@@ -96,6 +96,54 @@ _RATE_FIELDS: tuple[str, ...] = (
     "fantasy_points",
 )
 
+# Required CSV headers (verified against live nflverse assets 2026-11-08).
+_STATS_REQUIRED_HEADERS: tuple[str, ...] = (
+    "season",
+    "season_type",
+    "week",
+    "player_id",
+    "position",
+    "team",
+    "opponent_team",
+    "targets",
+    "receptions",
+    "receiving_yards",
+    "receiving_tds",
+    "carries",
+    "rushing_yards",
+    "rushing_tds",
+    "passing_yards",
+    "passing_tds",
+    "fantasy_points_ppr",
+)
+_PBP_REQUIRED_HEADERS: tuple[str, ...] = (
+    "season",
+    "season_type",
+    "week",
+    "game_id",
+    "play_id",
+    "posteam",
+    "defteam",
+    "drive",
+    "qb_kneel",
+    "pass_attempt",
+    "rush_attempt",
+    "yards_gained",
+    "epa",
+    "xpass",
+    "series_success",
+    "touchdown",
+    "complete_pass",
+    "receiver_player_id",
+)
+_SCHEDULE_REQUIRED_HEADERS: tuple[str, ...] = (
+    "season",
+    "game_type",
+    "week",
+    "away_team",
+    "home_team",
+)
+
 
 class WorkbookNflverseError(RuntimeError):
     """Raised when Workbook nflverse downloads or parsing fail."""
@@ -153,22 +201,41 @@ def _decode_csv_bytes(raw: bytes) -> str:
         return raw.decode("utf-8")
 
 
-def _parse_float(value: str | None) -> float:
+def _ensure_csv_headers(
+    fieldnames: list[str] | None,
+    required: tuple[str, ...],
+    *,
+    source: str,
+) -> None:
+    if not fieldnames:
+        raise WorkbookNflverseError(f"{source}: missing CSV header row")
+    missing = [name for name in required if name not in fieldnames]
+    if missing:
+        joined = ", ".join(missing)
+        raise WorkbookNflverseError(f"{source}: missing required columns: {joined}")
+
+
+def _parse_float(value: str | None, *, field: str) -> float:
+    """Parse a stat counter; empty cells mean zero when the column exists."""
     if value is None or value == "":
         return 0.0
     try:
         return float(value)
-    except ValueError:
-        return 0.0
+    except ValueError as exc:
+        raise WorkbookNflverseError(
+            f"invalid numeric value for {field}: {value!r}"
+        ) from exc
 
 
-def _parse_optional_float(value: str | None) -> float | None:
+def _parse_optional_float(value: str | None, *, field: str) -> float | None:
     if value is None or value == "":
         return None
     try:
         return float(value)
-    except ValueError:
-        return None
+    except ValueError as exc:
+        raise WorkbookNflverseError(
+            f"invalid numeric value for {field}: {value!r}"
+        ) from exc
 
 
 def _parse_int(value: str | None) -> int | None:
@@ -206,6 +273,9 @@ def parse_positional_stats(
     WR classification without needing a separate roster join.
     """
     reader = csv.DictReader(io.StringIO(text))
+    _ensure_csv_headers(
+        reader.fieldnames, _STATS_REQUIRED_HEADERS, source="stats_player_week"
+    )
     player_position: dict[str, str] = {}
     off_sums: dict[tuple[str, str, int], dict[str, float]] = defaultdict(_empty_rate_sums)
     def_sums: dict[tuple[str, str, int], dict[str, float]] = defaultdict(_empty_rate_sums)
@@ -234,16 +304,18 @@ def parse_positional_stats(
             continue
 
         bag = {
-            "targets": _parse_float(row.get("targets")),
-            "receptions": _parse_float(row.get("receptions")),
-            "rec_yards": _parse_float(row.get("receiving_yards")),
-            "rec_tds": _parse_float(row.get("receiving_tds")),
-            "rush_att": _parse_float(row.get("carries")),
-            "rush_yards": _parse_float(row.get("rushing_yards")),
-            "rush_tds": _parse_float(row.get("rushing_tds")),
-            "pass_yards": _parse_float(row.get("passing_yards")),
-            "pass_tds": _parse_float(row.get("passing_tds")),
-            "fantasy_points": _parse_float(row.get("fantasy_points_ppr")),
+            "targets": _parse_float(row.get("targets"), field="targets"),
+            "receptions": _parse_float(row.get("receptions"), field="receptions"),
+            "rec_yards": _parse_float(row.get("receiving_yards"), field="receiving_yards"),
+            "rec_tds": _parse_float(row.get("receiving_tds"), field="receiving_tds"),
+            "rush_att": _parse_float(row.get("carries"), field="carries"),
+            "rush_yards": _parse_float(row.get("rushing_yards"), field="rushing_yards"),
+            "rush_tds": _parse_float(row.get("rushing_tds"), field="rushing_tds"),
+            "pass_yards": _parse_float(row.get("passing_yards"), field="passing_yards"),
+            "pass_tds": _parse_float(row.get("passing_tds"), field="passing_tds"),
+            "fantasy_points": _parse_float(
+                row.get("fantasy_points_ppr"), field="fantasy_points_ppr"
+            ),
         }
         off_bucket = off_sums[(group, team, week)]
         def_bucket = def_sums[(group, opponent, week)]
@@ -362,6 +434,7 @@ def parse_play_by_play(
     kneels" rule.
     """
     reader = csv.DictReader(io.StringIO(text))
+    _ensure_csv_headers(reader.fieldnames, _PBP_REQUIRED_HEADERS, source="play_by_play")
 
     # (team, week, drive_id) -> {"success": bool, "has_play": bool}
     drive_state: dict[tuple[str, int, str], dict[str, bool]] = {}
@@ -400,11 +473,11 @@ def parse_play_by_play(
         is_pass = _parse_bool(row.get("pass_attempt"))
         is_rush = _parse_bool(row.get("rush_attempt"))
         if (is_pass or is_rush) and not is_kneel:
-            xpass = _parse_optional_float(row.get("xpass"))
+            xpass = _parse_optional_float(row.get("xpass"), field="xpass")
             pass_plays.append(PassPlay(team=posteam, week=week, is_pass=is_pass, xpass=xpass))
 
-            epa = _parse_optional_float(row.get("epa"))
-            yards = _parse_float(row.get("yards_gained"))
+            epa = _parse_optional_float(row.get("epa"), field="epa")
+            yards = _parse_float(row.get("yards_gained"), field="yards_gained")
             off_acc = off_rates[(posteam, week)]
             def_acc = def_rates[(defteam, week)]
 
@@ -452,7 +525,11 @@ def parse_play_by_play(
             )
             if alignment in ("outside", "slot"):
                 is_complete = _parse_bool(row.get("complete_pass"))
-                yards = _parse_float(row.get("yards_gained")) if is_complete else 0.0
+                yards = (
+                    _parse_float(row.get("yards_gained"), field="yards_gained")
+                    if is_complete
+                    else 0.0
+                )
                 is_td = is_complete and _parse_bool(row.get("touchdown"))
                 bag = {
                     "targets": 1.0,
@@ -522,6 +599,11 @@ def _finalize_out_slot(
     return out
 
 
+def _validate_schedule_headers(text: str) -> None:
+    reader = csv.DictReader(io.StringIO(text))
+    _ensure_csv_headers(reader.fieldnames, _SCHEDULE_REQUIRED_HEADERS, source="schedules")
+
+
 def _invert_schedule(
     team_week: dict[str, dict[int, str | None]],
 ) -> dict[int, dict[str, str | None]]:
@@ -579,6 +661,7 @@ def load_workbook_dataset(
         positional_off = {**positional_off, **out_slot_off}
         positional_def = {**positional_def, **out_slot_def}
 
+        _validate_schedule_headers(schedule_text)
         team_week_schedule = parse_schedule_csv(schedule_text, season=season)
         schedule = _invert_schedule(team_week_schedule)
         teams = sorted(team_week_schedule.keys()) or list(NFL_TEAMS)

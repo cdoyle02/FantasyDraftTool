@@ -22,6 +22,8 @@ from draft_api.workbook.nflverse import (
     WorkbookNflverseError,
     load_workbook_dataset,
     parse_alignment_csv,
+    parse_play_by_play,
+    parse_positional_stats,
 )
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -146,6 +148,52 @@ def test_http_get_failure_raises_workbook_nflverse_error() -> None:
 
     with pytest.raises(WorkbookNflverseError):
         load_workbook_dataset(SEASON, http_get=_boom)
+
+
+def test_parse_positional_stats_rejects_missing_required_headers() -> None:
+    text = "season,week,position\n2026,5,WR\n"
+    with pytest.raises(WorkbookNflverseError, match="missing required columns"):
+        parse_positional_stats(text, season=SEASON)
+
+
+def test_parse_positional_stats_rejects_invalid_numeric_values() -> None:
+    text = (FIXTURES / "stats_player_week5.csv").read_text()
+    bad = text.replace("16.0", "not-a-number", 1)
+    with pytest.raises(WorkbookNflverseError, match="invalid numeric value"):
+        parse_positional_stats(bad, season=SEASON)
+
+
+def test_parse_play_by_play_rejects_missing_required_headers() -> None:
+    text = "season,week,posteam\n2026,5,KC\n"
+    with pytest.raises(WorkbookNflverseError, match="missing required columns"):
+        parse_play_by_play(
+            text,
+            season=SEASON,
+            player_position={},
+            alignment_by_key={},
+        )
+
+
+def test_parse_play_by_play_rejects_invalid_optional_numeric_fields() -> None:
+    text = (FIXTURES / "pbp_week5.csv").read_text()
+    bad = text.replace("0.5", "bad-epa", 1)
+    with pytest.raises(WorkbookNflverseError, match="invalid numeric value for epa"):
+        parse_play_by_play(
+            bad,
+            season=SEASON,
+            player_position={"WR1": "WR", "WR2": "WR"},
+            alignment_by_key={},
+        )
+
+
+def test_load_workbook_dataset_rejects_missing_schedule_headers() -> None:
+    def _get_bad_schedule(url: str) -> bytes:
+        if url == SCHEDULES_URL:
+            return b"season,week\n2026,5\n"
+        return _fake_http_get(url)
+
+    with pytest.raises(WorkbookNflverseError, match="schedules: missing required columns"):
+        load_workbook_dataset(SEASON, http_get=_get_bad_schedule)
 
 
 def test_default_http_get_wraps_network_errors() -> None:
