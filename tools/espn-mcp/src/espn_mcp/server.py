@@ -989,7 +989,8 @@ def katie_roster() -> str:
     return (
         "Call espn_league_rosters with league 'Girls Who Ball' and owner 'Katie'. "
         "Report starters, bench, and IR with lineup slot, NFL team, injury, and "
-        "weekly_actual_points for this week (null means not played yet). "
+        "weekly_actual_points — that field is this week's fantasy points so far. "
+        "null means the player has not played yet this week (do not invent 0 or last week's score). "
         "Do not invent players that are absent from the tool result."
     )
 

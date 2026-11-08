@@ -470,7 +470,8 @@ async def test_katie_roster_prompt_mentions_weekly_actual_points() -> None:
     rendered = await server.get_prompt("katie_roster")
     text = " ".join(message.content.text for message in rendered.messages if message.content.text)
     assert "weekly_actual_points" in text
-    assert "fantasy points" not in text.lower() or "weekly_actual" in text
+    assert "fantasy points" in text.lower()
+    assert "not played yet" in text.lower()
 
 
 # --- Private league skip (directory scan) ---
