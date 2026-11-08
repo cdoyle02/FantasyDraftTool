@@ -1,0 +1,126 @@
+{
+  "season": 2026,
+  "fetchedAt": "2026-11-08T00:00:00Z",
+  "teams": [
+    "BUF",
+    "KC"
+  ],
+  "schedule": {
+    "5": {
+      "BUF": "KC",
+      "KC": "BUF"
+    }
+  },
+  "drives": [
+    {
+      "team": "KC",
+      "week": 5,
+      "success": true
+    },
+    {
+      "team": "KC",
+      "week": 5,
+      "success": false
+    }
+  ],
+  "passPlays": [
+    {
+      "team": "KC",
+      "week": 5,
+      "isPass": true,
+      "xpass": 0.61
+    },
+    {
+      "team": "KC",
+      "week": 5,
+      "isPass": false,
+      "xpass": null
+    }
+  ],
+  "teamEnvOff": [
+    {
+      "team": "KC",
+      "week": 5,
+      "side": "off",
+      "proe": -1.25,
+      "pass_plays": 2.0,
+      "epa_pass": 0.2,
+      "xplsv_pass": 0.5,
+      "run_plays": 2.0,
+      "epa_run": 0.075,
+      "xplsv_run": 0.5
+    }
+  ],
+  "teamEnvDef": [
+    {
+      "team": "BUF",
+      "week": 5,
+      "side": "def",
+      "proe": -1.25,
+      "pass_plays": 2.0,
+      "epa_pass": 0.2,
+      "xplsv_pass": null,
+      "run_plays": null,
+      "epa_run": null,
+      "xplsv_run": null
+    }
+  ],
+  "positionalOff": {
+    "all_wr": [
+      {
+        "team": "KC",
+        "week": 5,
+        "rates": {
+          "targets": 8.0,
+          "receptions": 6.0,
+          "rec_yards": 75.0,
+          "rec_tds": 1.0,
+          "rush_att": null,
+          "rush_yards": null,
+          "rush_tds": null,
+          "pass_yards": null,
+          "pass_tds": null,
+          "fantasy_points": 21.5
+        }
+      }
+    ],
+    "qb": [
+      {
+        "team": "KC",
+        "week": 5,
+        "rates": {
+          "targets": null,
+          "receptions": null,
+          "rec_yards": null,
+          "rec_tds": null,
+          "rush_att": null,
+          "rush_yards": null,
+          "rush_tds": null,
+          "pass_yards": 250.0,
+          "pass_tds": 2.0,
+          "fantasy_points": null
+        }
+      }
+    ]
+  },
+  "positionalDef": {
+    "all_wr": [
+      {
+        "team": "BUF",
+        "week": 5,
+        "rates": {
+          "targets": 8.0,
+          "receptions": null,
+          "rec_yards": null,
+          "rec_tds": null,
+          "rush_att": null,
+          "rush_yards": null,
+          "rush_tds": null,
+          "pass_yards": null,
+          "pass_tds": null,
+          "fantasy_points": 21.5
+        }
+      }
+    ]
+  }
+}
