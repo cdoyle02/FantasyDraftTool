@@ -20,6 +20,7 @@ from draft_api.sos.calculate import (
     shrunk_defensive_afpa,
     softness_bucket,
 )
+from draft_api.sos.usage import PlayerUsage
 
 
 @dataclass(frozen=True, slots=True)
@@ -157,6 +158,107 @@ def build_tier1_grid(
         shrink_k=k,
         teams=ranked,
     )
+
+
+@dataclass(frozen=True, slots=True)
+class DefenseSoftness:
+    defense: str
+    rank: int
+    softness: Softness
+    softness_score: float
+
+
+def build_defense_softness_index(
+    *,
+    position: Position,
+    window: SosWindow,
+    games: list[CompletedGame],
+    teams: list[str],
+    shrink_k: int | None = None,
+) -> tuple[int, tuple[int, ...], dict[str, DefenseSoftness]]:
+    """Shrunk defensive ranks and softness scores for the rating window."""
+    _ = shrink_k  # reserved for future per-request shrink override
+    through = rated_through_week(games)
+    rating_weeks_set = resolve_sos_window(window, through)
+    rating_weeks = tuple(sorted(rating_weeks_set))
+    window_games = _games_in_weeks(games, rating_weeks_set)
+    shrunk = shrunk_defensive_afpa(window_games, position, teams=teams)
+    defense_ranks = rank_defenses_shrunk(shrunk, teams)
+    index: dict[str, DefenseSoftness] = {}
+    for defense, rank in defense_ranks.items():
+        softness, score = softness_bucket(rank)
+        index[defense] = DefenseSoftness(
+            defense=defense,
+            rank=rank,
+            softness=softness,
+            softness_score=score,
+        )
+    return through, rating_weeks, index
+
+
+def build_player_opportunity(
+    *,
+    usage_index: list[PlayerUsage],
+    defense_softness: dict[str, DefenseSoftness],
+    schedule: dict[str, dict[int, str | None]],
+    week: int,
+) -> list[dict[str, Any]]:
+    """Opportunity = opponent softness score × usage share for one NFL week."""
+    rows: list[dict[str, Any]] = []
+    for player in usage_index:
+        opponent = schedule.get(player.team, {}).get(week)
+        if opponent is None:
+            rows.append(
+                {
+                    "gsisId": player.gsis_id,
+                    "playerId": None,
+                    "name": player.player_name,
+                    "team": player.team,
+                    "position": player.position,
+                    "week": week,
+                    "opponent": None,
+                    "opponentRank": None,
+                    "softness": None,
+                    "softnessScore": None,
+                    "usageShare": player.usage_share,
+                    "opportunity": None,
+                    "bye": True,
+                }
+            )
+            continue
+        softness_row = defense_softness.get(opponent)
+        softness = softness_row.softness if softness_row else None
+        softness_score = softness_row.softness_score if softness_row else None
+        opp_rank = softness_row.rank if softness_row else None
+        if player.usage_share is None or softness_score is None:
+            opportunity = None
+        else:
+            opportunity = softness_score * player.usage_share
+        rows.append(
+            {
+                "gsisId": player.gsis_id,
+                "playerId": None,
+                "name": player.player_name,
+                "team": player.team,
+                "position": player.position,
+                "week": week,
+                "opponent": opponent,
+                "opponentRank": opp_rank,
+                "softness": softness,
+                "softnessScore": softness_score,
+                "usageShare": player.usage_share,
+                "opportunity": opportunity,
+                "bye": False,
+            }
+        )
+    rows.sort(
+        key=lambda row: (
+            row["opportunity"] is None,
+            -(row["opportunity"] or 0.0),
+            row["name"],
+        )
+    )
+    return rows
 
 
 def tier1_payload_to_dict(
