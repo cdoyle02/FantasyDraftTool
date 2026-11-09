@@ -353,6 +353,7 @@ export class DraftApiClient {
     if (params.startWeek != null) query.set('startWeek', String(params.startWeek))
     if (params.endWeek != null) query.set('endWeek', String(params.endWeek))
     if (params.season != null) query.set('season', String(params.season))
+    if (params.wrRole && params.wrRole !== 'all') query.set('wrRole', params.wrRole)
     return this.request<StrengthOfScheduleTier1Response>(
       `/api/v1/nfl/strength-of-schedule/tier1?${query}`,
       { method: 'GET' },
@@ -366,6 +367,7 @@ export class DraftApiClient {
     if (params.week != null) query.set('week', String(params.week))
     if (params.season != null) query.set('season', String(params.season))
     if (params.leagueId) query.set('leagueId', params.leagueId)
+    if (params.wrRole && params.wrRole !== 'all') query.set('wrRole', params.wrRole)
     return this.request<StrengthOfScheduleTier1OpportunityResponse>(
       `/api/v1/nfl/strength-of-schedule/tier1/opportunity?${query}`,
       { method: 'GET' },
@@ -379,6 +381,7 @@ export class DraftApiClient {
     if (params.startWeek != null) query.set('startWeek', String(params.startWeek))
     if (params.endWeek != null) query.set('endWeek', String(params.endWeek))
     if (params.season != null) query.set('season', String(params.season))
+    if (params.wrRole && params.wrRole !== 'all') query.set('wrRole', params.wrRole)
     return this.request<StrengthOfScheduleTier2Response>(
       `/api/v1/nfl/strength-of-schedule/tier2?${query}`,
       { method: 'GET' },
@@ -392,6 +395,7 @@ export class DraftApiClient {
     if (params.week != null) query.set('week', String(params.week))
     if (params.season != null) query.set('season', String(params.season))
     if (params.leagueId) query.set('leagueId', params.leagueId)
+    if (params.wrRole && params.wrRole !== 'all') query.set('wrRole', params.wrRole)
     return this.request<StrengthOfScheduleTier2OpportunityResponse>(
       `/api/v1/nfl/strength-of-schedule/tier2/opportunity?${query}`,
       { method: 'GET' },

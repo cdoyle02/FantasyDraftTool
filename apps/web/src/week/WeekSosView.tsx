@@ -11,7 +11,8 @@ import type {
   StrengthOfScheduleTier1Response,
   StrengthOfScheduleTier2OpportunityResponse,
   StrengthOfScheduleTier2Response,
-  SosTier2Position
+  SosTier2Position,
+  SosWrRole
 } from './types'
 import { WORKBOOK_LEAGUE_STORAGE_KEY } from './WeekWorkbookView'
 
@@ -38,6 +39,12 @@ type WindowPreset = 'ros' | 'playoffs' | 'full' | 'custom'
 type SosViewMode = 'tier1' | 'tier2' | 'classic'
 
 const TIER2_POSITIONS: SosTier2Position[] = ['QB', 'RB', 'WR', 'TE']
+
+const WR_ROLE_OPTIONS: { key: SosWrRole; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'outside', label: 'Out (Clay)' },
+  { key: 'slot', label: 'Slot (Clay)' }
+]
 
 function isTier2Position(position: SosPosition): position is SosTier2Position {
   return TIER2_POSITIONS.includes(position as SosTier2Position)
@@ -127,6 +134,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [ratedThrough, setRatedThrough] = useState(0)
+  const [wrRole, setWrRole] = useState<SosWrRole>('all')
 
   const window = useMemo(() => {
     if (preset === 'custom') {
@@ -144,6 +152,12 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
   }, [position, viewMode])
 
   useEffect(() => {
+    if (position !== 'WR') {
+      setWrRole('all')
+    }
+  }, [position])
+
+  useEffect(() => {
     let cancelled = false
     const load = async () => {
       setLoading(true)
@@ -154,7 +168,8 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
             position,
             window: ratingWindow,
             startWeek: window.startWeek,
-            endWeek: window.endWeek
+            endWeek: window.endWeek,
+            wrRole: position === 'WR' ? wrRole : undefined
           })
           if (cancelled) return
           setTier1Data(payload)
@@ -166,7 +181,8 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
             position,
             window: ratingWindow,
             startWeek: window.startWeek,
-            endWeek: window.endWeek
+            endWeek: window.endWeek,
+            wrRole: position === 'WR' ? wrRole : undefined
           })
           if (cancelled) return
           setTier2Data(payload)
@@ -200,7 +216,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
     return () => {
       cancelled = true
     }
-  }, [position, viewMode, metric, ratingWindow, window.startWeek, window.endWeek])
+  }, [position, viewMode, metric, ratingWindow, window.startWeek, window.endWeek, wrRole])
 
   useEffect(() => {
     let cancelled = false
@@ -256,13 +272,15 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
                 position,
                 window: ratingWindow,
                 week: opportunityWeek,
-                leagueId: leagueId || undefined
+                leagueId: leagueId || undefined,
+                wrRole: position === 'WR' ? wrRole : undefined
               })
             : await draftApi.tier1Opportunity({
                 position,
                 window: ratingWindow,
                 week: opportunityWeek,
-                leagueId: leagueId || undefined
+                leagueId: leagueId || undefined,
+                wrRole: position === 'WR' ? wrRole : undefined
               })
         if (cancelled) return
         setOpportunityData(payload)
@@ -278,7 +296,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
     return () => {
       cancelled = true
     }
-  }, [viewMode, position, ratingWindow, opportunityWeek, leagueId])
+  }, [viewMode, position, ratingWindow, opportunityWeek, leagueId, wrRole])
 
   const applyPreset = (next: Exclude<WindowPreset, 'custom'>) => {
     const resolved = presetWindow(next, ratedThrough)
@@ -437,6 +455,30 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
                 <option value="pae">Schedule adjusted</option>
               </select>
             </label>
+          )}
+          {position === 'WR' && (viewMode === 'tier1' || viewMode === 'tier2') && (
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted">WR role (Clay)</span>
+              <div
+                className="flex flex-wrap rounded-lg border border-line p-0.5"
+                role="group"
+                aria-label="Clay WR role split"
+              >
+                {WR_ROLE_OPTIONS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    data-testid={`sos-wr-role-${key}`}
+                    className={`rounded-md px-2.5 py-1.5 text-xs font-semibold ${
+                      wrRole === key ? 'bg-mint text-ink' : 'text-muted hover:text-white'
+                    }`}
+                    onClick={() => setWrRole(key)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
           {(viewMode === 'tier1' || viewMode === 'tier2') && (
             <div className="flex flex-col gap-1">

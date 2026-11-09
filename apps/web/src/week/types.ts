@@ -96,6 +96,9 @@ export interface JaredKAvailableResponse extends JaredKRankingsResponse {
 }
 
 export type SosPosition = 'QB' | 'RB' | 'WR' | 'TE' | 'DST'
+
+/** Clay Out/Slot split for WR SoS Tier 1/2 (default all WRs). */
+export type SosWrRole = 'all' | 'outside' | 'slot'
 export type SosMetric = 'fpa' | 'pae'
 
 export interface SosWeekCell {
@@ -177,6 +180,7 @@ export interface StrengthOfScheduleTier1Query {
   startWeek?: number
   endWeek?: number
   season?: number
+  wrRole?: SosWrRole
 }
 
 export type Tier1JoinStatus = 'matched' | 'unmatched'
@@ -224,6 +228,7 @@ export interface StrengthOfScheduleTier1OpportunityQuery {
   week?: number
   season?: number
   leagueId?: string
+  wrRole?: SosWrRole
 }
 
 export type SosTier2Position = 'QB' | 'RB' | 'WR' | 'TE'
@@ -268,6 +273,7 @@ export interface StrengthOfScheduleTier2Query {
   startWeek?: number
   endWeek?: number
   season?: number
+  wrRole?: SosWrRole
 }
 
 export interface Tier2OpportunityPlayer extends Tier1OpportunityPlayer {
@@ -305,6 +311,7 @@ export interface StrengthOfScheduleTier2OpportunityQuery {
   week?: number
   season?: number
   leagueId?: string
+  wrRole?: SosWrRole
 }
 
 /** Workbook Net Matchups — see `apps/api/src/draft_api/workbook/README.md` (SSOT for the math). */

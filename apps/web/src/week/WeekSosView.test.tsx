@@ -420,4 +420,18 @@ describe('WeekSosView', () => {
     })
     expect(sessionStorage.getItem('crossLink.position')).toBeNull()
   })
+
+  it('sends wrRole=slot when Clay Slot WR toggle is selected', async () => {
+    render(<WeekSosView />)
+    await waitFor(() => expect(screen.getByTestId('sos-table')).toBeInTheDocument())
+    fireEvent.change(screen.getByTestId('sos-position'), { target: { value: 'WR' } })
+    await waitFor(() => expect(screen.getByTestId('sos-wr-role-slot')).toBeInTheDocument())
+    vi.mocked(fetch).mockClear()
+    fireEvent.click(screen.getByTestId('sos-wr-role-slot'))
+    await waitFor(() => {
+      const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+      expect(calls.some((url) => url.includes('/tier1?') && url.includes('wrRole=slot'))).toBe(true)
+      expect(calls.some((url) => url.includes('tier1/opportunity') && url.includes('wrRole=slot'))).toBe(true)
+    })
+  })
 })
