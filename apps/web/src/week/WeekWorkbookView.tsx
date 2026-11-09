@@ -1,5 +1,12 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { draftApi } from '../api/client'
+import {
+  WorkbookInjuriesPanel,
+  WorkbookMatricesPanel,
+  WorkbookPacePanel,
+  WorkbookSubNav,
+  WorkbookTopPanel
+} from './WeekWorkbookP2Tabs'
 import type {
   EspnLeague,
   SosPosition,
@@ -9,6 +16,7 @@ import type {
   WorkbookMatchupsResponse,
   WorkbookScoring,
   WorkbookSlate,
+  WorkbookSubTab,
   WorkbookTeamRow,
   WorkbookWindow
 } from './types'
@@ -169,6 +177,7 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
   const [customEnd, setCustomEnd] = useState(17)
   const [scoring, setScoring] = useState<WorkbookScoring>('ppr')
   const [slate, setSlate] = useState<WorkbookSlate>('main')
+  const [subTab, setSubTab] = useState<WorkbookSubTab>('matchups')
   const [data, setData] = useState<WorkbookMatchupsResponse | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -208,6 +217,7 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
   }, [leagueId])
 
   useEffect(() => {
+    if (subTab !== 'matchups') return
     let cancelled = false
     const load = async () => {
       setLoading(true)
@@ -237,7 +247,23 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
     return () => {
       cancelled = true
     }
-  }, [week, window, scoring, slate, customStart, customEnd, leagueId, includeFa])
+  }, [subTab, week, window, scoring, slate, customStart, customEnd, leagueId, includeFa])
+
+  const p2Controls = useMemo(
+    () => ({ week, window, customStart, customEnd, scoring }),
+    [week, window, customStart, customEnd, scoring]
+  )
+
+  const subTabTitle =
+    subTab === 'matchups'
+      ? 'Workbook Net Matchups'
+      : subTab === 'top'
+        ? 'Time of Possession'
+        : subTab === 'pace'
+          ? 'Offensive Pace'
+          : subTab === 'injuries'
+            ? 'League Injuries'
+            : 'Positional Matrices'
 
   const allRows = useMemo(() => data?.games.flatMap((game) => game.rows) ?? [], [data])
   const pools = useMemo(() => {
@@ -295,8 +321,8 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
     <div className="space-y-4" data-testid="week-workbook-view">
       <section className="mb-1 grid gap-3 rounded-2xl border border-line bg-gradient-to-r from-panel to-ink p-4 shadow-glow lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
-          <p className="eyebrow">Matchups</p>
-          <h2 className="text-lg font-semibold">Workbook Net Matchups</h2>
+          <p className="eyebrow">Workbook</p>
+          <h2 className="text-lg font-semibold">{subTabTitle}</h2>
           <p className="mt-1 text-xs text-muted">
             Household Net Matchups · green = offense-friendly cell · red = tough · inspired by Majesstik/OWS, computed by us
           </p>
@@ -448,13 +474,15 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
         </div>
       </section>
 
-      {error && (
+      <WorkbookSubNav active={subTab} onChange={setSubTab} />
+
+      {subTab === 'matchups' && error && (
         <div role="alert" className="rounded-lg border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-xs text-rose-100">
           {error}
         </div>
       )}
 
-      {data?.stale && (
+      {subTab === 'matchups' && data?.stale && (
         <div
           data-testid="workbook-stale-banner"
           className="rounded-lg border border-amber-300/30 bg-amber-300/10 px-4 py-2 text-xs text-amber-100"
@@ -463,12 +491,18 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
         </div>
       )}
 
-      {data?.overlayError && leagueId && (
+      {subTab === 'matchups' && data?.overlayError && leagueId && (
         <p className="rounded-lg border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-xs text-amber-100">
           ESPN highlights unavailable — showing the Net board only.
         </p>
       )}
 
+      {subTab === 'top' && <WorkbookTopPanel controls={p2Controls} />}
+      {subTab === 'pace' && <WorkbookPacePanel controls={p2Controls} />}
+      {subTab === 'injuries' && <WorkbookInjuriesPanel controls={p2Controls} leagueId={leagueId} />}
+      {subTab === 'matrices' && <WorkbookMatricesPanel controls={p2Controls} />}
+
+      {subTab === 'matchups' && (
       <section className="panel overflow-hidden">
         <div className="panel-heading">
           <div>
@@ -557,8 +591,9 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
           </table>
         </div>
       </section>
+      )}
 
-      {explainTarget && (
+      {subTab === 'matchups' && explainTarget && (
         <section
           className="panel p-4"
           data-testid="workbook-explain-panel"
@@ -605,12 +640,13 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
         </section>
       )}
 
-      {data && (
+      {subTab === 'matchups' && data && (
         <p data-testid="workbook-attribution" className="px-1 text-[10px] text-muted">
           {data.attribution}
         </p>
       )}
 
+      {subTab === 'matchups' && (
       <div className="flex flex-wrap items-center gap-3 px-1">
         <button
           type="button"
@@ -626,6 +662,7 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
           </span>
         )}
       </div>
+      )}
     </div>
   )
 }

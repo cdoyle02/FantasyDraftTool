@@ -3,8 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { WeekWorkbookView } from './WeekWorkbookView'
 import type {
   WorkbookExplainResponse,
+  WorkbookInjuriesResponse,
   WorkbookMatchupsResponse,
-  WorkbookTeamRow
+  WorkbookMatricesResponse,
+  WorkbookPaceResponse,
+  WorkbookTeamRow,
+  WorkbookTopResponse
 } from './types'
 
 /** Mirrors `draft_api.workbook.service.ATTRIBUTION` (Clay Out/Slot roles). */
@@ -110,6 +114,92 @@ function buildPayload(overrides: Partial<WorkbookMatchupsResponse> = {}): Workbo
   }
 }
 
+function buildTopPayload(overrides: Partial<WorkbookTopResponse> = {}): WorkbookTopResponse {
+  return {
+    season: 2026,
+    week: 10,
+    window: 'l4',
+    ratedThroughWeek: 9,
+    fetchedAt: '2026-11-08T12:00:00Z',
+    source: 'nflverse',
+    stale: false,
+    attribution: MOCK_ATTRIBUTION,
+    method: 'plays_share_proxy',
+    teams: [
+      { team: 'AAA', topPct: 58.3, method: 'plays_share_proxy', sampleGames: 1 },
+      { team: 'BBB', topPct: 41.7, method: 'plays_share_proxy', sampleGames: 1 }
+    ],
+    ...overrides
+  }
+}
+
+function buildPacePayload(overrides: Partial<WorkbookPaceResponse> = {}): WorkbookPaceResponse {
+  return {
+    season: 2026,
+    week: 10,
+    window: 'l4',
+    ratedThroughWeek: 9,
+    fetchedAt: '2026-11-08T12:00:00Z',
+    source: 'nflverse',
+    stale: false,
+    attribution: MOCK_ATTRIBUTION,
+    teams: [
+      { team: 'AAA', playsPerGame: 65.0, passRate: 0.55, runRate: 0.45 },
+      { team: 'BBB', playsPerGame: 60.0, passRate: 0.5, runRate: 0.5 }
+    ],
+    ...overrides
+  }
+}
+
+function buildInjuriesPayload(overrides: Partial<WorkbookInjuriesResponse> = {}): WorkbookInjuriesResponse {
+  return {
+    season: 2026,
+    week: 10,
+    fetchedAt: '2026-11-08T12:00:00Z',
+    source: 'espn',
+    stale: false,
+    warnings: [],
+    injuries: [
+      {
+        playerId: 1001,
+        name: 'Player Out',
+        team: 'AAA',
+        status: 'O',
+        bodyPart: 'Knee',
+        practice: 'DNP',
+        gameStatus: null
+      }
+    ],
+    ...overrides
+  }
+}
+
+function buildMatricesPayload(overrides: Partial<WorkbookMatricesResponse> = {}): WorkbookMatricesResponse {
+  const cell = (value: number, tier: 'top' | 'mid' | 'bottom') => ({
+    value,
+    tier,
+    tierColor: tier === 'top' ? 'green' : tier === 'bottom' ? 'red' : 'neutral'
+  }) as const
+  return {
+    season: 2026,
+    week: 10,
+    window: 'l4',
+    scoring: 'ppr',
+    group: 'wr',
+    metric: 'fp_per_game',
+    ratedThroughWeek: 9,
+    fetchedAt: '2026-11-08T12:00:00Z',
+    source: 'nflverse',
+    stale: false,
+    attribution: MOCK_ATTRIBUTION,
+    teams: [
+      { team: 'AAA', off: cell(12, 'top'), def: cell(10, 'mid'), net: cell(11, 'top') },
+      { team: 'BBB', off: cell(9, 'bottom'), def: cell(11, 'top'), net: cell(8, 'bottom') }
+    ],
+    ...overrides
+  }
+}
+
 function buildExplainPayload(overrides: Partial<WorkbookExplainResponse> = {}): WorkbookExplainResponse {
   return {
     season: 2026,
@@ -201,6 +291,38 @@ describe('WeekWorkbookView', () => {
               })
             ),
             { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+
+        if (parsed.pathname === '/api/v1/nfl/workbook/top') {
+          return new Response(JSON.stringify(buildTopPayload()), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        }
+
+        if (parsed.pathname === '/api/v1/nfl/workbook/pace') {
+          return new Response(JSON.stringify(buildPacePayload()), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        }
+
+        if (parsed.pathname === '/api/v1/nfl/workbook/injuries') {
+          return new Response(JSON.stringify(buildInjuriesPayload()), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        }
+
+        if (parsed.pathname.startsWith('/api/v1/nfl/workbook/matrices/')) {
+          const group = parsed.pathname.split('/').pop() ?? 'wr'
+          return new Response(
+            JSON.stringify(buildMatricesPayload({ group: group as WorkbookMatricesResponse['group'] })),
+            {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            }
           )
         }
 
@@ -353,5 +475,61 @@ describe('WeekWorkbookView', () => {
       )
     })
     expect(sessionStorage.getItem('crossLink.week')).toBeNull()
+  })
+
+  it('renders workbook sub-navigation', async () => {
+    render(<WeekWorkbookView />)
+    await waitFor(() => expect(screen.getByTestId('workbook-subnav')).toBeInTheDocument())
+    expect(screen.getByTestId('workbook-subnav-matchups')).toBeInTheDocument()
+    expect(screen.getByTestId('workbook-subnav-top')).toBeInTheDocument()
+    expect(screen.getByTestId('workbook-subnav-pace')).toBeInTheDocument()
+    expect(screen.getByTestId('workbook-subnav-injuries')).toBeInTheDocument()
+    expect(screen.getByTestId('workbook-subnav-matrices')).toBeInTheDocument()
+  })
+
+  it('loads TOP data when the TOP sub-tab is selected', async () => {
+    render(<WeekWorkbookView />)
+    await waitFor(() => expect(screen.getByTestId('workbook-table')).toBeInTheDocument())
+    fireEvent.click(screen.getByTestId('workbook-subnav-top'))
+    await waitFor(() => expect(screen.getByTestId('workbook-top-table')).toBeInTheDocument())
+    const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+    expect(calls.some((url) => url.includes('/workbook/top'))).toBe(true)
+    expect(screen.getByTestId('workbook-top-row-AAA')).toHaveTextContent('58.3')
+  })
+
+  it('loads pace data when the Pace sub-tab is selected', async () => {
+    render(<WeekWorkbookView />)
+    await waitFor(() => expect(screen.getByTestId('workbook-table')).toBeInTheDocument())
+    fireEvent.click(screen.getByTestId('workbook-subnav-pace'))
+    await waitFor(() => expect(screen.getByTestId('workbook-pace-table')).toBeInTheDocument())
+    const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+    expect(calls.some((url) => url.includes('/workbook/pace'))).toBe(true)
+    expect(screen.getByTestId('workbook-pace-row-AAA')).toHaveTextContent('65.0')
+  })
+
+  it('loads injuries when league is selected and Injuries tab is active', async () => {
+    render(<WeekWorkbookView />)
+    await waitFor(() => expect(screen.getByTestId('workbook-league-select')).toBeInTheDocument())
+    fireEvent.change(screen.getByTestId('workbook-league-select'), {
+      target: { value: '1216398267' }
+    })
+    fireEvent.click(screen.getByTestId('workbook-subnav-injuries'))
+    await waitFor(() => expect(screen.getByTestId('workbook-injuries-table')).toBeInTheDocument())
+    const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+    expect(
+      calls.some((url) => url.includes('/workbook/injuries') && url.includes('leagueId=1216398267'))
+    ).toBe(true)
+    expect(screen.getByTestId('workbook-injury-1001')).toHaveTextContent('Player Out')
+  })
+
+  it('loads matrices when the Matrices sub-tab is selected', async () => {
+    render(<WeekWorkbookView />)
+    await waitFor(() => expect(screen.getByTestId('workbook-table')).toBeInTheDocument())
+    fireEvent.click(screen.getByTestId('workbook-subnav-matrices'))
+    await waitFor(() => expect(screen.getByTestId('workbook-matrices-table')).toBeInTheDocument())
+    const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+    expect(calls.some((url) => url.includes('/workbook/matrices/wr'))).toBe(true)
+    expect(screen.getByTestId('workbook-matrix-row-AAA')).toHaveTextContent('T')
+    expect(screen.getByTestId('workbook-matrix-row-AAA')).toHaveTextContent('11.0')
   })
 })

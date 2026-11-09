@@ -22,8 +22,16 @@ import type {
   WorkbookExplainResponse,
   WorkbookFeederQuery,
   WorkbookFeederResponse,
+  WorkbookInjuriesQuery,
+  WorkbookInjuriesResponse,
   WorkbookMatchupsQuery,
-  WorkbookMatchupsResponse
+  WorkbookMatchupsResponse,
+  WorkbookMatricesQuery,
+  WorkbookMatricesResponse,
+  WorkbookMatrixGroup,
+  WorkbookP2WindowQuery,
+  WorkbookPaceResponse,
+  WorkbookTopResponse
 } from '../week/types'
 
 export interface RecommendationRequest {
@@ -388,6 +396,45 @@ export class DraftApiClient {
     query.set('metric', params.metric)
     return this.request<WorkbookExplainResponse>(
       `/api/v1/nfl/workbook/explain?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
+
+  workbookTop(params: WorkbookP2WindowQuery) {
+    const query = new URLSearchParams({ window: params.window })
+    query.set('week', String(params.week))
+    if (params.startWeek != null) query.set('startWeek', String(params.startWeek))
+    if (params.endWeek != null) query.set('endWeek', String(params.endWeek))
+    if (params.season != null) query.set('season', String(params.season))
+    return this.request<WorkbookTopResponse>(`/api/v1/nfl/workbook/top?${query}`, { method: 'GET' }, 30_000)
+  }
+
+  workbookPace(params: WorkbookP2WindowQuery) {
+    const query = new URLSearchParams({ window: params.window })
+    query.set('week', String(params.week))
+    if (params.startWeek != null) query.set('startWeek', String(params.startWeek))
+    if (params.endWeek != null) query.set('endWeek', String(params.endWeek))
+    if (params.season != null) query.set('season', String(params.season))
+    return this.request<WorkbookPaceResponse>(`/api/v1/nfl/workbook/pace?${query}`, { method: 'GET' }, 30_000)
+  }
+
+  workbookInjuries(params: WorkbookInjuriesQuery) {
+    const query = new URLSearchParams({ week: String(params.week), leagueId: params.leagueId })
+    if (params.season != null) query.set('season', String(params.season))
+    return this.request<WorkbookInjuriesResponse>(
+      `/api/v1/nfl/workbook/injuries?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
+
+  workbookMatrices(group: WorkbookMatrixGroup, params: Omit<WorkbookMatricesQuery, 'group'>) {
+    const query = DraftApiClient.workbookWindowQuery(params)
+    query.set('week', String(params.week))
+    query.set('metric', params.metric)
+    return this.request<WorkbookMatricesResponse>(
+      `/api/v1/nfl/workbook/matrices/${group}?${query}`,
       { method: 'GET' },
       30_000
     )

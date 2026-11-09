@@ -343,3 +343,125 @@ export interface WorkbookExplainQuery {
   endWeek?: number
   season?: number
 }
+
+/** Shared window params for Workbook P2 tab APIs (TOP, Pace, Matrices). */
+export interface WorkbookP2WindowQuery {
+  week: number
+  window: WorkbookWindow
+  startWeek?: number
+  endWeek?: number
+  season?: number
+}
+
+export type WorkbookTopMethod = 'pbp_drive' | 'plays_share_proxy'
+
+export interface WorkbookTopTeamRow {
+  team: string
+  topPct: number | null
+  method: WorkbookTopMethod
+  sampleGames: number
+}
+
+export interface WorkbookTopResponse {
+  season: number
+  week: number
+  window: WorkbookWindow
+  ratedThroughWeek: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  attribution: string
+  method: WorkbookTopMethod
+  teams: WorkbookTopTeamRow[]
+}
+
+export interface WorkbookPaceTeamRow {
+  team: string
+  playsPerGame: number | null
+  passRate: number | null
+  runRate: number | null
+}
+
+export interface WorkbookPaceResponse {
+  season: number
+  week: number
+  window: WorkbookWindow
+  ratedThroughWeek: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  attribution: string
+  teams: WorkbookPaceTeamRow[]
+}
+
+export interface WorkbookInjuryRow {
+  playerId: number
+  name: string
+  team: string
+  status: string
+  bodyPart: string | null
+  practice: string | null
+  gameStatus: string | null
+}
+
+export interface WorkbookInjuriesResponse {
+  season: number
+  week: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  injuries: WorkbookInjuryRow[]
+  warnings: string[]
+}
+
+export interface WorkbookInjuriesQuery {
+  week: number
+  leagueId: string
+  season?: number
+}
+
+export type WorkbookMatrixGroup = 'qb' | 'wr' | 'te' | 'rb' | 'dsr'
+export type WorkbookMatrixMetric =
+  | 'fp_per_game'
+  | 'targets_per_game'
+  | 'yards_per_game'
+  | 'tds_per_game'
+  | 'dsr'
+export type WorkbookMatrixTertile = 'top' | 'mid' | 'bottom'
+export type WorkbookMatrixTierColor = 'green' | 'neutral' | 'red'
+
+export interface WorkbookMatrixCell {
+  value: number | null
+  tier: WorkbookMatrixTertile | null
+  tierColor: WorkbookMatrixTierColor | null
+}
+
+export interface WorkbookMatrixTeamRow {
+  team: string
+  off: WorkbookMatrixCell
+  def: WorkbookMatrixCell
+  net: WorkbookMatrixCell
+}
+
+export interface WorkbookMatricesResponse {
+  season: number
+  week: number
+  window: WorkbookWindow
+  scoring: WorkbookScoring
+  group: WorkbookMatrixGroup
+  metric: WorkbookMatrixMetric
+  ratedThroughWeek: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  attribution: string
+  teams: WorkbookMatrixTeamRow[]
+}
+
+export interface WorkbookMatricesQuery extends WorkbookP2WindowQuery {
+  group: WorkbookMatrixGroup
+  metric: WorkbookMatrixMetric
+  scoring: WorkbookScoring
+}
+
+export type WorkbookSubTab = 'matchups' | 'top' | 'pace' | 'injuries' | 'matrices'
