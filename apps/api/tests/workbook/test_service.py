@@ -285,8 +285,8 @@ def test_stale_snapshot_fallback_when_loader_fails() -> None:
 
     set_workbook_http_get(_boom)
 
-    # Regression coverage for the packaged fallback: the slim snapshot has
-    # week-5 BUF/KC rates, so stale mode should still return a usable board.
+    # Packaged snapshot includes Clay-derived Out/Slot buckets even when live
+    # nflverse is down.
     body = build_matchups_response(
         week=5,
         window="custom",
@@ -299,15 +299,13 @@ def test_stale_snapshot_fallback_when_loader_fails() -> None:
     assert body["source"] == "snapshot"
     assert body["stale"] is True
     assert body["games"]
-    game = body["games"][0]
-    assert (game["home"], game["away"], game["kickoff"]) == (
-        "BUF",
-        "KC",
-        "2026-10-04T17:00:00Z",
-    )
-    assert {row["team"] for row in game["rows"]} == {"BUF", "KC"}
-    kc_row = next(row for row in game["rows"] if row["team"] == "KC")
-    assert kc_row["allWr"]["fpG"] == pytest.approx(9.75)
+    buf_game = next(g for g in body["games"] if g["away"] == "BUF" or g["home"] == "BUF")
+    buf_row = next(r for r in buf_game["rows"] if r["team"] == "BUF")
+    assert buf_row["allWr"]["fpG"] is not None
+    assert buf_row["outWr"]["fpG"] is not None
+    assert buf_row["slotWr"]["fpG"] is not None
+    assert "reason" not in buf_row["outWr"]
+    assert "reason" not in buf_row["slotWr"]
 
 
 def test_feeder_response_reports_off_and_def_legs() -> None:

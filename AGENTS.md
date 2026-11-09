@@ -59,6 +59,8 @@ CI: `.github/workflows/ci.yml` (python + web + e2e). **espn-mcp tests are not in
 
 - Architecture: [docs/architecture.md](docs/architecture.md)
 - Deploy: [docs/deployment.md](docs/deployment.md)
+- **SoS Tier 1 design:** [docs/superpowers/specs/2026-11-08-advanced-sos-tier1-design.md](docs/superpowers/specs/2026-11-08-advanced-sos-tier1-design.md) · impl plan [docs/superpowers/plans/2026-11-08-advanced-sos-tier1.md](docs/superpowers/plans/2026-11-08-advanced-sos-tier1.md)
+- **Workbook Net Matchups P1–P3:** [P1 overlay/MCP](docs/superpowers/plans/2026-11-08-workbook-p1-overlay-mcp.md) · [P2 tabs](docs/superpowers/plans/2026-11-08-workbook-p2-tabs.md) · [P3 pool/OLDL](docs/superpowers/plans/2026-11-08-workbook-p3-pool-oldl.md) (design: [spec](docs/superpowers/specs/2026-11-08-workbook-net-matchups-design.md); Clay Out/Slot: [plan](docs/superpowers/plans/2026-11-08-workbook-clay-role-out-slot.md))
 - **Full audit (cloud, multi-user, risks):** [docs/audits/2026-10-10-full-codebase-analysis.md](docs/audits/2026-10-10-full-codebase-analysis.md)
 - **Chat/skill wishlist (impl TBD):** [docs/audits/2026-10-10-desired-features-from-chats.md](docs/audits/2026-10-10-desired-features-from-chats.md)
 - Formula: [docs/formula-v4.md](docs/formula-v4.md), [docs/formula-v5.md](docs/formula-v5.md)

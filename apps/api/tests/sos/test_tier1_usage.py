@@ -1,6 +1,6 @@
 """Tier 1 usage shares from nflverse stats_player_week rows."""
 
-from draft_api.sos.usage import PlayerUsage, build_usage_index
+from draft_api.sos.usage import PlayerUsage, build_usage_index, parse_usage_stats_csv
 
 
 def _rb_row(
@@ -123,3 +123,16 @@ def test_player_usage_dataclass_fields():
     row: PlayerUsage = usage[0]
     assert row.gsis_id == "X"
     assert row.position == "RB"
+
+
+def test_parse_usage_stats_csv_trims_columns_and_filters_season_type():
+    text = (
+        "season,week,season_type,position,team,player_id,player_display_name,"
+        "carries,targets,passing_yards,fantasy_points_ppr\n"
+        "2026,1,REG,RB,KC,R1,One,10,0,0,12.0\n"
+        "2026,1,PRE,RB,KC,R2,Two,5,0,0,6.0\n"
+    )
+    rows = parse_usage_stats_csv(text, season=2026)
+    assert len(rows) == 1
+    assert rows[0]["player_display_name"] == "One"
+    assert "fantasy_points_ppr" not in rows[0]

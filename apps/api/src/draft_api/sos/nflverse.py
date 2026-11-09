@@ -8,7 +8,7 @@ import io
 import urllib.error
 import urllib.request
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Callable
 
@@ -95,6 +95,7 @@ class SosDataset:
     games: list[CompletedGame]
     schedule: dict[str, dict[int, str | None]]
     teams: list[str]
+    usage_stats: tuple[dict[str, str | None], ...] = field(default_factory=tuple)
 
     @property
     def rated_through_week(self) -> int:
@@ -328,6 +329,32 @@ def _decode_csv_bytes(raw: bytes) -> str:
         return gzip.decompress(raw).decode("utf-8")
     except OSError:
         return raw.decode("utf-8")
+
+
+def decode_nflverse_csv_bytes(raw: bytes) -> str:
+    """Decode gzipped or plain nflverse CSV bytes."""
+    return _decode_csv_bytes(raw)
+
+
+def load_usage_stats(
+    season: int,
+    *,
+    http_get: HttpGetter | None = None,
+) -> tuple[dict[str, str | None], ...]:
+    """Download and trim stats_player_week rows for opportunity / snapshot refresh."""
+    from draft_api.sos.usage import parse_usage_stats_csv
+
+    getter = http_get or default_http_get
+    try:
+        raw = getter(STATS_URL.format(season=season))
+    except Exception as exc:  # noqa: BLE001 - surfaced to callers as NflverseError
+        raise NflverseError(f"nflverse stats_player_week download failed: {exc}") from exc
+    text = _decode_csv_bytes(raw)
+    try:
+        rows = parse_usage_stats_csv(text, season=season)
+    except UnicodeDecodeError as exc:
+        raise NflverseError(f"nflverse stats_player_week parse failed: {exc}") from exc
+    return tuple(rows)
 
 
 def load_sos_dataset(

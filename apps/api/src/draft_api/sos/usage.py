@@ -2,20 +2,31 @@
 
 from __future__ import annotations
 
+import csv
+import io
 from collections import defaultdict
 from dataclasses import dataclass
 
 from draft_api.sos.calculate import Position, SKILL_POSITIONS
 from draft_api.sos.nflverse import normalize_team
+from draft_api.sos.tier2_snap import SnapPctIndex
 
-
-@dataclass(frozen=True, slots=True)
-class PlayerUsage:
-    gsis_id: str | None
-    player_name: str
-    team: str
-    position: Position
-    usage_share: float | None
+# Columns required by build_usage_index (trimmed on snapshot refresh).
+USAGE_STATS_FIELDS: tuple[str, ...] = (
+    "season",
+    "week",
+    "season_type",
+    "position",
+    "team",
+    "player_id",
+    "gsis_id",
+    "player_display_name",
+    "player_name",
+    "carries",
+    "rush_attempts",
+    "targets",
+    "passing_yards",
+)
 
 
 def _parse_int(value: str | None) -> int | None:
@@ -25,6 +36,57 @@ def _parse_int(value: str | None) -> int | None:
         return int(float(value))
     except ValueError:
         return None
+
+
+def _row_eligible_for_usage(row: dict[str, str | None], *, season: int) -> bool:
+    if (row.get("season_type") or "").upper() not in ("REG", "REGULAR"):
+        return False
+    row_season = _parse_int(row.get("season"))
+    if row_season is not None and row_season != season:
+        return False
+    week = _parse_int(row.get("week"))
+    if week is None or week < 1 or week > 18:
+        return False
+    row_pos = (row.get("position") or "").upper()
+    if row_pos not in SKILL_POSITIONS:
+        return False
+    if not normalize_team(row.get("team") or ""):
+        return False
+    return True
+
+
+def trim_usage_stats_row(row: dict[str, str | None]) -> dict[str, str | None]:
+    """Keep only usage-index columns with non-empty values."""
+    trimmed: dict[str, str | None] = {}
+    for key in USAGE_STATS_FIELDS:
+        value = row.get(key)
+        if value is None or value == "":
+            continue
+        trimmed[key] = value
+    return trimmed
+
+
+def parse_usage_stats_csv(text: str, *, season: int) -> list[dict[str, str | None]]:
+    """Parse nflverse stats_player_week CSV into trimmed usage-ready rows."""
+    reader = csv.DictReader(io.StringIO(text))
+    out: list[dict[str, str | None]] = []
+    for raw in reader:
+        row = {key: (None if value == "" else value) for key, value in dict(raw).items()}
+        if not _row_eligible_for_usage(row, season=season):
+            continue
+        trimmed = trim_usage_stats_row(row)
+        if trimmed:
+            out.append(trimmed)
+    return out
+
+
+@dataclass(frozen=True, slots=True)
+class PlayerUsage:
+    gsis_id: str | None
+    player_name: str
+    team: str
+    position: Position
+    usage_share: float | None
 
 
 def _parse_float(value: str | None) -> float:

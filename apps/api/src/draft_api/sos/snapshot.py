@@ -27,7 +27,7 @@ def snapshot_path_for_write(season: int) -> Path:
 
 
 def dataset_to_dict(dataset: SosDataset) -> dict[str, Any]:
-    return {
+    payload: dict[str, Any] = {
         "season": dataset.season,
         "fetchedAt": dataset.fetched_at,
         "teams": list(dataset.teams),
@@ -48,6 +48,9 @@ def dataset_to_dict(dataset: SosDataset) -> dict[str, Any]:
             for game in dataset.games
         ],
     }
+    if dataset.usage_stats:
+        payload["usageStats"] = list(dataset.usage_stats)
+    return payload
 
 
 def dataset_from_dict(payload: dict[str, Any]) -> SosDataset:
@@ -78,12 +81,24 @@ def dataset_from_dict(payload: dict[str, Any]) -> SosDataset:
                 points=points,
             )
         )
+    usage_stats: tuple[dict[str, str | None], ...] = ()
+    raw_usage = payload.get("usageStats")
+    if raw_usage is not None:
+        if not isinstance(raw_usage, list):
+            raise SnapshotError("usageStats must be a JSON array")
+        usage_stats = tuple(
+            {str(k): (None if v is None else str(v)) for k, v in dict(row).items()}
+            for row in raw_usage
+            if isinstance(row, dict)
+        )
+
     return SosDataset(
         season=season,
         fetched_at=str(payload.get("fetchedAt") or ""),
         games=games,
         schedule=schedule,
         teams=teams,
+        usage_stats=usage_stats,
     )
 
 

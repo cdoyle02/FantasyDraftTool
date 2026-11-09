@@ -20,6 +20,8 @@ uv run python -m draft_api.sos.refresh --season 2026
 
 Commit the updated JSON and redeploy the API so Railway’s fallback stays current.
 
+The snapshot also embeds trimmed `usageStats` rows (from `stats_player_week`) so Tier 1 **opportunity** can still compute usage shares when the live stats download fails. If neither live nor packaged usage rows are available, responses set `usageUnavailable: true` (empty `players`).
+
 ## Tier 1 (shrunk aFPA)
 
 Rolling defensive allowance with empirical-Bayes shrink toward the league mean:
@@ -53,4 +55,4 @@ Classic FPA/PAE endpoint is unchanged.
 
 `GET /api/v1/nfl/strength-of-schedule/tier1?position=RB&window=l8&startWeek=10&endWeek=17&season=2026`
 
-`GET /api/v1/nfl/strength-of-schedule/tier1/opportunity?position=RB&window=l8&week=10&season=2026` — nflverse players sorted by `opportunity` desc. With `leagueId` (household league from `espn_leagues.json`), returns ESPN roster rows joined by normalized name+team (`joinStatus`, `joinStats`); ESPN failures set `overlayError: espn_unavailable` and empty `players`.
+`GET /api/v1/nfl/strength-of-schedule/tier1/opportunity?position=RB&window=l8&week=10&season=2026` — nflverse players sorted by `opportunity` desc. With `leagueId` (household league from `espn_leagues.json`), returns ESPN roster rows joined by normalized name+team (`joinStatus`, `joinStats`); ESPN failures set `overlayError: espn_unavailable` and empty `players`. Stats download failures fall back to packaged `usageStats`; if that is also empty, `usageUnavailable: true`.

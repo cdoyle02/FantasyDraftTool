@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import csv
-import gzip
-import io
 import logging
 from datetime import datetime, timezone
 from typing import Any
@@ -23,7 +20,14 @@ from draft_api.espn_roster import EspnRosterError, fetch_league_roster
 from draft_api.espn_available_dst import espn_credentials_from_env
 from draft_api.sos.roster_join import join_roster_opportunity
 from draft_api.sos.usage import build_usage_index
-from draft_api.sos.nflverse import STATS_URL, HttpGetter, NflverseError, SosDataset, default_http_get, load_sos_dataset
+from draft_api.sos.nflverse import (
+    HttpGetter,
+    NflverseError,
+    SosDataset,
+    default_http_get,
+    load_sos_dataset,
+    load_usage_stats,
+)
 from draft_api.sos.snapshot import SnapshotError, read_packaged_snapshot
 
 logger = logging.getLogger("fantasy_draft_api.sos")
@@ -65,21 +69,27 @@ def clear_sos_cache() -> None:
     _dataset_cache.clear()
 
 
-def _decode_stats_csv(raw: bytes) -> str:
-    try:
-        return gzip.decompress(raw).decode("utf-8")
-    except OSError:
-        return raw.decode("utf-8")
-
-
-def _resolve_stats_rows(season: int) -> list[dict[str, str | None]]:
+def _resolve_stats_rows(
+    season: int,
+    dataset: SosDataset,
+) -> tuple[list[dict[str, str | None]], bool]:
+    """Return (rows, used_packaged_usage)."""
     if _stats_rows_override is not None:
-        return _stats_rows_override
-    getter = _http_get_override or default_http_get
-    raw = getter(STATS_URL.format(season=season))
-    text = _decode_stats_csv(raw)
-    reader = csv.DictReader(io.StringIO(text))
-    return [dict(row) for row in reader]
+        return _stats_rows_override, False
+    try:
+        return list(load_usage_stats(season, http_get=_http_get_override)), False
+    except NflverseError as exc:
+        logger.warning("stats_player_week live fetch failed for opportunity: %s", exc)
+    if dataset.usage_stats:
+        return list(dataset.usage_stats), True
+    try:
+        snapshot = read_packaged_snapshot(season)
+    except SnapshotError as exc:
+        logger.warning("packaged usage stats unavailable: %s", exc)
+        return [], False
+    if snapshot.usage_stats:
+        return list(snapshot.usage_stats), True
+    return [], False
 
 
 def _default_window(now: datetime) -> tuple[int, int]:
@@ -206,11 +216,8 @@ def build_tier1_opportunity_response(
     if target_week < 1 or target_week > 18:
         raise ValueError(f"invalid week {target_week}")
 
-    try:
-        stats_rows = _resolve_stats_rows(season)
-    except NflverseError as exc:
-        logger.warning("stats_player_week unavailable for opportunity: %s", exc)
-        stats_rows = []
+    stats_rows, _usage_from_snapshot = _resolve_stats_rows(season, dataset)
+    usage_unavailable = len(stats_rows) == 0
 
     rated_through, rating_weeks, softness = build_defense_softness_index(
         position=position,
@@ -275,4 +282,6 @@ def build_tier1_opportunity_response(
         body["joinStats"] = join_stats
     if overlay_error:
         body["overlayError"] = overlay_error
+    if usage_unavailable:
+        body["usageUnavailable"] = True
     return body
