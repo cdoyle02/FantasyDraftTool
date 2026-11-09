@@ -1,0 +1,87 @@
+{
+  "season": 2026,
+  "position": "RB",
+  "window": "season",
+  "evaluation_weeks": [2, 3],
+  "teams": ["AAA", "BBB", "CCC", "DDD"],
+  "schedule": {
+    "AAA": {"1": "BBB", "2": "CCC", "3": "DDD"},
+    "BBB": {"1": "AAA", "2": "DDD", "3": "CCC"},
+    "CCC": {"1": "DDD", "2": "AAA", "3": "BBB"},
+    "DDD": {"1": "CCC", "2": "BBB", "3": "AAA"}
+  },
+  "games": [
+    {"week": 1, "offense": "AAA", "defense": "BBB", "points": {"RB": 24.0}},
+    {"week": 1, "offense": "BBB", "defense": "AAA", "points": {"RB": 8.0}},
+    {"week": 1, "offense": "CCC", "defense": "DDD", "points": {"RB": 12.0}},
+    {"week": 1, "offense": "DDD", "defense": "CCC", "points": {"RB": 10.0}}
+  ],
+  "stats_rows": [
+    {
+      "season": "2026",
+      "week": "1",
+      "season_type": "REG",
+      "position": "RB",
+      "team": "AAA",
+      "player_display_name": "High Use",
+      "player_id": "H1",
+      "carries": "18",
+      "fantasy_points_ppr": "22.0"
+    },
+    {
+      "season": "2026",
+      "week": "1",
+      "season_type": "REG",
+      "position": "RB",
+      "team": "AAA",
+      "player_display_name": "Low Use",
+      "player_id": "L1",
+      "carries": "6",
+      "fantasy_points_ppr": "8.0"
+    },
+    {
+      "season": "2026",
+      "week": "2",
+      "season_type": "REG",
+      "position": "RB",
+      "team": "AAA",
+      "player_display_name": "High Use",
+      "player_id": "H1",
+      "carries": "20",
+      "fantasy_points_ppr": "28.0"
+    },
+    {
+      "season": "2026",
+      "week": "2",
+      "season_type": "REG",
+      "position": "RB",
+      "team": "AAA",
+      "player_display_name": "Low Use",
+      "player_id": "L1",
+      "carries": "4",
+      "fantasy_points_ppr": "5.0"
+    },
+    {
+      "season": "2026",
+      "week": "3",
+      "season_type": "REG",
+      "position": "RB",
+      "team": "AAA",
+      "player_display_name": "High Use",
+      "player_id": "H1",
+      "carries": "16",
+      "fantasy_points_ppr": "18.0"
+    },
+    {
+      "season": "2026",
+      "week": "3",
+      "season_type": "REG",
+      "position": "RB",
+      "team": "AAA",
+      "player_display_name": "Low Use",
+      "player_id": "L1",
+      "carries": "8",
+      "fantasy_points_ppr": "6.0"
+    }
+  ]
+}

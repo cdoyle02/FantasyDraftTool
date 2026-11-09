@@ -1,0 +1,9 @@
+{
+  "fixture": "tier1_backtest_mini.json",
+  "position": "RB",
+  "window": "season",
+  "n_observations": 4,
+  "n_weeks": 2,
+  "spearman_rho": 0.8944271909999159,
+  "baseline_rho": 0.8944271909999159
+}
