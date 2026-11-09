@@ -26,6 +26,8 @@ USAGE_STATS_FIELDS: tuple[str, ...] = (
     "rush_attempts",
     "targets",
     "passing_yards",
+    "passing_epa",
+    "rushing_epa",
 )
 
 
@@ -129,12 +131,33 @@ def _player_key(row: dict[str, str | None]) -> tuple[str, str, str]:
     return (player_id or name, name, team)
 
 
+def _player_meets_snap_threshold(
+    row: dict[str, str | None],
+    *,
+    snap_pct_index: SnapPctIndex | None,
+    min_offense_snap_pct: float,
+) -> bool:
+    if snap_pct_index is None:
+        return True
+    week = _parse_int(row.get("week"))
+    if week is None:
+        return False
+    team = normalize_team(row.get("team") or "")
+    name = (row.get("player_display_name") or row.get("player_name") or "").strip()
+    pct = snap_pct_index.offense_pct(team=team, week=week, player_name=name)
+    if pct is None:
+        return False
+    return pct >= min_offense_snap_pct
+
+
 def build_usage_index(
     stats_rows: list[dict[str, str | None]],
     *,
     position: Position,
     weeks: set[int],
     season: int | None = None,
+    snap_pct_index: SnapPctIndex | None = None,
+    min_offense_snap_pct: float = 0.20,
 ) -> list[PlayerUsage]:
     """Mean weekly usage share for each player over `weeks` (bye weeks excluded)."""
     if position not in SKILL_POSITIONS:
@@ -147,13 +170,23 @@ def build_usage_index(
         return []
 
     if position == "QB":
-        return _qb_usage_index(scoped)
+        return _qb_usage_index(
+            scoped,
+            snap_pct_index=snap_pct_index,
+            min_offense_snap_pct=min_offense_snap_pct,
+        )
 
     weekly_shares: dict[tuple[str, str, str], list[float]] = defaultdict(list)
     team_week_totals: dict[tuple[str, int], float] = defaultdict(float)
     player_meta: dict[tuple[str, str, str], tuple[str | None, str]] = {}
 
     for row in scoped:
+        if not _player_meets_snap_threshold(
+            row,
+            snap_pct_index=snap_pct_index,
+            min_offense_snap_pct=min_offense_snap_pct,
+        ):
+            continue
         week = _parse_int(row.get("week"))
         if week is None:
             continue
@@ -170,6 +203,12 @@ def build_usage_index(
         team_week_totals[(team, week)] += volume
 
     for row in scoped:
+        if not _player_meets_snap_threshold(
+            row,
+            snap_pct_index=snap_pct_index,
+            min_offense_snap_pct=min_offense_snap_pct,
+        ):
+            continue
         week = _parse_int(row.get("week"))
         if week is None:
             continue
@@ -205,11 +244,22 @@ def build_usage_index(
     return out
 
 
-def _qb_usage_index(rows: list[dict[str, str | None]]) -> list[PlayerUsage]:
+def _qb_usage_index(
+    rows: list[dict[str, str | None]],
+    *,
+    snap_pct_index: SnapPctIndex | None = None,
+    min_offense_snap_pct: float = 0.20,
+) -> list[PlayerUsage]:
     """Starter = most passing yards in window; starter share 1.0, others null."""
     yards_by_player: dict[tuple[str, str, str], float] = defaultdict(float)
     meta: dict[tuple[str, str, str], tuple[str | None, str]] = {}
     for row in rows:
+        if not _player_meets_snap_threshold(
+            row,
+            snap_pct_index=snap_pct_index,
+            min_offense_snap_pct=min_offense_snap_pct,
+        ):
+            continue
         key = _player_key(row)
         yards_by_player[key] += _parse_float(row.get("passing_yards"))
         meta[key] = (
