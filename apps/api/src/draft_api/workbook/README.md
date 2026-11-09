@@ -238,6 +238,44 @@ unavailable.** Task 8 is expected to wire the real `OddsProvider` (same one
 Out WR / Slot WR drill-down and the full positional metric set are reachable
 via `explain`, not the feeder table, in P0.
 
+## P2 supporting tabs (API)
+
+### Time of possession (TOP)
+
+`GET /api/v1/nfl/workbook/top` (`build_top_response`) — rolling window matches
+matchups (`l4` | `season` | `custom`, rated through `week - 1`).
+
+- **Primary (when PBP drive seconds are wired):** `method: "pbp_drive"` —
+  mean per-game share `team_drive_seconds / (team + opponent drive seconds)`.
+- **Fallback (current nflverse loader):** `method: "plays_share_proxy"` —
+  mean per-game `team_off_plays / (team_off_plays + opponent_off_plays)` using
+  `TeamRateSlice.pass_plays + run_plays` from PBP aggregation. Labeled in API;
+  upgrade path is real `drive_time_of_possession` in PBP (see
+  `workbook/top.py`).
+
+### Pace
+
+`GET /api/v1/nfl/workbook/pace` — offensive plays per game and pass/run share
+from countable PBP snaps (`pass_attempt` + `rush_attempt`, kneels already
+dropped at parse; optional `play_type` kneel/spike/no_play excluded in
+`pace.py` when present on test fixtures).
+
+### Injuries
+
+`GET /api/v1/nfl/workbook/injuries?leagueId=` — ESPN `mRoster` injury fields
+(`injuryStatus`, `injuryBodyPart`, practice hints). Sorted by team then severity
+(Out > Doubtful > Questionable > Probable). On ESPN failure: HTTP 200,
+`injuries: []`, `warnings: ["injuries_unavailable"]`, `source: "espn"`.
+
+### Positional matrices
+
+`GET /api/v1/nfl/workbook/matrices/{group}?metric=` — OFF / DEF / Net columns
+with **league-relative tertile tiers** for the selected window (not absolute FP
+thresholds). Tier cut: rank `n` teams with data; top `ceil(n/3)` → `top`, next
+`ceil(n/3)` → `mid`, remainder → `bottom`. Metrics: `fp_per_game` (positional
+feeder headline), `targets_per_game` / `yards_per_game` / `tds_per_game`
+(volume feeders), `dsr` (group `dsr` only).
+
 ## Explain
 
 `build_explain_response(team, week, metric, ...)` returns the same `off` /

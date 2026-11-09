@@ -45,6 +45,12 @@ from draft_api.espn_roster import EspnRosterError, load_espn_overlay_players
 from draft_api.workbook.espn_overlay import build_highlights, highlights_to_json
 from draft_api.workbook.fantasy import Scoring, passing_points, receiving_points, rushing_points
 from draft_api.workbook.identity import normalize_team
+from draft_api.workbook.injuries import (
+    InjuriesFetchError,
+    fetch_week_injuries,
+    row_to_json as injury_row_to_json,
+)
+from draft_api.workbook.matrices import MatrixGroup, MatrixMetric, build_matrix_payload
 from draft_api.workbook.nflverse import (
     HttpGetter,
     PositionalWeekRate,
@@ -52,6 +58,8 @@ from draft_api.workbook.nflverse import (
     WorkbookNflverseError,
     load_workbook_dataset,
 )
+from draft_api.workbook.pace import build_pace_table, row_to_json as pace_row_to_json
+from draft_api.workbook.top import build_top_table, slice_to_json as top_slice_to_json
 from draft_api.workbook.snapshot import SnapshotError, read_packaged_snapshot
 
 logger = logging.getLogger("fantasy_draft_api.workbook")
@@ -86,6 +94,14 @@ _EXPLAIN_METRICS: tuple[str, ...] = (
     "rb_fp",
     "out_wr_fp",
     "slot_wr_fp",
+)
+_MATRIX_GROUPS: tuple[str, ...] = ("qb", "wr", "te", "rb", "dsr")
+_MATRIX_METRICS: tuple[str, ...] = (
+    "fp_per_game",
+    "targets_per_game",
+    "yards_per_game",
+    "tds_per_game",
+    "dsr",
 )
 
 # Feeder group -> positional_off/positional_def bucket key.
@@ -872,3 +888,197 @@ def build_explain_response(
         "def": def_value,
         "net": net_value,
     }
+
+
+# --- P2 tabs: TOP / Pace / Injuries / Matrices --------------------------------
+
+
+def _p2_workbook_meta(
+    dataset: WorkbookDataset,
+    *,
+    week: int,
+    window: str,
+    moment: datetime,
+    source: str,
+    stale: bool,
+    **extra: Any,
+) -> dict[str, Any]:
+    rated_through_week = _rated_through_week(week)
+    return {
+        "season": dataset.season,
+        "week": week,
+        "window": window,
+        "ratedThroughWeek": rated_through_week,
+        "fetchedAt": _fetched_at(dataset, moment),
+        "source": source,
+        "stale": stale,
+        "attribution": ATTRIBUTION,
+        **extra,
+    }
+
+
+def build_top_response(
+    *,
+    week: int,
+    window: str,
+    season: int = DEFAULT_SEASON,
+    now: datetime | None = None,
+    custom_start_week: int | None = None,
+    custom_end_week: int | None = None,
+) -> dict[str, Any]:
+    if week < 1 or week > 18:
+        raise WorkbookServiceError(f"invalid week {week}")
+    _validate_choice(window, _WINDOWS, field_name="window")
+
+    moment = now or datetime.now(UTC)
+    dataset, source, stale = resolve_dataset(season, now=moment)
+    rated_through_week = _rated_through_week(week)
+    weeks = _resolve_weeks(
+        window=window,
+        rated_through_week=rated_through_week,
+        custom_start_week=custom_start_week,
+        custom_end_week=custom_end_week,
+    )
+    teams = build_top_table(dataset, weeks=weeks)
+    method = teams[0].method if teams else "plays_share_proxy"
+    if any(row.method == "pbp_drive" for row in teams):
+        method = "pbp_drive"
+    payload = _p2_workbook_meta(
+        dataset, week=week, window=window, moment=moment, source=source, stale=stale
+    )
+    payload["method"] = method
+    payload["teams"] = [top_slice_to_json(row) for row in teams]
+    return payload
+
+
+def build_pace_response(
+    *,
+    week: int,
+    window: str,
+    season: int = DEFAULT_SEASON,
+    now: datetime | None = None,
+    custom_start_week: int | None = None,
+    custom_end_week: int | None = None,
+) -> dict[str, Any]:
+    if week < 1 or week > 18:
+        raise WorkbookServiceError(f"invalid week {week}")
+    _validate_choice(window, _WINDOWS, field_name="window")
+
+    moment = now or datetime.now(UTC)
+    dataset, source, stale = resolve_dataset(season, now=moment)
+    rated_through_week = _rated_through_week(week)
+    weeks = _resolve_weeks(
+        window=window,
+        rated_through_week=rated_through_week,
+        custom_start_week=custom_start_week,
+        custom_end_week=custom_end_week,
+    )
+    teams = build_pace_table(dataset, weeks=weeks)
+    payload = _p2_workbook_meta(
+        dataset, week=week, window=window, moment=moment, source=source, stale=stale
+    )
+    payload["teams"] = [pace_row_to_json(row) for row in teams]
+    return payload
+
+
+def build_injuries_response(
+    *,
+    week: int,
+    season: int = DEFAULT_SEASON,
+    league_id: str | None = None,
+    now: datetime | None = None,
+    espn_http_json: HttpJsonGetter | None = None,
+) -> dict[str, Any]:
+    if week < 1 or week > 18:
+        raise WorkbookServiceError(f"invalid week {week}")
+    if not league_id:
+        raise WorkbookServiceError("leagueId is required for Workbook injuries")
+
+    moment = now or datetime.now(UTC)
+    get_league(league_id)
+    warnings: list[str] = []
+    injuries: list[dict[str, Any]] = []
+    try:
+        espn_s2, swid, _ = espn_credentials_from_env()
+        if espn_http_json is not None:
+            espn_s2 = espn_s2 or "test-espn-s2"
+            swid = swid or "{00000000-0000-0000-0000-000000000000}"
+        elif not espn_s2 or not swid:
+            raise InjuriesFetchError("ESPN credentials are not configured")
+        rows = fetch_week_injuries(
+            league_id=league_id,
+            season=season,
+            week=week,
+            espn_s2=espn_s2,
+            swid=swid,
+            http_json=espn_http_json,
+        )
+        injuries = [injury_row_to_json(row) for row in rows]
+    except (InjuriesFetchError, EspnRosterError, EspnAvailableError) as exc:
+        logger.warning("Workbook injuries unavailable: %s", exc)
+        warnings.append("injuries_unavailable")
+
+    return {
+        "season": season,
+        "week": week,
+        "fetchedAt": moment.astimezone(UTC).isoformat().replace("+00:00", "Z"),
+        "source": "espn",
+        "stale": False,
+        "injuries": injuries,
+        "warnings": warnings,
+    }
+
+
+def build_matrix_response(
+    *,
+    group: str,
+    metric: str,
+    week: int,
+    window: str,
+    scoring: str,
+    season: int = DEFAULT_SEASON,
+    now: datetime | None = None,
+    custom_start_week: int | None = None,
+    custom_end_week: int | None = None,
+) -> dict[str, Any]:
+    _validate_choice(group, _MATRIX_GROUPS, field_name="group")
+    _validate_choice(metric, _MATRIX_METRICS, field_name="metric")
+    _validate_choice(window, _WINDOWS, field_name="window")
+    _validate_choice(scoring, _SCORINGS, field_name="scoring")
+    if week < 1 or week > 18:
+        raise WorkbookServiceError(f"invalid week {week}")
+    if group != "dsr" and metric == "dsr":
+        raise WorkbookServiceError("metric dsr requires group dsr")
+    if group == "dsr" and metric != "dsr":
+        raise WorkbookServiceError("dsr group requires metric dsr")
+
+    scoring_literal = cast(Scoring, scoring)
+    moment = now or datetime.now(UTC)
+    dataset, source, stale = resolve_dataset(season, now=moment)
+    rated_through_week = _rated_through_week(week)
+    weeks = _resolve_weeks(
+        window=window,
+        rated_through_week=rated_through_week,
+        custom_start_week=custom_start_week,
+        custom_end_week=custom_end_week,
+    )
+    matrix = build_matrix_payload(
+        dataset,
+        group=cast(MatrixGroup, group),
+        metric=cast(MatrixMetric, metric),
+        weeks=weeks,
+        scoring=scoring_literal,
+    )
+    payload = _p2_workbook_meta(
+        dataset,
+        week=week,
+        window=window,
+        moment=moment,
+        source=source,
+        stale=stale,
+        scoring=scoring,
+        group=group,
+        metric=metric,
+    )
+    payload["teams"] = matrix["teams"]
+    return payload
