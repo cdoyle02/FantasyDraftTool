@@ -20,6 +20,23 @@ uv run python -m draft_api.sos.refresh --season 2026
 
 Commit the updated JSON and redeploy the API so Railway’s fallback stays current.
 
-## Endpoint
+## Tier 1 (shrunk aFPA)
+
+Rolling defensive allowance with empirical-Bayes shrink toward the league mean:
+
+```
+shrunk = (n * raw_afpa + k * prior) / (n + k)
+```
+
+- Default pseudo-count **`k = 4`** (`shrinkK` in API responses).
+- Rating window: **`l4`** (last 4 completed weeks), **`l8`** (default), or **`season`** (week 1 through `ratedThroughWeek`).
+- Softness buckets by defense rank (1 = softest): ranks **1–7** `soft`, **8–25** `neutral`, **26–32** `tough`.
+- Linear scores: soft **1.0**, neutral **0.5**, tough **0.0** (for future opportunity = softness × usage).
+
+Classic FPA/PAE endpoint is unchanged.
+
+## Endpoints
 
 `GET /api/v1/nfl/strength-of-schedule?position=RB&metric=fpa&startWeek=10&endWeek=17&season=2026`
+
+`GET /api/v1/nfl/strength-of-schedule/tier1?position=RB&window=l8&startWeek=10&endWeek=17&season=2026`

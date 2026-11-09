@@ -135,6 +135,50 @@ export interface StrengthOfScheduleQuery {
   season?: number
 }
 
+export type SosTier1Window = 'l4' | 'l8' | 'season'
+export type SosSoftness = 'soft' | 'neutral' | 'tough'
+
+export interface SosTier1WeekCell {
+  week: number
+  opponent: string | null
+  shrunkAfpa: number | null
+  rank: number | null
+  softness: SosSoftness | null
+  softnessScore: number | null
+  bye: boolean
+  inWindow: boolean
+}
+
+export interface SosTier1TeamRow {
+  team: string
+  rank: number
+  opponentAverage: number | null
+  weeks: SosTier1WeekCell[]
+}
+
+export interface StrengthOfScheduleTier1Response {
+  season: number
+  position: SosPosition
+  window: SosTier1Window
+  startWeek: number
+  endWeek: number
+  ratedThroughWeek: number
+  ratingWeeks: number[]
+  shrinkK: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  teams: SosTier1TeamRow[]
+}
+
+export interface StrengthOfScheduleTier1Query {
+  position: SosPosition
+  window?: SosTier1Window
+  startWeek?: number
+  endWeek?: number
+  season?: number
+}
+
 /** Workbook Net Matchups — see `apps/api/src/draft_api/workbook/README.md` (SSOT for the math). */
 
 export type WorkbookWindow = 'l4' | 'season' | 'custom'

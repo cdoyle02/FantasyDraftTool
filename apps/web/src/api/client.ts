@@ -15,6 +15,8 @@ import type {
   KyleDstRankingsResponse,
   StrengthOfScheduleQuery,
   StrengthOfScheduleResponse,
+  StrengthOfScheduleTier1Query,
+  StrengthOfScheduleTier1Response,
   WeekOddsResponse,
   WorkbookExplainQuery,
   WorkbookExplainResponse,
@@ -323,6 +325,19 @@ export class DraftApiClient {
     if (params.season != null) query.set('season', String(params.season))
     return this.request<StrengthOfScheduleResponse>(
       `/api/v1/nfl/strength-of-schedule?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
+
+  strengthOfScheduleTier1(params: StrengthOfScheduleTier1Query) {
+    const query = new URLSearchParams({ position: params.position })
+    query.set('window', params.window ?? 'l8')
+    if (params.startWeek != null) query.set('startWeek', String(params.startWeek))
+    if (params.endWeek != null) query.set('endWeek', String(params.endWeek))
+    if (params.season != null) query.set('season', String(params.season))
+    return this.request<StrengthOfScheduleTier1Response>(
+      `/api/v1/nfl/strength-of-schedule/tier1?${query}`,
       { method: 'GET' },
       30_000
     )

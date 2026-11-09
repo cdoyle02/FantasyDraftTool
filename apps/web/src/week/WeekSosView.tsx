@@ -3,20 +3,42 @@ import { draftApi } from '../api/client'
 import type {
   SosMetric,
   SosPosition,
-  StrengthOfScheduleResponse
+  SosSoftness,
+  SosTier1Window,
+  StrengthOfScheduleResponse,
+  StrengthOfScheduleTier1Response
 } from './types'
 
 const POSITIONS: SosPosition[] = ['QB', 'RB', 'WR', 'TE', 'DST']
 const WEEK_OPTIONS = Array.from({ length: 18 }, (_, i) => i + 1)
+const RATING_WINDOWS: { key: SosTier1Window; label: string }[] = [
+  { key: 'l4', label: 'L4' },
+  { key: 'l8', label: 'L8' },
+  { key: 'season', label: 'Season' }
+]
 
 type WindowPreset = 'ros' | 'playoffs' | 'full' | 'custom'
+type SosViewMode = 'tier1' | 'classic'
 
 function rankColor(rank: number | null): string {
   if (rank == null) return 'transparent'
-  // 1 (easiest) → green, 32 (hardest) → red
   const t = Math.max(0, Math.min(1, (rank - 1) / 31))
-  const hue = 120 * (1 - t) // 120 = green, 0 = red
+  const hue = 120 * (1 - t)
   return `hsla(${hue}, 70%, 35%, 0.55)`
+}
+
+function softnessColor(softness: SosSoftness | null): string {
+  if (softness === 'soft') return 'hsla(120, 70%, 32%, 0.62)'
+  if (softness === 'tough') return 'hsla(0, 70%, 38%, 0.62)'
+  if (softness === 'neutral') return 'hsla(48, 75%, 36%, 0.45)'
+  return 'transparent'
+}
+
+function softnessBadge(softness: SosSoftness | null): string {
+  if (softness === 'soft') return 'S'
+  if (softness === 'tough') return 'T'
+  if (softness === 'neutral') return 'N'
+  return '—'
 }
 
 function formatAvg(value: number | null | undefined): string {
@@ -36,14 +58,16 @@ function presetWindow(
 
 export function WeekSosView() {
   const [position, setPosition] = useState<SosPosition>('RB')
+  const [viewMode, setViewMode] = useState<SosViewMode>('tier1')
   const [metric, setMetric] = useState<SosMetric>('fpa')
+  const [ratingWindow, setRatingWindow] = useState<SosTier1Window>('l8')
   const [preset, setPreset] = useState<WindowPreset>('ros')
   const [customStart, setCustomStart] = useState(1)
   const [customEnd, setCustomEnd] = useState(17)
-  const [data, setData] = useState<StrengthOfScheduleResponse | null>(null)
+  const [classicData, setClassicData] = useState<StrengthOfScheduleResponse | null>(null)
+  const [tier1Data, setTier1Data] = useState<StrengthOfScheduleTier1Response | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
-  // Bootstrapped from the first response so ROS uses ratedThroughWeek+1.
   const [ratedThrough, setRatedThrough] = useState(0)
 
   const window = useMemo(() => {
@@ -61,18 +85,33 @@ export function WeekSosView() {
       setLoading(true)
       setError('')
       try {
-        const payload = await draftApi.strengthOfSchedule({
-          position,
-          metric,
-          startWeek: window.startWeek,
-          endWeek: window.endWeek
-        })
-        if (cancelled) return
-        setData(payload)
-        setRatedThrough(payload.ratedThroughWeek)
+        if (viewMode === 'tier1') {
+          const payload = await draftApi.strengthOfScheduleTier1({
+            position,
+            window: ratingWindow,
+            startWeek: window.startWeek,
+            endWeek: window.endWeek
+          })
+          if (cancelled) return
+          setTier1Data(payload)
+          setClassicData(null)
+          setRatedThrough(payload.ratedThroughWeek)
+        } else {
+          const payload = await draftApi.strengthOfSchedule({
+            position,
+            metric,
+            startWeek: window.startWeek,
+            endWeek: window.endWeek
+          })
+          if (cancelled) return
+          setClassicData(payload)
+          setTier1Data(null)
+          setRatedThrough(payload.ratedThroughWeek)
+        }
       } catch (err) {
         if (cancelled) return
-        setData(null)
+        setClassicData(null)
+        setTier1Data(null)
         setError(err instanceof Error ? err.message : 'Could not load strength of schedule.')
       } finally {
         if (!cancelled) setLoading(false)
@@ -82,7 +121,7 @@ export function WeekSosView() {
     return () => {
       cancelled = true
     }
-  }, [position, metric, window.startWeek, window.endWeek])
+  }, [position, viewMode, metric, ratingWindow, window.startWeek, window.endWeek])
 
   const applyPreset = (next: Exclude<WindowPreset, 'custom'>) => {
     const resolved = presetWindow(next, ratedThrough)
@@ -101,20 +140,36 @@ export function WeekSosView() {
     setPreset('custom')
   }
 
-  const metricLabel = metric === 'fpa' ? 'Points allowed' : 'Schedule adjusted'
+  const activeRatedThrough =
+    viewMode === 'tier1' ? tier1Data?.ratedThroughWeek ?? 0 : classicData?.ratedThroughWeek ?? 0
+  const activeStale = viewMode === 'tier1' ? tier1Data?.stale : classicData?.stale
+  const activeSource = viewMode === 'tier1' ? tier1Data?.source : classicData?.source
+
+  const metricLabel =
+    viewMode === 'tier1'
+      ? `Shrunk aFPA · ${ratingWindow.toUpperCase()} rating`
+      : metric === 'fpa'
+        ? 'Points allowed'
+        : 'Schedule adjusted'
   const scoringNote = position === 'DST' ? 'ESPN-style D/ST scoring (nflverse team stats)' : 'Full PPR team totals (nflverse)'
-  const sourceLine = data
-    ? [
-        scoringNote,
-        data.ratedThroughWeek > 0 ? `rated through week ${data.ratedThroughWeek}` : 'no completed weeks yet',
-        data.stale ? 'snapshot fallback' : data.source
-      ].join(' · ')
-    : null
+  const sourceLine =
+    activeRatedThrough > 0 || activeSource
+      ? [
+          scoringNote,
+          activeRatedThrough > 0 ? `rated through week ${activeRatedThrough}` : 'no completed weeks yet',
+          viewMode === 'tier1' && tier1Data ? `shrink k=${tier1Data.shrinkK}` : null,
+          activeStale ? 'snapshot fallback' : activeSource
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : null
 
   const weekLabel =
     window.startWeek === window.endWeek
       ? `week ${window.startWeek}`
       : `weeks ${window.startWeek}–${window.endWeek}`
+
+  const teamRows = viewMode === 'tier1' ? tier1Data?.teams ?? [] : classicData?.teams ?? []
 
   return (
     <div className="space-y-4" data-testid="week-sos-view">
@@ -123,7 +178,10 @@ export function WeekSosView() {
           <p className="eyebrow">Matchups</p>
           <h2 className="text-lg font-semibold">Strength of schedule</h2>
           <p className="mt-1 text-xs text-muted">
-            Household grid · green = easy opponent rank · red = tough · not FootClan numbers
+            Household grid ·{' '}
+            {viewMode === 'tier1'
+              ? 'S / N / T = soft / neutral / tough defensive buckets'
+              : 'green = easy opponent rank · red = tough · not FootClan numbers'}
           </p>
           {sourceLine && (
             <p className="mt-1 text-[11px] text-muted" data-testid="sos-source-line">
@@ -148,19 +206,53 @@ export function WeekSosView() {
             </select>
           </label>
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-muted">
-            Metric
+            View
             <select
-              data-testid="sos-metric"
+              data-testid="sos-view-mode"
               className="rounded-lg border border-line bg-ink px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-100"
-              value={metric}
-              onChange={(event) => setMetric(event.target.value as SosMetric)}
+              value={viewMode}
+              onChange={(event) => setViewMode(event.target.value as SosViewMode)}
             >
-              <option value="fpa">Points allowed</option>
-              <option value="pae">Schedule adjusted</option>
+              <option value="tier1">Tier 1 (shrunk aFPA)</option>
+              <option value="classic">Classic (FPA / PAE)</option>
             </select>
           </label>
+          {viewMode === 'classic' && (
+            <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-muted">
+              Metric
+              <select
+                data-testid="sos-metric"
+                className="rounded-lg border border-line bg-ink px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-100"
+                value={metric}
+                onChange={(event) => setMetric(event.target.value as SosMetric)}
+              >
+                <option value="fpa">Points allowed</option>
+                <option value="pae">Schedule adjusted</option>
+              </select>
+            </label>
+          )}
+          {viewMode === 'tier1' && (
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Rating window</span>
+              <div className="flex flex-wrap rounded-lg border border-line p-0.5" role="group" aria-label="Tier1 rating window">
+                {RATING_WINDOWS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    data-testid={`sos-rating-${key}`}
+                    className={`rounded-md px-2.5 py-1.5 text-xs font-semibold ${
+                      ratingWindow === key ? 'bg-mint text-ink' : 'text-muted hover:text-white'
+                    }`}
+                    onClick={() => setRatingWindow(key)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Window</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Display window</span>
             <div className="flex flex-wrap rounded-lg border border-line p-0.5" role="group" aria-label="Week window">
               {(
                 [
@@ -261,7 +353,7 @@ export function WeekSosView() {
               </tr>
             </thead>
             <tbody>
-              {(data?.teams ?? []).map((row) => (
+              {teamRows.map((row) => (
                 <tr key={row.team} className="border-b border-line/60" data-testid={`sos-row-${row.team}`}>
                   <td className="sticky left-0 z-10 bg-panel px-2 py-1.5 font-semibold text-mint">{row.rank}</td>
                   <td className="sticky left-10 z-10 bg-panel px-2 py-1.5 font-bold">{row.team}</td>
@@ -278,20 +370,57 @@ export function WeekSosView() {
                         </td>
                       )
                     }
+                    if (viewMode === 'tier1' && 'softness' in cell) {
+                      const tier1Cell = cell as (typeof row.weeks)[number] & {
+                        shrunkAfpa?: number | null
+                        rank?: number | null
+                        softness?: SosSoftness | null
+                      }
+                      const oppRank = tier1Cell.rank ?? null
+                      const softness = tier1Cell.softness ?? null
+                      return (
+                        <td
+                          key={cell.week}
+                          data-testid={`sos-cell-${row.team}-${cell.week}`}
+                          className={`px-1 py-1 text-center ${cell.inWindow ? '' : 'opacity-40'}`}
+                          style={{ backgroundColor: softnessColor(softness) }}
+                          title={
+                            cell.opponent
+                              ? `${cell.opponent} · rank ${oppRank ?? '—'} · ${formatAvg(tier1Cell.shrunkAfpa)} aFPA · ${softness ?? '—'}`
+                              : undefined
+                          }
+                        >
+                          <div
+                            className="text-[9px] font-bold uppercase tracking-wide leading-tight text-slate-100"
+                            data-testid={`sos-badge-${row.team}-${cell.week}`}
+                          >
+                            {softnessBadge(softness)}
+                          </div>
+                          <div className="font-bold tabular-nums leading-tight">{oppRank ?? '—'}</div>
+                          <div className="text-[10px] font-semibold leading-tight text-slate-200/90">
+                            {cell.opponent}
+                          </div>
+                        </td>
+                      )
+                    }
+                    const classicCell = cell as {
+                      opponentRank: number | null
+                      opponentValue: number | null
+                    }
                     return (
                       <td
                         key={cell.week}
                         data-testid={`sos-cell-${row.team}-${cell.week}`}
                         className={`px-1 py-1 text-center ${cell.inWindow ? '' : 'opacity-40'}`}
-                        style={{ backgroundColor: rankColor(cell.opponentRank) }}
+                        style={{ backgroundColor: rankColor(classicCell.opponentRank) }}
                         title={
                           cell.opponent
-                            ? `${cell.opponent} · rank ${cell.opponentRank ?? '—'} · ${formatAvg(cell.opponentValue)}`
+                            ? `${cell.opponent} · rank ${classicCell.opponentRank ?? '—'} · ${formatAvg(classicCell.opponentValue)}`
                             : undefined
                         }
                       >
                         <div className="font-bold tabular-nums leading-tight">
-                          {cell.opponentRank ?? '—'}
+                          {classicCell.opponentRank ?? '—'}
                         </div>
                         <div className="text-[10px] font-semibold leading-tight text-slate-200/90">
                           {cell.opponent}
@@ -301,7 +430,7 @@ export function WeekSosView() {
                   })}
                 </tr>
               ))}
-              {!loading && !error && (data?.teams.length ?? 0) === 0 && (
+              {!loading && !error && teamRows.length === 0 && (
                 <tr>
                   <td colSpan={21} className="px-4 py-6 text-center text-muted">
                     No schedule data yet.
