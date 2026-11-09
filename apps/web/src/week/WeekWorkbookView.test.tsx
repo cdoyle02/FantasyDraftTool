@@ -7,6 +7,10 @@ import type {
   WorkbookTeamRow
 } from './types'
 
+/** Mirrors `draft_api.workbook.service.ATTRIBUTION` (Clay Out/Slot roles). */
+const MOCK_ATTRIBUTION =
+  'Computed by FantasyDraftTool from nflverse + odds. Out/Slot roles from ESPN Mike Clay WR/CB cheat sheet (role-based); stats from nflverse. Methodology inspired by Majesstik/OWS Workbook; not their sheet.'
+
 function buildRow(overrides: Partial<WorkbookTeamRow> = {}): WorkbookTeamRow {
   return {
     team: 'AAA',
@@ -57,7 +61,7 @@ function buildPayload(overrides: Partial<WorkbookMatchupsResponse> = {}): Workbo
     fetchedAt: '2026-11-08T12:00:00Z',
     source: 'nflverse',
     stale: false,
-    attribution: 'Computed by FantasyDraftTool from nflverse + odds.',
+    attribution: MOCK_ATTRIBUTION,
     games: [
       {
         away: 'BBB',
@@ -119,7 +123,7 @@ function buildExplainPayload(overrides: Partial<WorkbookExplainResponse> = {}): 
     fetchedAt: '2026-11-08T12:00:00Z',
     source: 'nflverse',
     stale: false,
-    attribution: 'Computed by FantasyDraftTool from nflverse + odds.',
+    attribution: MOCK_ATTRIBUTION,
     off: 20.1,
     def: 16.3,
     net: 18.2,
@@ -180,7 +184,9 @@ describe('WeekWorkbookView', () => {
     expect(screen.getByTestId('workbook-row-AAA')).toBeInTheDocument()
     expect(screen.getByTestId('workbook-row-BBB')).toBeInTheDocument()
     expect(screen.getByTestId('workbook-cell-AAA-vegas')).toHaveTextContent('24.5')
-    expect(screen.getByTestId('workbook-attribution')).toHaveTextContent('Computed by FantasyDraftTool')
+    const attribution = screen.getByTestId('workbook-attribution')
+    expect(attribution).toHaveTextContent('Computed by FantasyDraftTool')
+    expect(attribution).toHaveTextContent('Clay')
     expect(screen.queryByTestId('workbook-stale-banner')).not.toBeInTheDocument()
   })
 
