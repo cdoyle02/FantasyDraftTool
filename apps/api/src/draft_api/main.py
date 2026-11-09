@@ -7,7 +7,7 @@ import logging
 import os
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 from dvs_engine import (
@@ -40,7 +40,16 @@ from .jared_k_available import build_jared_available_payload
 from .kyle_dst import KyleDstError, fetch_kyle_dst_rankings
 from .kyle_dst_available import build_kyle_available_payload
 from .odds import OddsApiError, OddsProvider, TheOddsApiProvider, TtlCache
+from .sos.nflverse import NflverseError
+from .sos.service import build_strength_of_schedule_response
 from .week_odds import build_week_odds_payload
+from .workbook.nflverse import WorkbookNflverseError
+from .workbook.service import (
+    WorkbookServiceError,
+    build_explain_response,
+    build_feeder_response,
+    build_matchups_response,
+)
 
 
 class ApiModel(BaseModel):
@@ -366,7 +375,7 @@ def week_odds() -> dict[str, Any] | JSONResponse:
     """Current fantasy-week NFL spreads/totals with ranked favorite D/ST plays."""
     try:
         provider = get_odds_provider()
-        return build_week_odds_payload(provider, now=datetime.now(timezone.utc))
+        return build_week_odds_payload(provider, now=datetime.now(UTC))
     except (OddsApiError, ValueError) as exc:
         # OddsApiError: provider/key failures. ValueError: bad NFL_SEASON_WEEK1_TUESDAY.
         return error_response(503, "odds_unavailable", str(exc))
@@ -458,3 +467,124 @@ def jared_k_available(leagueId: str) -> dict[str, Any] | JSONResponse:
         available=available,
         league=league,
     )
+
+
+@app.get("/api/v1/nfl/strength-of-schedule", response_model=None)
+def strength_of_schedule(
+    position: str = "RB",
+    metric: str = "fpa",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Team × week PPR strength of schedule (FPA or schedule-adjusted PAE)."""
+    position_key = position.upper()
+    metric_key = metric.lower()
+    if position_key not in ("QB", "RB", "WR", "TE", "DST"):
+        return error_response(
+            400,
+            "invalid_position",
+            f"position must be QB, RB, WR, TE, or DST (got {position!r})",
+        )
+    if metric_key not in ("fpa", "pae"):
+        return error_response(
+            400,
+            "invalid_metric",
+            f"metric must be fpa or pae (got {metric!r})",
+        )
+    try:
+        return build_strength_of_schedule_response(
+            position=position_key,  # type: ignore[arg-type]
+            metric=metric_key,  # type: ignore[arg-type]
+            start_week=startWeek,
+            end_week=endWeek,
+            season=season,
+            now=datetime.now(UTC),
+        )
+    except (NflverseError, ValueError) as exc:
+        status = 400 if isinstance(exc, ValueError) else 503
+        code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
+        return error_response(status, code, str(exc))
+
+
+@app.get("/api/v1/nfl/workbook/matchups", response_model=None)
+def workbook_matchups(
+    week: int,
+    window: str = "l4",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    scoring: str = "ppr",
+    slate: str = "main",
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Workbook Net Matchups board for one NFL week."""
+    try:
+        return build_matchups_response(
+            week=week,
+            window=window,
+            custom_start_week=startWeek,
+            custom_end_week=endWeek,
+            scoring=scoring,
+            slate=slate,
+            season=season,
+        )
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+    except WorkbookNflverseError as exc:
+        return error_response(503, "workbook_unavailable", str(exc))
+
+
+@app.get("/api/v1/nfl/workbook/feeders/{group}", response_model=None)
+def workbook_feeders(
+    group: str,
+    week: int,
+    window: str = "l4",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    scoring: str = "ppr",
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Workbook feeder table (OFF/DEF/Net) for one metric group."""
+    try:
+        return build_feeder_response(
+            group=group,
+            week=week,
+            window=window,
+            custom_start_week=startWeek,
+            custom_end_week=endWeek,
+            scoring=scoring,
+            season=season,
+        )
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+    except WorkbookNflverseError as exc:
+        return error_response(503, "workbook_unavailable", str(exc))
+
+
+@app.get("/api/v1/nfl/workbook/explain", response_model=None)
+def workbook_explain(
+    team: str,
+    week: int,
+    metric: str,
+    window: str = "l4",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    scoring: str = "ppr",
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Workbook OFF/DEF/Net explanation for one team metric."""
+    try:
+        return build_explain_response(
+            team=team,
+            week=week,
+            metric=metric,
+            window=window,
+            custom_start_week=startWeek,
+            custom_end_week=endWeek,
+            scoring=scoring,
+            season=season,
+        )
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+    except WorkbookNflverseError as exc:
+        return error_response(503, "workbook_unavailable", str(exc))
