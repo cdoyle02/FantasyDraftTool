@@ -6,7 +6,9 @@ import type {
   WorkbookInjuriesResponse,
   WorkbookMatchupsResponse,
   WorkbookMatricesResponse,
+  WorkbookOldlResponse,
   WorkbookPaceResponse,
+  WorkbookPoolRankResponse,
   WorkbookTeamRow,
   WorkbookTopResponse
 } from './types'
@@ -174,6 +176,84 @@ function buildInjuriesPayload(overrides: Partial<WorkbookInjuriesResponse> = {})
   }
 }
 
+function buildPoolRankPayload(overrides: Partial<WorkbookPoolRankResponse> = {}): WorkbookPoolRankResponse {
+  return {
+    season: 2026,
+    week: 10,
+    window: 'l4',
+    scoring: 'half_ppr',
+    ratedThroughWeek: 9,
+    fetchedAt: '2026-11-08T12:00:00Z',
+    source: 'nflverse',
+    stale: false,
+    attribution: MOCK_ATTRIBUTION,
+    players: [
+      {
+        name: 'Player A',
+        team: 'AAA',
+        salary: 5000,
+        position: 'WR',
+        matchupTeam: 'AAA',
+        opponent: 'BBB',
+        netFpG: 12.0,
+        tier: 'top',
+        joinStatus: 'matched',
+        value: 2.4
+      }
+    ],
+    ...overrides
+  }
+}
+
+function buildOldlPayload(overrides: Partial<WorkbookOldlResponse> = {}): WorkbookOldlResponse {
+  return {
+    season: 2026,
+    week: 10,
+    window: 'l4',
+    ratedThroughWeek: 9,
+    fetchedAt: '2026-11-08T12:00:00Z',
+    source: 'nflverse',
+    stale: false,
+    attribution: MOCK_ATTRIBUTION,
+    disclaimer: 'OL/DL proxy from nflverse; not Football Outsiders.',
+    teams: [
+      {
+        team: 'AAA',
+        pressureRateAllowed: 0.25,
+        sackRateAllowed: 0.05,
+        epaPerDropbackAllowed: 0.1,
+        rankPressure: 5
+      }
+    ],
+    games: [
+      {
+        home: 'AAA',
+        away: 'BBB',
+        kickoff: null,
+        rows: [
+          {
+            team: 'AAA',
+            role: 'offense_ol',
+            pressureRateAllowed: 0.2,
+            sackRateAllowed: 0.04,
+            epaPerDropbackAllowed: 0.05,
+            rankPressure: 8
+          },
+          {
+            team: 'BBB',
+            role: 'defense_dl',
+            pressureRateAllowed: 0.3,
+            sackRateAllowed: 0.07,
+            epaPerDropbackAllowed: 0.12,
+            rankPressure: 3
+          }
+        ]
+      }
+    ],
+    ...overrides
+  }
+}
+
 function buildMatricesPayload(overrides: Partial<WorkbookMatricesResponse> = {}): WorkbookMatricesResponse {
   const cell = (value: number, tier: 'top' | 'mid' | 'bottom') => ({
     value,
@@ -225,7 +305,7 @@ describe('WeekWorkbookView', () => {
   beforeEach(() => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async (input: RequestInfo | URL) => {
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input)
         const parsed = new URL(url, 'http://localhost')
         const params = parsed.searchParams
@@ -324,6 +404,20 @@ describe('WeekWorkbookView', () => {
               headers: { 'Content-Type': 'application/json' }
             }
           )
+        }
+
+        if (parsed.pathname === '/api/v1/nfl/workbook/oldl') {
+          return new Response(JSON.stringify(buildOldlPayload()), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        }
+
+        if (parsed.pathname === '/api/v1/nfl/workbook/pool/rank' && init?.method === 'POST') {
+          return new Response(JSON.stringify(buildPoolRankPayload()), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          })
         }
 
         throw new Error(`Unexpected fetch: ${url}`)
@@ -485,6 +579,8 @@ describe('WeekWorkbookView', () => {
     expect(screen.getByTestId('workbook-subnav-pace')).toBeInTheDocument()
     expect(screen.getByTestId('workbook-subnav-injuries')).toBeInTheDocument()
     expect(screen.getByTestId('workbook-subnav-matrices')).toBeInTheDocument()
+    expect(screen.getByTestId('workbook-subnav-pool')).toBeInTheDocument()
+    expect(screen.getByTestId('workbook-subnav-oldl')).toBeInTheDocument()
   })
 
   it('loads TOP data when the TOP sub-tab is selected', async () => {
@@ -531,5 +627,26 @@ describe('WeekWorkbookView', () => {
     expect(calls.some((url) => url.includes('/workbook/matrices/wr'))).toBe(true)
     expect(screen.getByTestId('workbook-matrix-row-AAA')).toHaveTextContent('T')
     expect(screen.getByTestId('workbook-matrix-row-AAA')).toHaveTextContent('11.0')
+  })
+
+  it('shows pool paste UI on Pool sub-tab without loading matchups again', async () => {
+    render(<WeekWorkbookView />)
+    await waitFor(() => expect(screen.getByTestId('workbook-table')).toBeInTheDocument())
+    const before = vi.mocked(fetch).mock.calls.filter((call) => String(call[0]).includes('/workbook/matchups')).length
+    fireEvent.click(screen.getByTestId('workbook-subnav-pool'))
+    await waitFor(() => expect(screen.getByTestId('workbook-pool-panel')).toBeInTheDocument())
+    const after = vi.mocked(fetch).mock.calls.filter((call) => String(call[0]).includes('/workbook/matchups')).length
+    expect(after).toBe(before)
+  })
+
+  it('loads OL/DL proxy when the OL/DL sub-tab is selected', async () => {
+    render(<WeekWorkbookView />)
+    await waitFor(() => expect(screen.getByTestId('workbook-table')).toBeInTheDocument())
+    fireEvent.click(screen.getByTestId('workbook-subnav-oldl'))
+    await waitFor(() => expect(screen.getByTestId('workbook-oldl-table')).toBeInTheDocument())
+    const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+    expect(calls.some((url) => url.includes('/workbook/oldl'))).toBe(true)
+    expect(screen.getByTestId('workbook-oldl-disclaimer')).toBeInTheDocument()
+    expect(screen.getByTestId('workbook-oldl-row-AAA')).toHaveTextContent('OL proxy')
   })
 })

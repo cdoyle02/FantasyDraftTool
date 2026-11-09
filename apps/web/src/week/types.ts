@@ -511,4 +511,97 @@ export interface WorkbookMatricesQuery extends WorkbookP2WindowQuery {
   scoring: WorkbookScoring
 }
 
-export type WorkbookSubTab = 'matchups' | 'top' | 'pace' | 'injuries' | 'matrices'
+export type WorkbookSubTab =
+  | 'matchups'
+  | 'top'
+  | 'pace'
+  | 'injuries'
+  | 'matrices'
+  | 'pool'
+  | 'oldl'
+
+export type WorkbookPoolJoinStatus = 'matched' | 'unmatched'
+
+export interface WorkbookPoolPlayerPayload {
+  name: string
+  team: string
+  salary: number
+  position: string
+  opponent?: string
+}
+
+export interface WorkbookPoolRankRow {
+  name: string
+  team: string
+  salary: number
+  position: string
+  matchupTeam: string | null
+  opponent: string | null
+  netFpG: number | null
+  tier: WorkbookMatrixTertile | null
+  joinStatus: WorkbookPoolJoinStatus
+  value: number | null
+}
+
+export interface WorkbookPoolRankResponse {
+  season: number
+  week: number
+  window: WorkbookWindow
+  scoring: WorkbookScoring
+  ratedThroughWeek: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  attribution: string
+  players: WorkbookPoolRankRow[]
+}
+
+export interface WorkbookPoolRankQuery {
+  week: number
+  window: WorkbookWindow
+  scoring?: WorkbookScoring
+  players: WorkbookPoolPlayerPayload[]
+  startWeek?: number
+  endWeek?: number
+  season?: number
+}
+
+export type WorkbookOldlRole = 'offense_ol' | 'defense_dl'
+
+export interface WorkbookOldlMetricRow {
+  team: string
+  role: WorkbookOldlRole
+  pressureRateAllowed: number | null
+  sackRateAllowed: number | null
+  epaPerDropbackAllowed: number | null
+  rankPressure: number | null
+}
+
+export interface WorkbookOldlTeamRow {
+  team: string
+  pressureRateAllowed: number | null
+  sackRateAllowed: number | null
+  epaPerDropbackAllowed: number | null
+  rankPressure: number | null
+}
+
+export interface WorkbookOldlGame {
+  home: string
+  away: string
+  kickoff: string | null
+  rows: WorkbookOldlMetricRow[]
+}
+
+export interface WorkbookOldlResponse {
+  season: number
+  week: number
+  window: WorkbookWindow
+  ratedThroughWeek: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  attribution: string
+  disclaimer: string
+  teams: WorkbookOldlTeamRow[]
+  games: WorkbookOldlGame[]
+}

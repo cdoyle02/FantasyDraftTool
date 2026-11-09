@@ -32,7 +32,10 @@ import type {
   WorkbookMatricesResponse,
   WorkbookMatrixGroup,
   WorkbookP2WindowQuery,
+  WorkbookOldlResponse,
   WorkbookPaceResponse,
+  WorkbookPoolRankQuery,
+  WorkbookPoolRankResponse,
   WorkbookTopResponse
 } from '../week/types'
 
@@ -453,6 +456,37 @@ export class DraftApiClient {
       { method: 'GET' },
       30_000
     )
+  }
+
+  workbookPoolRank(params: WorkbookPoolRankQuery) {
+    const query = new URLSearchParams()
+    if (params.season != null) query.set('season', String(params.season))
+    if (params.startWeek != null) query.set('startWeek', String(params.startWeek))
+    if (params.endWeek != null) query.set('endWeek', String(params.endWeek))
+    const suffix = query.toString() ? `?${query}` : ''
+    return this.request<WorkbookPoolRankResponse>(
+      `/api/v1/nfl/workbook/pool/rank${suffix}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          week: params.week,
+          window: params.window,
+          scoring: params.scoring,
+          players: params.players
+        })
+      },
+      60_000
+    )
+  }
+
+  workbookOldl(params: WorkbookP2WindowQuery) {
+    const query = new URLSearchParams({ window: params.window })
+    query.set('week', String(params.week))
+    if (params.startWeek != null) query.set('startWeek', String(params.startWeek))
+    if (params.endWeek != null) query.set('endWeek', String(params.endWeek))
+    if (params.season != null) query.set('season', String(params.season))
+    return this.request<WorkbookOldlResponse>(`/api/v1/nfl/workbook/oldl?${query}`, { method: 'GET' }, 30_000)
   }
 }
 

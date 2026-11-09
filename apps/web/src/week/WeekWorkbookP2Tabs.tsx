@@ -20,7 +20,9 @@ export const WORKBOOK_SUB_TABS: Array<{ id: WorkbookSubTab; label: string; testI
   { id: 'top', label: 'TOP', testId: 'workbook-subnav-top' },
   { id: 'pace', label: 'Pace', testId: 'workbook-subnav-pace' },
   { id: 'injuries', label: 'Injuries', testId: 'workbook-subnav-injuries' },
-  { id: 'matrices', label: 'Matrices', testId: 'workbook-subnav-matrices' }
+  { id: 'matrices', label: 'Matrices', testId: 'workbook-subnav-matrices' },
+  { id: 'pool', label: 'Pool', testId: 'workbook-subnav-pool' },
+  { id: 'oldl', label: 'OL/DL', testId: 'workbook-subnav-oldl' }
 ]
 
 export interface WorkbookP2Controls {

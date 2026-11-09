@@ -7,6 +7,8 @@ import {
   WorkbookSubNav,
   WorkbookTopPanel
 } from './WeekWorkbookP2Tabs'
+import { WorkbookOldlPanel } from './WeekWorkbookP3Tabs'
+import { WorkbookPoolView } from './WorkbookPoolView'
 import type {
   EspnLeague,
   SosPosition,
@@ -263,7 +265,11 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
           ? 'Offensive Pace'
           : subTab === 'injuries'
             ? 'League Injuries'
-            : 'Positional Matrices'
+            : subTab === 'matrices'
+              ? 'Positional Matrices'
+              : subTab === 'pool'
+                ? 'DFS Salary Pool'
+                : 'OL/DL Proxy'
 
   const allRows = useMemo(() => data?.games.flatMap((game) => game.rows) ?? [], [data])
   const pools = useMemo(() => {
@@ -501,6 +507,8 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
       {subTab === 'pace' && <WorkbookPacePanel controls={p2Controls} />}
       {subTab === 'injuries' && <WorkbookInjuriesPanel controls={p2Controls} leagueId={leagueId} />}
       {subTab === 'matrices' && <WorkbookMatricesPanel controls={p2Controls} />}
+      {subTab === 'pool' && <WorkbookPoolView controls={p2Controls} />}
+      {subTab === 'oldl' && <WorkbookOldlPanel controls={p2Controls} />}
 
       {subTab === 'matchups' && (
       <section className="panel overflow-hidden">
