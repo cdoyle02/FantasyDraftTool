@@ -1,0 +1,52 @@
+{
+  "teams": [
+    {
+      "id": 7,
+      "abbrev": "MD",
+      "primaryOwner": "owner-a",
+      "roster": {
+        "entries": [
+          {
+            "playerId": 4362628,
+            "lineupSlotId": 4,
+            "playerPoolEntry": {
+              "player": {
+                "id": 4362628,
+                "fullName": "Stefon Diggs",
+                "defaultPositionId": 3,
+                "proTeamId": 17,
+                "injuryStatus": ""
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "abbrev": "KB",
+      "primaryOwner": "owner-b",
+      "roster": {
+        "entries": [
+          {
+            "playerId": 3117251,
+            "lineupSlotId": 2,
+            "playerPoolEntry": {
+              "player": {
+                "id": 3117251,
+                "fullName": "Christian McCaffrey",
+                "defaultPositionId": 2,
+                "proTeamId": 25,
+                "injuryStatus": "Q"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "members": [
+    {"id": "owner-a", "displayName": "Michael", "firstName": "Michael", "lastName": "Doyle"},
+    {"id": "owner-b", "displayName": "Katie", "firstName": "Katie", "lastName": "Doyle"}
+  ]
+}
