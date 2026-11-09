@@ -1,6 +1,11 @@
 """HTTP tests for GET /api/v1/nfl/workbook/* routes."""
 
-from draft_api.main import app
+from datetime import UTC, datetime
+
+from draft_api.implied_totals import GameLine
+from draft_api.main import app, set_odds_provider
+from draft_api.odds import OddsApiError
+from draft_api.odds.fake import FakeOddsProvider
 from draft_api.workbook.nflverse import PositionalWeekRate, ScheduledGame, WorkbookDataset
 from draft_api.workbook.service import (
     clear_workbook_cache,
@@ -55,6 +60,7 @@ def setup_function() -> None:
 
 
 def teardown_function() -> None:
+    set_odds_provider(None)
     set_workbook_dataset_override(None)
     set_workbook_http_get(None)
     clear_workbook_cache()
@@ -79,6 +85,67 @@ def test_workbook_matchups_route_returns_board() -> None:
     assert body["games"][0]["home"] == "AAA"
     row = next(row for row in body["games"][0]["rows"] if row["team"] == "AAA")
     assert row["allWr"]["fpG"] == 12.0
+
+
+def test_workbook_matchups_wires_odds_provider() -> None:
+    set_odds_provider(
+        FakeOddsProvider(
+            [
+                GameLine(
+                    home_team="AAA",
+                    away_team="BBB",
+                    commence_time=datetime(2026, 11, 8, 18, 0, tzinfo=UTC),
+                    spread=-3.0,
+                    total=45.0,
+                    favorite_team="AAA",
+                    underdog_team="BBB",
+                    bookmaker="test",
+                )
+            ]
+        )
+    )
+
+    response = client.get(
+        "/api/v1/nfl/workbook/matchups",
+        params={
+            "week": WEEK,
+            "window": "l4",
+            "scoring": "ppr",
+            "slate": "all",
+            "season": SEASON,
+        },
+    )
+
+    assert response.status_code == 200
+    row = next(
+        row for row in response.json()["games"][0]["rows"] if row["homeAway"] == "home"
+    )
+    assert row["gameEnvironment"]["vegasImpliedPoints"] == 24.0
+
+
+def test_workbook_matchups_succeeds_when_odds_fail() -> None:
+    class _FailingProvider:
+        def fetch_nfl_odds(self) -> list[GameLine]:
+            raise OddsApiError("odds down")
+
+    set_odds_provider(_FailingProvider())
+
+    response = client.get(
+        "/api/v1/nfl/workbook/matchups",
+        params={
+            "week": WEEK,
+            "window": "l4",
+            "scoring": "ppr",
+            "slate": "all",
+            "season": SEASON,
+        },
+    )
+
+    assert response.status_code == 200
+    row = next(
+        row for row in response.json()["games"][0]["rows"] if row["homeAway"] == "home"
+    )
+    assert row["gameEnvironment"]["vegasImpliedPoints"] is None
 
 
 def test_workbook_feeders_route_returns_group_table() -> None:

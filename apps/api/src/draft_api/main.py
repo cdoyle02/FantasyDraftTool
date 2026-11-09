@@ -518,6 +518,12 @@ def workbook_matchups(
     season: int = 2026,
 ) -> dict[str, Any] | JSONResponse:
     """Workbook Net Matchups board for one NFL week."""
+    odds_games: list[GameLine] | None = None
+    try:
+        odds_games = get_odds_provider().fetch_nfl_odds()
+    except OddsApiError as exc:
+        logger.warning("workbook_matchups odds unavailable: %s", exc)
+
     try:
         return build_matchups_response(
             week=week,
@@ -527,6 +533,7 @@ def workbook_matchups(
             scoring=scoring,
             slate=slate,
             season=season,
+            odds_games=odds_games,
         )
     except WorkbookServiceError as exc:
         return error_response(400, "invalid_params", str(exc))
