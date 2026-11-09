@@ -94,3 +94,184 @@ export interface JaredKAvailableResponse extends JaredKRankingsResponse {
   leagueName: string
   available: JaredKAvailableRow[]
 }
+
+export type SosPosition = 'QB' | 'RB' | 'WR' | 'TE' | 'DST'
+export type SosMetric = 'fpa' | 'pae'
+
+export interface SosWeekCell {
+  week: number
+  opponent: string | null
+  opponentRank: number | null
+  opponentValue: number | null
+  bye: boolean
+  inWindow: boolean
+}
+
+export interface SosTeamRow {
+  team: string
+  rank: number
+  opponentAverage: number | null
+  weeks: SosWeekCell[]
+}
+
+export interface StrengthOfScheduleResponse {
+  season: number
+  position: SosPosition
+  metric: SosMetric
+  startWeek: number
+  endWeek: number
+  ratedThroughWeek: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  teams: SosTeamRow[]
+}
+
+export interface StrengthOfScheduleQuery {
+  position: SosPosition
+  metric: SosMetric
+  startWeek?: number
+  endWeek?: number
+  season?: number
+}
+
+/** Workbook Net Matchups — see `apps/api/src/draft_api/workbook/README.md` (SSOT for the math). */
+
+export type WorkbookWindow = 'l4' | 'season' | 'custom'
+export type WorkbookScoring = 'ppr' | 'half_ppr'
+export type WorkbookSlate = 'main' | 'all'
+export type WorkbookExplainMetric =
+  | 'dsr'
+  | 'qb_fp'
+  | 'wr_fp'
+  | 'te_fp'
+  | 'rb_fp'
+  | 'out_wr_fp'
+  | 'slot_wr_fp'
+export type WorkbookFeederGroup = 'dsr' | 'qb' | 'wr' | 'te' | 'rb' | 'targets' | 'yards' | 'tds'
+
+export interface WorkbookGameEnvironment {
+  netDsr: number | null
+  combNetDsr: number | null
+  netDsrDiff: number | null
+  netProe: number | null
+  netPassPlays: number | null
+  netEpaPass: number | null
+  netXplsvPass: number | null
+  netRunPlays: number | null
+  netEpaRun: number | null
+  netXplsvRun: number | null
+  vegasImpliedPoints: number | null
+}
+
+/** One OFF/DEF-netted positional block (QB / ALL WR / Out WR / Slot WR / TE / RB). Keys vary
+ * per group (see README); `reason` is set instead of metrics when Out/Slot sample is too thin. */
+export interface WorkbookPositionalBlock {
+  [metric: string]: number | string | null | undefined
+  reason?: string
+}
+
+export interface WorkbookTeamRow {
+  team: string
+  homeAway: 'home' | 'away'
+  opponent: string
+  gameEnvironment: WorkbookGameEnvironment
+  qb: WorkbookPositionalBlock
+  allWr: WorkbookPositionalBlock
+  outWr: WorkbookPositionalBlock
+  slotWr: WorkbookPositionalBlock
+  te: WorkbookPositionalBlock
+  rb: WorkbookPositionalBlock
+}
+
+export interface WorkbookGame {
+  away: string
+  home: string
+  kickoff: string | null
+  mainSlate: boolean
+  rows: WorkbookTeamRow[]
+}
+
+export interface WorkbookMatchupsResponse {
+  season: number
+  week: number
+  window: WorkbookWindow
+  scoring: WorkbookScoring
+  slate: WorkbookSlate
+  ratedThroughWeek: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  attribution: string
+  games: WorkbookGame[]
+}
+
+export interface WorkbookMatchupsQuery {
+  week: number
+  window: WorkbookWindow
+  scoring: WorkbookScoring
+  slate: WorkbookSlate
+  startWeek?: number
+  endWeek?: number
+  season?: number
+}
+
+export interface WorkbookFeederRow {
+  team: string
+  off: number | null
+  def: number | null
+  net: number | null
+}
+
+export interface WorkbookFeederResponse {
+  season: number
+  week: number
+  window: WorkbookWindow
+  scoring: WorkbookScoring
+  group: WorkbookFeederGroup
+  ratedThroughWeek: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  attribution: string
+  teams: WorkbookFeederRow[]
+}
+
+export interface WorkbookFeederQuery {
+  group: WorkbookFeederGroup
+  week: number
+  window: WorkbookWindow
+  scoring: WorkbookScoring
+  startWeek?: number
+  endWeek?: number
+  season?: number
+}
+
+export interface WorkbookExplainResponse {
+  season: number
+  week: number
+  team: string
+  opponent: string | null
+  metric: WorkbookExplainMetric
+  window: WorkbookWindow
+  scoring: WorkbookScoring
+  ratedThroughWeek: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  attribution: string
+  off: number | null
+  def: number | null
+  net: number | null
+}
+
+export interface WorkbookExplainQuery {
+  team: string
+  week: number
+  metric: WorkbookExplainMetric
+  window: WorkbookWindow
+  scoring: WorkbookScoring
+  startWeek?: number
+  endWeek?: number
+  season?: number
+}

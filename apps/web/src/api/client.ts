@@ -13,7 +13,15 @@ import type {
   JaredKRankingsResponse,
   KyleDstAvailableResponse,
   KyleDstRankingsResponse,
-  WeekOddsResponse
+  StrengthOfScheduleQuery,
+  StrengthOfScheduleResponse,
+  WeekOddsResponse,
+  WorkbookExplainQuery,
+  WorkbookExplainResponse,
+  WorkbookFeederQuery,
+  WorkbookFeederResponse,
+  WorkbookMatchupsQuery,
+  WorkbookMatchupsResponse
 } from '../week/types'
 
 export interface RecommendationRequest {
@@ -302,6 +310,68 @@ export class DraftApiClient {
       `/api/v1/nfl/jared-k-available?${query}`,
       { method: 'GET' },
       20_000
+    )
+  }
+
+  strengthOfSchedule(params: StrengthOfScheduleQuery) {
+    const query = new URLSearchParams({
+      position: params.position,
+      metric: params.metric
+    })
+    if (params.startWeek != null) query.set('startWeek', String(params.startWeek))
+    if (params.endWeek != null) query.set('endWeek', String(params.endWeek))
+    if (params.season != null) query.set('season', String(params.season))
+    return this.request<StrengthOfScheduleResponse>(
+      `/api/v1/nfl/strength-of-schedule?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
+
+  private static workbookWindowQuery(params: {
+    window: string
+    scoring: string
+    startWeek?: number
+    endWeek?: number
+    season?: number
+  }): URLSearchParams {
+    const query = new URLSearchParams({ window: params.window, scoring: params.scoring })
+    if (params.startWeek != null) query.set('startWeek', String(params.startWeek))
+    if (params.endWeek != null) query.set('endWeek', String(params.endWeek))
+    if (params.season != null) query.set('season', String(params.season))
+    return query
+  }
+
+  workbookMatchups(params: WorkbookMatchupsQuery) {
+    const query = DraftApiClient.workbookWindowQuery(params)
+    query.set('week', String(params.week))
+    query.set('slate', params.slate)
+    return this.request<WorkbookMatchupsResponse>(
+      `/api/v1/nfl/workbook/matchups?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
+
+  workbookFeeders(group: WorkbookFeederQuery['group'], params: Omit<WorkbookFeederQuery, 'group'>) {
+    const query = DraftApiClient.workbookWindowQuery(params)
+    query.set('week', String(params.week))
+    return this.request<WorkbookFeederResponse>(
+      `/api/v1/nfl/workbook/feeders/${group}?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
+
+  workbookExplain(params: WorkbookExplainQuery) {
+    const query = DraftApiClient.workbookWindowQuery(params)
+    query.set('team', params.team)
+    query.set('week', String(params.week))
+    query.set('metric', params.metric)
+    return this.request<WorkbookExplainResponse>(
+      `/api/v1/nfl/workbook/explain?${query}`,
+      { method: 'GET' },
+      30_000
     )
   }
 }
