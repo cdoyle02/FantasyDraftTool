@@ -167,6 +167,8 @@ def test_tier1_opportunity_unknown_league_404():
 @patch("draft_api.sos.service.fetch_league_roster")
 def test_tier1_opportunity_league_roster_join(mock_fetch):
     set_sos_stats_rows_override(STATS_ROWS)
+    # Non-None http override unlocks the roster path without real ESPN cookies.
+    set_espn_roster_http_json(lambda url, headers: {})
     mock_fetch.return_value = [
         EspnRosterPlayer(
             player_id=9001,
