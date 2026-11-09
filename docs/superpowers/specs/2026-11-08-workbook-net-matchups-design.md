@@ -1,7 +1,7 @@
 # Workbook Net Matchups (Majesstik / OWS-inspired)
 
 **Date:** 2026-11-08  
-**Status:** Approved (design); implementation plans per phase  
+**Status:** Approved (design); P0/P0.5 plans shipped or in progress; P1–P3 plans at `docs/superpowers/plans/2026-11-08-workbook-p{1,2,3}-*.md`  
 **Inspiration:** [Majesstik #TheWorkbook](https://docs.google.com/spreadsheets/d/1f-OJbf4l9SIDigrsAMrrjiOU-G4i1Q1NidZkKk2z6C0/edit) · [How to Use #TheWorkbook](https://oneweekseason.com/how-to-use-theworkbook/) · [By The Numbers Guide](https://oneweekseason.com/by-the-numbers-guide/) · tutorial [x.com/majesstik1/status/1702730284410740737](https://x.com/majesstik1/status/1702730284410740737)  
 **Note:** We **compute our own** Net Matchups from nflverse + our odds. We do **not** scrape or republish Majesstik’s sheet.
 
