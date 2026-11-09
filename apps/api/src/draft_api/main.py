@@ -161,16 +161,11 @@ origins = [
     ).split(",")
     if origin.strip()
 ]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["*"],
-)
 
 # Household shared-token gate. When FANTASY_DRAFT_API_TOKEN is unset the gate is off
 # (local/dev and existing tests). Production should always set the variable.
+# Registered before CORSMiddleware so CORS stays outermost and can attach
+# Access-Control-* headers to 401 responses (otherwise browsers report "Failed to fetch").
 _API_TOKEN_OPEN_PATHS = frozenset({"/health", "/api/v1/health", "/api/v1/version"})
 
 
@@ -322,6 +317,16 @@ async def request_log(
         )
     )
     return response
+
+
+# Must be registered last so it wraps token gate + request_log (Starlette insert(0)).
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 
 def error_response(

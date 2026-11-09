@@ -64,3 +64,19 @@ def test_options_preflight_passes_when_token_set(monkeypatch: pytest.MonkeyPatch
     )
     # CORS middleware answers preflight; auth must not 401 it.
     assert response.status_code != 401
+
+
+def test_401_includes_cors_headers_for_browser(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Without ACAO on 401, browsers surface 'Failed to fetch' instead of ApiAuthError."""
+    monkeypatch.setenv("FANTASY_DRAFT_API_TOKEN", "household-secret")
+    monkeypatch.setenv(
+        "FANTASY_DRAFT_CORS_ORIGINS", "http://localhost:5173,https://web.example"
+    )
+    # CORSMiddleware reads origins at import time; force a request that uses the
+    # already-configured local origins from the app module under test.
+    response = client.get(
+        "/api/v1/espn/leagues",
+        headers={"Origin": "http://localhost:5173"},
+    )
+    assert response.status_code == 401
+    assert response.headers.get("access-control-allow-origin") == "http://localhost:5173"
