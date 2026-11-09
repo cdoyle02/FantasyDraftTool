@@ -1,0 +1,5 @@
+season,season_type,week,game_id,play_id,posteam,defteam,drive,drive_time_of_possession,drive_play_count,qb_kneel,pass_attempt,rush_attempt
+2026,REG,9,2026_09_AAA_BBB,1,AAA,BBB,1,180,8,0,1,0
+2026,REG,9,2026_09_AAA_BBB,2,AAA,BBB,2,120,6,0,0,1
+2026,REG,9,2026_09_AAA_BBB,3,BBB,AAA,3,150,7,0,1,0
+2026,REG,9,2026_09_AAA_BBB,4,BBB,AAA,4,90,5,0,0,1
