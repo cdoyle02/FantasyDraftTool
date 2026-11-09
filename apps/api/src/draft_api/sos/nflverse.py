@@ -96,6 +96,7 @@ class SosDataset:
     schedule: dict[str, dict[int, str | None]]
     teams: list[str]
     usage_stats: tuple[dict[str, str | None], ...] = field(default_factory=tuple)
+    snap_counts: tuple[dict[str, str | None], ...] = field(default_factory=tuple)
 
     @property
     def rated_through_week(self) -> int:
@@ -354,6 +355,24 @@ def load_usage_stats(
         rows = parse_usage_stats_csv(text, season=season)
     except UnicodeDecodeError as exc:
         raise NflverseError(f"nflverse stats_player_week parse failed: {exc}") from exc
+    return tuple(rows)
+
+
+def load_snap_counts(
+    season: int,
+    *,
+    http_get: HttpGetter | None = None,
+) -> tuple[dict[str, str | None], ...]:
+    """Download and trim snap_counts rows for Tier 2 opportunity / snapshot refresh."""
+    from draft_api.sos.tier2_snap import SNAP_COUNTS_URL, decode_snap_csv, parse_snap_counts_csv
+
+    getter = http_get or default_http_get
+    try:
+        raw = getter(SNAP_COUNTS_URL.format(season=season))
+    except Exception as exc:  # noqa: BLE001 - surfaced to callers as NflverseError
+        raise NflverseError(f"nflverse snap_counts download failed: {exc}") from exc
+    text = decode_snap_csv(raw)
+    rows = parse_snap_counts_csv(text, season=season)
     return tuple(rows)
 
 

@@ -1,6 +1,6 @@
 """Snap-filtered usage shares (Tier 2)."""
 
-from draft_api.sos.tier2_snap import SnapPctIndex, build_snap_pct_index
+from draft_api.sos.tier2_snap import SnapPctIndex, build_snap_pct_index, trim_snap_counts_row
 from draft_api.sos.usage import build_usage_index
 
 
@@ -15,6 +15,28 @@ def _rb_row(*, week: int, team: str, player_id: str, name: str, carries: str) ->
         "player_id": player_id,
         "player_display_name": name,
         "carries": carries,
+    }
+
+
+def test_trim_snap_counts_row_drops_extra_columns():
+    row = {
+        "season": "2026",
+        "week": "1",
+        "game_type": "REG",
+        "team": "KC",
+        "player": "Alpha",
+        "offense_pct": "0.55",
+        "defense_pct": "0.10",
+        "position": "RB",
+    }
+    trimmed = trim_snap_counts_row(row)
+    assert trimmed == {
+        "season": "2026",
+        "week": "1",
+        "game_type": "REG",
+        "team": "KC",
+        "player": "Alpha",
+        "offense_pct": "0.55",
     }
 
 

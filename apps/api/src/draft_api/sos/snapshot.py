@@ -50,6 +50,8 @@ def dataset_to_dict(dataset: SosDataset) -> dict[str, Any]:
     }
     if dataset.usage_stats:
         payload["usageStats"] = list(dataset.usage_stats)
+    if dataset.snap_counts:
+        payload["snapCounts"] = list(dataset.snap_counts)
     return payload
 
 
@@ -92,6 +94,17 @@ def dataset_from_dict(payload: dict[str, Any]) -> SosDataset:
             if isinstance(row, dict)
         )
 
+    snap_counts: tuple[dict[str, str | None], ...] = ()
+    raw_snaps = payload.get("snapCounts")
+    if raw_snaps is not None:
+        if not isinstance(raw_snaps, list):
+            raise SnapshotError("snapCounts must be a JSON array")
+        snap_counts = tuple(
+            {str(k): (None if v is None else str(v)) for k, v in dict(row).items()}
+            for row in raw_snaps
+            if isinstance(row, dict)
+        )
+
     return SosDataset(
         season=season,
         fetched_at=str(payload.get("fetchedAt") or ""),
@@ -99,6 +112,7 @@ def dataset_from_dict(payload: dict[str, Any]) -> SosDataset:
         schedule=schedule,
         teams=teams,
         usage_stats=usage_stats,
+        snap_counts=snap_counts,
     )
 
 

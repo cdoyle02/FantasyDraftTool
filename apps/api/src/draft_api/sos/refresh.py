@@ -12,7 +12,7 @@ import sys
 
 from dataclasses import replace
 
-from draft_api.sos.nflverse import load_sos_dataset, load_usage_stats
+from draft_api.sos.nflverse import load_snap_counts, load_sos_dataset, load_usage_stats
 from draft_api.sos.snapshot import write_snapshot
 
 
@@ -29,14 +29,16 @@ def main(argv: list[str] | None = None) -> int:
 
     dataset = load_sos_dataset(args.season)
     usage_stats = load_usage_stats(args.season)
-    dataset = replace(dataset, usage_stats=usage_stats)
+    snap_counts = load_snap_counts(args.season)
+    dataset = replace(dataset, usage_stats=usage_stats, snap_counts=snap_counts)
     from pathlib import Path
 
     path = write_snapshot(dataset, Path(args.out) if args.out else None)
     print(
         f"Wrote {path} · season={dataset.season} · "
         f"games={len(dataset.games)} · ratedThroughWeek={dataset.rated_through_week} · "
-        f"usageRows={len(dataset.usage_stats)}"
+        f"usageRows={len(dataset.usage_stats)} · "
+        f"snapRows={len(dataset.snap_counts)}"
     )
     return 0
 

@@ -113,7 +113,11 @@ def _resolve_stats_rows(
     return [], False
 
 
-def _resolve_snap_rows(season: int) -> tuple[list[dict[str, str | None]], bool]:
+def _resolve_snap_rows(
+    season: int,
+    dataset: SosDataset,
+) -> tuple[list[dict[str, str | None]], bool]:
+    """Return (rows, used_packaged_snaps)."""
     if _snap_rows_override is not None:
         return _snap_rows_override, False
     getter = _http_get_override or default_http_get
@@ -123,7 +127,16 @@ def _resolve_snap_rows(season: int) -> tuple[list[dict[str, str | None]], bool]:
         return parse_snap_counts_csv(text, season=season), False
     except Exception as exc:  # noqa: BLE001 — snap_counts is optional enrichment
         logger.warning("snap_counts live fetch failed for Tier 2: %s", exc)
+    if dataset.snap_counts:
+        return list(dataset.snap_counts), True
+    try:
+        snapshot = read_packaged_snapshot(season)
+    except SnapshotError as exc:
+        logger.warning("packaged snap counts unavailable: %s", exc)
         return [], False
+    if snapshot.snap_counts:
+        return list(snapshot.snap_counts), True
+    return [], False
 
 
 def _default_window(now: datetime) -> tuple[int, int]:
@@ -387,7 +400,7 @@ def build_tier2_opportunity_response(
 
     stats_rows, _ = _resolve_stats_rows(season, dataset)
     usage_unavailable = len(stats_rows) == 0
-    snap_rows, _ = _resolve_snap_rows(season)
+    snap_rows, _ = _resolve_snap_rows(season, dataset)
     snap_filtered = len(snap_rows) > 0
     snap_index = build_snap_pct_index(snap_rows, season=season) if snap_filtered else None
 

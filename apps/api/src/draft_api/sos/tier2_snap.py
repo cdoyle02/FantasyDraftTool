@@ -17,6 +17,17 @@ SNAP_COUNTS_URL = (
 
 DEFAULT_MIN_OFFENSE_SNAP_PCT = 0.20
 
+# Columns kept when packaging snap_counts into the SoS snapshot.
+SNAP_COUNTS_FIELDS: tuple[str, ...] = (
+    "season",
+    "week",
+    "game_type",
+    "season_type",
+    "team",
+    "player",
+    "offense_pct",
+)
+
 
 def _parse_int(value: str | None) -> int | None:
     if value is None or value == "":
@@ -78,9 +89,50 @@ def build_snap_pct_index(
     return SnapPctIndex(by_key=by_key)
 
 
+def trim_snap_counts_row(row: dict[str, str | None]) -> dict[str, str | None]:
+    """Keep only snap-index columns with non-empty values."""
+    trimmed: dict[str, str | None] = {}
+    for key in SNAP_COUNTS_FIELDS:
+        value = row.get(key)
+        if value is None or value == "":
+            continue
+        trimmed[key] = value
+    return trimmed
+
+
+def _row_eligible_for_snap(row: dict[str, str | None], *, season: int) -> bool:
+    row_season = _parse_int(row.get("season"))
+    if row_season is not None and row_season != season:
+        return False
+    if (row.get("game_type") or row.get("season_type") or "REG").upper() not in (
+        "REG",
+        "REGULAR",
+    ):
+        return False
+    week = _parse_int(row.get("week"))
+    if week is None or week < 1 or week > 18:
+        return False
+    if not normalize_team(row.get("team") or ""):
+        return False
+    if not (row.get("player") or "").strip():
+        return False
+    if _parse_float(row.get("offense_pct")) is None:
+        return False
+    return True
+
+
 def parse_snap_counts_csv(text: str, *, season: int) -> list[dict[str, str | None]]:
+    """Parse nflverse snap_counts CSV into trimmed snapshot-ready rows."""
     reader = csv.DictReader(io.StringIO(text))
-    return [{k: (None if v == "" else v) for k, v in dict(row).items()} for row in reader]
+    out: list[dict[str, str | None]] = []
+    for raw in reader:
+        row = {key: (None if value == "" else value) for key, value in dict(raw).items()}
+        if not _row_eligible_for_snap(row, season=season):
+            continue
+        trimmed = trim_snap_counts_row(row)
+        if trimmed:
+            out.append(trimmed)
+    return out
 
 
 def decode_snap_csv(raw: bytes) -> str:

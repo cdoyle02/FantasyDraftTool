@@ -9,7 +9,11 @@ from draft_api.sos.nflverse import SosDataset
 from draft_api.sos.snapshot import SnapshotError, dataset_from_dict, write_snapshot
 
 
-def _mini_dataset(*, usage_stats: tuple[dict[str, str | None], ...] = ()) -> SosDataset:
+def _mini_dataset(
+    *,
+    usage_stats: tuple[dict[str, str | None], ...] = (),
+    snap_counts: tuple[dict[str, str | None], ...] = (),
+) -> SosDataset:
     return SosDataset(
         season=2026,
         fetched_at="2026-11-08T12:00:00Z",
@@ -24,6 +28,7 @@ def _mini_dataset(*, usage_stats: tuple[dict[str, str | None], ...] = ()) -> Sos
         schedule={"KC": {1: "BUF"}, "BUF": {1: "KC"}},
         teams=["BUF", "KC"],
         usage_stats=usage_stats,
+        snap_counts=snap_counts,
     )
 
 
@@ -37,6 +42,26 @@ USAGE_ROW = {
     "player_display_name": "Test Back",
     "carries": "12",
 }
+
+
+SNAP_ROW = {
+    "season": "2026",
+    "week": "1",
+    "game_type": "REG",
+    "team": "KC",
+    "player": "Test Back",
+    "offense_pct": "0.65",
+}
+
+
+def test_write_snapshot_round_trips_snap_counts(tmp_path) -> None:
+    dataset = _mini_dataset(snap_counts=(SNAP_ROW,))
+    target = tmp_path / "sos_2026.json"
+    write_snapshot(dataset, target)
+
+    payload = json.loads(target.read_text(encoding="utf-8"))
+    assert payload["snapCounts"][0]["player"] == "Test Back"
+    assert dataset_from_dict(payload) == dataset
 
 
 def test_write_snapshot_round_trips_usage_stats(tmp_path) -> None:
