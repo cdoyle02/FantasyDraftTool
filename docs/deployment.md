@@ -5,7 +5,7 @@ Household Day-0 runs three Railway services in one project (`fantasy-draft-mcp`)
 | Service | Dockerfile / config | Role |
 |---------|---------------------|------|
 | `web` | [`apps/web/Dockerfile`](../apps/web/Dockerfile), [`apps/web/railway.toml`](../apps/web/railway.toml) | Vite PWA (engine wheel + Pyodide) via Caddy SPA fallback |
-| `api` | [`apps/api/Dockerfile`](../apps/api/Dockerfile), root [`railway.toml`](../railway.toml) | FastAPI recommendations + Week boards |
+| `api` | [`apps/api/Dockerfile`](../apps/api/Dockerfile), [`apps/api/railway.toml`](../apps/api/railway.toml) | FastAPI recommendations + Week boards |
 | `fantasy-draft-mcp` | [`tools/espn-mcp/Dockerfile`](../tools/espn-mcp/Dockerfile) | Hosted ESPN MCP (keep separate from the API) |
 
 Do not merge the API and MCP into one service.
