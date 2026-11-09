@@ -36,8 +36,13 @@ from draft_api.sos.tier2_snap import (
     parse_snap_counts_csv,
 )
 from draft_api.espn_leagues import get_league
-from draft_api.espn_roster import EspnRosterError, fetch_league_roster
+from draft_api.espn_roster import (
+    EspnRosterError,
+    fetch_league_roster,
+    fetch_league_roster_with_owner,
+)
 from draft_api.espn_available_dst import espn_credentials_from_env
+from draft_api.sos.grid_availability import annotate_grid_teams
 from draft_api.sos.roster_join import join_roster_opportunity
 from draft_api.sos.usage import build_usage_index
 from draft_api.sos.nflverse import (
@@ -200,6 +205,103 @@ def resolve_dataset(season: int, *, now: datetime | None = None) -> tuple[SosDat
             ) from snap_exc
 
 
+def _opportunity_players_for_grid(
+    *,
+    dataset: SosDataset,
+    season: int,
+    position: Position,
+    window: SosWindow,
+    wr_role: WrRole,
+    week: int,
+) -> list[dict[str, Any]]:
+    """Nflverse opportunity rows used to pick a primary skill player per NFL team."""
+    if position == "DST":
+        return []
+    stats_rows, _ = _resolve_stats_rows(season, dataset)
+    role_index = _clay_roles_for_request(season, dataset)
+    scoped_stats = _stats_for_wr_role(
+        stats_rows, position=position, wr_role=wr_role, role_index=role_index
+    )
+    _rated_through, rating_weeks, softness = build_defense_softness_index(
+        position=position,
+        window=window,
+        games=dataset.games,
+        teams=dataset.teams,
+        stats_rows=scoped_stats,
+        wr_role=wr_role,
+    )
+    usage = build_usage_index(
+        scoped_stats,
+        position=position,
+        weeks=set(rating_weeks),
+        season=season,
+    )
+    usage = filter_usage_index_by_clay_role(usage, role_index, wr_role)
+    return build_player_opportunity(
+        usage_index=usage,
+        defense_softness=softness,
+        schedule=dataset.schedule,
+        week=week,
+    )
+
+
+def _apply_league_grid_availability(
+    body: dict[str, Any],
+    *,
+    position: Position,
+    season: int,
+    league_id: str | None,
+    espn_profile: str | None,
+    espn_http_json: Any | None,
+    opportunity_players: list[dict[str, Any]] | None,
+    owner: str | None = None,
+    owner_team_id: int | None = None,
+) -> dict[str, Any]:
+    """Attach primaryPlayer + leagueAvailability when a fantasy league is selected."""
+    if not league_id:
+        return body
+    league = get_league(league_id)
+    body["leagueId"] = league["id"]
+    body["leagueName"] = league["name"]
+    try:
+        espn_s2, swid, cred_season = espn_credentials_from_env(
+            league_id=league_id, espn_profile=espn_profile
+        )
+        roster_season = season or cred_season
+        if espn_http_json is not None:
+            espn_s2 = espn_s2 or "test-espn-s2"
+            swid = swid or "{00000000-0000-0000-0000-000000000000}"
+        elif not espn_s2 or not swid:
+            raise EspnRosterError("ESPN credentials are not configured")
+        roster, resolved_owner = fetch_league_roster_with_owner(
+            league_id=league_id,
+            season=roster_season,
+            espn_s2=espn_s2,
+            swid=swid or "",
+            owner=owner,
+            owner_team_id=owner_team_id,
+            http_json=espn_http_json,
+        )
+        body["teams"] = annotate_grid_teams(
+            list(body.get("teams") or []),
+            position=position,
+            opportunity_players=opportunity_players,
+            roster=roster,
+            owner_team_id=resolved_owner,
+        )
+    except EspnRosterError as exc:
+        logger.warning("SoS grid league availability unavailable: %s", exc)
+        body["teams"] = annotate_grid_teams(
+            list(body.get("teams") or []),
+            position=position,
+            opportunity_players=opportunity_players,
+            roster=None,
+            owner_team_id=None,
+        )
+        body["overlayError"] = "espn_unavailable"
+    return body
+
+
 def build_strength_of_schedule_response(
     *,
     position: Position,
@@ -208,6 +310,9 @@ def build_strength_of_schedule_response(
     end_week: int | None = None,
     season: int = DEFAULT_SEASON,
     now: datetime | None = None,
+    league_id: str | None = None,
+    espn_profile: str | None = None,
+    espn_http_json: HttpGetter | None = None,
 ) -> dict[str, Any]:
     moment = now or datetime.now(timezone.utc)
     default_start, default_end = _default_window(moment)
@@ -228,7 +333,29 @@ def build_strength_of_schedule_response(
     fetched_at = dataset.fetched_at or moment.astimezone(timezone.utc).isoformat().replace(
         "+00:00", "Z"
     )
-    return sos_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
+    body = sos_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
+    opp_week = min(18, max(1, default_end))
+    opportunity_players = (
+        None
+        if position == "DST"
+        else _opportunity_players_for_grid(
+            dataset=dataset,
+            season=season,
+            position=position,
+            window="l8",
+            wr_role="all",
+            week=opp_week,
+        )
+    )
+    return _apply_league_grid_availability(
+        body,
+        position=position,
+        season=season,
+        league_id=league_id,
+        espn_profile=espn_profile,
+        espn_http_json=espn_http_json,
+        opportunity_players=opportunity_players,
+    )
 
 
 def build_tier1_strength_of_schedule_response(
@@ -240,6 +367,9 @@ def build_tier1_strength_of_schedule_response(
     season: int = DEFAULT_SEASON,
     now: datetime | None = None,
     wr_role: WrRole = "all",
+    league_id: str | None = None,
+    espn_profile: str | None = None,
+    espn_http_json: HttpGetter | None = None,
 ) -> dict[str, Any]:
     moment = now or datetime.now(timezone.utc)
     default_start, default_end = _default_window(moment)
@@ -270,7 +400,24 @@ def build_tier1_strength_of_schedule_response(
     body = tier1_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
     if wr_role != "all":
         body["wrRole"] = wr_role
-    return body
+    opp_week = min(18, max(1, (payload.rated_through_week or default_end) + 1))
+    opportunity_players = _opportunity_players_for_grid(
+        dataset=dataset,
+        season=season,
+        position=position,
+        window=window,
+        wr_role=wr_role,
+        week=opp_week,
+    )
+    return _apply_league_grid_availability(
+        body,
+        position=position,
+        season=season,
+        league_id=league_id,
+        espn_profile=espn_profile,
+        espn_http_json=espn_http_json,
+        opportunity_players=opportunity_players,
+    )
 
 
 def build_tier1_opportunity_response(
@@ -283,6 +430,7 @@ def build_tier1_opportunity_response(
     now: datetime | None = None,
     espn_http_json: HttpGetter | None = None,
     wr_role: WrRole = "all",
+    espn_profile: str | None = None,
 ) -> dict[str, Any]:
     """Nflverse player opportunity rows (softness × usage); optional ESPN roster overlay."""
     if position == "DST":
@@ -334,7 +482,9 @@ def build_tier1_opportunity_response(
     overlay_error: str | None = None
     if league_id:
         try:
-            espn_s2, swid, cred_season = espn_credentials_from_env()
+            espn_s2, swid, cred_season = espn_credentials_from_env(
+                league_id=league_id, espn_profile=espn_profile
+            )
             roster_season = season or cred_season
             if espn_http_json is not None:
                 espn_s2 = espn_s2 or "test-espn-s2"
@@ -393,6 +543,9 @@ def build_tier2_strength_of_schedule_response(
     season: int = DEFAULT_SEASON,
     now: datetime | None = None,
     wr_role: WrRole = "all",
+    league_id: str | None = None,
+    espn_profile: str | None = None,
+    espn_http_json: HttpGetter | None = None,
 ) -> dict[str, Any]:
     moment = now or datetime.now(timezone.utc)
     default_start, default_end = _default_window(moment)
@@ -422,7 +575,25 @@ def build_tier2_strength_of_schedule_response(
     body = tier2_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
     if wr_role != "all":
         body["wrRole"] = wr_role
-    return body
+    opp_week = min(18, max(1, (payload.rated_through_week or default_end) + 1))
+    # Tier 2 grid availability still uses Tier 1 opportunity ranking for primary player.
+    opportunity_players = _opportunity_players_for_grid(
+        dataset=dataset,
+        season=season,
+        position=position,  # type: ignore[arg-type]
+        window=window,
+        wr_role=wr_role,
+        week=opp_week,
+    )
+    return _apply_league_grid_availability(
+        body,
+        position=position,  # type: ignore[arg-type]
+        season=season,
+        league_id=league_id,
+        espn_profile=espn_profile,
+        espn_http_json=espn_http_json,
+        opportunity_players=opportunity_players,
+    )
 
 
 def build_tier2_opportunity_response(
@@ -436,6 +607,7 @@ def build_tier2_opportunity_response(
     espn_http_json: HttpGetter | None = None,
     game_lines: list[GameLine] | None = None,
     wr_role: WrRole = "all",
+    espn_profile: str | None = None,
 ) -> dict[str, Any]:
     if position not in ("QB", "RB", "WR", "TE"):
         raise ValueError(
@@ -499,7 +671,9 @@ def build_tier2_opportunity_response(
     overlay_error: str | None = None
     if league_id:
         try:
-            espn_s2, swid, cred_season = espn_credentials_from_env()
+            espn_s2, swid, cred_season = espn_credentials_from_env(
+                league_id=league_id, espn_profile=espn_profile
+            )
             roster_season = season or cred_season
             if espn_http_json is not None:
                 espn_s2 = espn_s2 or "test-espn-s2"

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { draftApi } from '../api/client'
 import type {
   EspnLeague,
+  SosLeagueAvailability,
   SosMetric,
   SosPosition,
   SosSoftness,
@@ -48,6 +49,17 @@ const WR_ROLE_OPTIONS: { key: SosWrRole; label: string }[] = [
 
 function isTier2Position(position: SosPosition): position is SosTier2Position {
   return TIER2_POSITIONS.includes(position as SosTier2Position)
+}
+
+function availabilityBadge(status: SosLeagueAvailability | undefined): { label: string; className: string } | null {
+  if (!status || status === 'unknown') return null
+  if (status === 'available') {
+    return { label: 'FA', className: 'bg-mint/20 text-mint' }
+  }
+  if (status === 'on_roster') {
+    return { label: 'Mine', className: 'bg-sky-500/20 text-sky-200' }
+  }
+  return { label: 'Taken', className: 'bg-rose-500/20 text-rose-200' }
 }
 
 function rankColor(rank: number | null): string {
@@ -169,7 +181,8 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
             window: ratingWindow,
             startWeek: window.startWeek,
             endWeek: window.endWeek,
-            wrRole: position === 'WR' ? wrRole : undefined
+            wrRole: position === 'WR' ? wrRole : undefined,
+            leagueId: leagueId || undefined
           })
           if (cancelled) return
           setTier1Data(payload)
@@ -182,7 +195,8 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
             window: ratingWindow,
             startWeek: window.startWeek,
             endWeek: window.endWeek,
-            wrRole: position === 'WR' ? wrRole : undefined
+            wrRole: position === 'WR' ? wrRole : undefined,
+            leagueId: leagueId || undefined
           })
           if (cancelled) return
           setTier2Data(payload)
@@ -194,7 +208,8 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
             position,
             metric,
             startWeek: window.startWeek,
-            endWeek: window.endWeek
+            endWeek: window.endWeek,
+            leagueId: leagueId || undefined
           })
           if (cancelled) return
           setClassicData(payload)
@@ -216,7 +231,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
     return () => {
       cancelled = true
     }
-  }, [position, viewMode, metric, ratingWindow, window.startWeek, window.endWeek, wrRole])
+  }, [position, viewMode, metric, ratingWindow, window.startWeek, window.endWeek, wrRole, leagueId])
 
   useEffect(() => {
     let cancelled = false
@@ -539,6 +554,22 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
             </div>
           </div>
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-muted">
+            League
+            <select
+              data-testid="sos-league-select-grid"
+              className="min-w-[12rem] rounded-lg border border-line bg-ink px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-100"
+              value={leagueId}
+              onChange={(event) => setLeagueId(event.target.value)}
+            >
+              <option value="">No league overlay</option>
+              {leagues.map((league) => (
+                <option key={league.id} value={league.id}>
+                  {league.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-muted">
             From
             <select
               data-testid="sos-start-week"
@@ -605,7 +636,31 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
               {teamRows.map((row) => (
                 <tr key={row.team} className="border-b border-line/60" data-testid={`sos-row-${row.team}`}>
                   <td className="sticky left-0 z-10 bg-panel px-2 py-1.5 font-semibold text-mint">{row.rank}</td>
-                  <td className="sticky left-10 z-10 bg-panel px-2 py-1.5 font-bold">{row.team}</td>
+                  <td className="sticky left-10 z-10 bg-panel px-2 py-1.5">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-bold">{row.team}</span>
+                      {row.primaryPlayer?.name ? (
+                        <span
+                          className="flex flex-wrap items-center gap-1 text-[10px] font-medium text-slate-300"
+                          data-testid={`sos-primary-${row.team}`}
+                        >
+                          <span className="max-w-[9rem] truncate">{row.primaryPlayer.name}</span>
+                          {(() => {
+                            const badge = availabilityBadge(row.leagueAvailability)
+                            if (!badge) return null
+                            return (
+                              <span
+                                className={`rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide ${badge.className}`}
+                                data-testid={`sos-avail-${row.team}`}
+                              >
+                                {badge.label}
+                              </span>
+                            )
+                          })()}
+                        </span>
+                      ) : null}
+                    </div>
+                  </td>
                   <td className="px-2 py-1.5 tabular-nums text-muted">{formatAvg(row.opponentAverage)}</td>
                   {row.weeks.map((cell) => {
                     if (cell.bye) {

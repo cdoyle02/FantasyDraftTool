@@ -110,11 +110,24 @@ export interface SosWeekCell {
   inWindow: boolean
 }
 
+/** Fantasy-league status for the primary player on an SoS team row. */
+export type SosLeagueAvailability = 'available' | 'on_roster' | 'taken' | 'unknown'
+
+export interface SosPrimaryPlayer {
+  name: string
+  playerId?: number | null
+  position?: string
+  team?: string
+  gsisId?: string | null
+}
+
 export interface SosTeamRow {
   team: string
   rank: number
   opponentAverage: number | null
   weeks: SosWeekCell[]
+  primaryPlayer?: SosPrimaryPlayer | null
+  leagueAvailability?: SosLeagueAvailability
 }
 
 export interface StrengthOfScheduleResponse {
@@ -128,6 +141,9 @@ export interface StrengthOfScheduleResponse {
   source: string
   stale: boolean
   teams: SosTeamRow[]
+  leagueId?: string
+  leagueName?: string
+  overlayError?: string
 }
 
 export interface StrengthOfScheduleQuery {
@@ -136,6 +152,7 @@ export interface StrengthOfScheduleQuery {
   startWeek?: number
   endWeek?: number
   season?: number
+  leagueId?: string
 }
 
 export type SosTier1Window = 'l4' | 'l8' | 'season'
@@ -157,6 +174,8 @@ export interface SosTier1TeamRow {
   rank: number
   opponentAverage: number | null
   weeks: SosTier1WeekCell[]
+  primaryPlayer?: SosPrimaryPlayer | null
+  leagueAvailability?: SosLeagueAvailability
 }
 
 export interface StrengthOfScheduleTier1Response {
@@ -172,6 +191,10 @@ export interface StrengthOfScheduleTier1Response {
   source: string
   stale: boolean
   teams: SosTier1TeamRow[]
+  leagueId?: string
+  leagueName?: string
+  overlayError?: string
+  wrRole?: SosWrRole
 }
 
 export interface StrengthOfScheduleTier1Query {
@@ -181,6 +204,7 @@ export interface StrengthOfScheduleTier1Query {
   endWeek?: number
   season?: number
   wrRole?: SosWrRole
+  leagueId?: string
 }
 
 export type Tier1JoinStatus = 'matched' | 'unmatched'
@@ -249,6 +273,8 @@ export interface SosTier2TeamRow {
   rank: number
   opponentAverage: number | null
   weeks: SosTier2WeekCell[]
+  primaryPlayer?: SosPrimaryPlayer | null
+  leagueAvailability?: SosLeagueAvailability
 }
 
 export interface StrengthOfScheduleTier2Response {
@@ -258,6 +284,9 @@ export interface StrengthOfScheduleTier2Response {
   startWeek: number
   endWeek: number
   ratedThroughWeek: number
+  leagueId?: string
+  leagueName?: string
+  overlayError?: string
   ratingWeeks: number[]
   shrinkK: number
   softnessMetric: string
@@ -274,6 +303,7 @@ export interface StrengthOfScheduleTier2Query {
   endWeek?: number
   season?: number
   wrRole?: SosWrRole
+  leagueId?: string
 }
 
 export interface Tier2OpportunityPlayer extends Tier1OpportunityPlayer {

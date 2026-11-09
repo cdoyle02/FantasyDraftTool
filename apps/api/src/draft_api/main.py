@@ -410,7 +410,10 @@ def kyle_dst_rankings() -> dict[str, Any] | JSONResponse:
 
 
 @app.get("/api/v1/nfl/kyle-dst-available", response_model=None)
-def kyle_dst_available(leagueId: str) -> dict[str, Any] | JSONResponse:
+def kyle_dst_available(
+    leagueId: str,
+    espnProfile: str | None = None,
+) -> dict[str, Any] | JSONResponse:
     """Kyle DST rankings plus FREEAGENT/WAIVERS defenses for a configured league."""
     try:
         league = get_league(leagueId)
@@ -423,7 +426,9 @@ def kyle_dst_available(leagueId: str) -> dict[str, Any] | JSONResponse:
         return error_response(503, "kyle_rankings_unavailable", str(exc))
 
     try:
-        espn_s2, swid, season = espn_credentials_from_env()
+        espn_s2, swid, season = espn_credentials_from_env(
+            league_id=league["id"], espn_profile=espnProfile
+        )
         available = fetch_available_dst(
             league_id=league["id"],
             season=season,
@@ -451,7 +456,10 @@ def jared_k_rankings() -> dict[str, Any] | JSONResponse:
 
 
 @app.get("/api/v1/nfl/jared-k-available", response_model=None)
-def jared_k_available(leagueId: str) -> dict[str, Any] | JSONResponse:
+def jared_k_available(
+    leagueId: str,
+    espnProfile: str | None = None,
+) -> dict[str, Any] | JSONResponse:
     """Jared K rankings plus FREEAGENT/WAIVERS kickers for a configured league."""
     try:
         league = get_league(leagueId)
@@ -464,7 +472,9 @@ def jared_k_available(leagueId: str) -> dict[str, Any] | JSONResponse:
         return error_response(503, "jared_rankings_unavailable", str(exc))
 
     try:
-        espn_s2, swid, season = espn_credentials_from_env()
+        espn_s2, swid, season = espn_credentials_from_env(
+            league_id=league["id"], espn_profile=espnProfile
+        )
         available = fetch_available_k(
             league_id=league["id"],
             season=season,
@@ -489,6 +499,8 @@ def strength_of_schedule(
     startWeek: int | None = None,
     endWeek: int | None = None,
     season: int = 2026,
+    leagueId: str | None = None,
+    espnProfile: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Team × week PPR strength of schedule (FPA or schedule-adjusted PAE)."""
     position_key = position.upper()
@@ -513,7 +525,12 @@ def strength_of_schedule(
             end_week=endWeek,
             season=season,
             now=datetime.now(UTC),
+            league_id=leagueId,
+            espn_profile=espnProfile,
+            espn_http_json=_espn_roster_http_json_override,
         )
+    except LeagueNotFoundError as exc:
+        return error_response(404, "league_not_found", str(exc))
     except (NflverseError, ValueError) as exc:
         status = 400 if isinstance(exc, ValueError) else 503
         code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
@@ -536,6 +553,8 @@ def strength_of_schedule_tier1(
     endWeek: int | None = None,
     season: int = 2026,
     wrRole: str | None = None,
+    leagueId: str | None = None,
+    espnProfile: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Team × week shrunk aFPA strength of schedule (Tier 1 rolling window)."""
     from draft_api.sos.service import build_tier1_strength_of_schedule_response
@@ -564,7 +583,12 @@ def strength_of_schedule_tier1(
             season=season,
             now=datetime.now(UTC),
             wr_role=wr_role,
+            league_id=leagueId,
+            espn_profile=espnProfile,
+            espn_http_json=_espn_roster_http_json_override,
         )
+    except LeagueNotFoundError as exc:
+        return error_response(404, "league_not_found", str(exc))
     except (NflverseError, ValueError) as exc:
         status = 400 if isinstance(exc, ValueError) else 503
         code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
@@ -579,6 +603,7 @@ def strength_of_schedule_tier1_opportunity(
     leagueId: str | None = None,
     season: int = 2026,
     wrRole: str | None = None,
+    espnProfile: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Player opportunity scores (shrunk softness × nflverse usage share)."""
     from draft_api.espn_leagues import LeagueNotFoundError
@@ -609,6 +634,7 @@ def strength_of_schedule_tier1_opportunity(
             now=datetime.now(UTC),
             espn_http_json=_espn_roster_http_json_override,
             wr_role=wr_role,
+            espn_profile=espnProfile,
         )
     except LeagueNotFoundError as exc:
         return error_response(404, "league_not_found", str(exc))
@@ -626,6 +652,8 @@ def strength_of_schedule_tier2(
     endWeek: int | None = None,
     season: int = 2026,
     wrRole: str | None = None,
+    leagueId: str | None = None,
+    espnProfile: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Team × week shrunk EPA-allowed strength of schedule (Tier 2 skill positions)."""
     from draft_api.sos.service import build_tier2_strength_of_schedule_response
@@ -651,10 +679,15 @@ def strength_of_schedule_tier2(
             window=window_key,  # type: ignore[arg-type]
             start_week=startWeek,
             end_week=endWeek,
+            league_id=leagueId,
+            espn_profile=espnProfile,
+            espn_http_json=_espn_roster_http_json_override,
             season=season,
             now=datetime.now(UTC),
             wr_role=wr_role,
         )
+    except LeagueNotFoundError as exc:
+        return error_response(404, "league_not_found", str(exc))
     except (NflverseError, ValueError) as exc:
         status = 400 if isinstance(exc, ValueError) else 503
         code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
@@ -669,6 +702,7 @@ def strength_of_schedule_tier2_opportunity(
     leagueId: str | None = None,
     season: int = 2026,
     wrRole: str | None = None,
+    espnProfile: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Tier 2 opportunity: EPA softness × snap-filtered usage × game script."""
     from draft_api.espn_leagues import LeagueNotFoundError
@@ -706,6 +740,7 @@ def strength_of_schedule_tier2_opportunity(
             espn_http_json=_espn_roster_http_json_override,
             game_lines=odds_games,
             wr_role=wr_role,
+            espn_profile=espnProfile,
         )
     except LeagueNotFoundError as exc:
         return error_response(404, "league_not_found", str(exc))
@@ -723,6 +758,8 @@ def strength_of_schedule_tier2_dup(
     endWeek: int | None = None,
     season: int = 2026,
     wrRole: str | None = None,
+    leagueId: str | None = None,
+    espnProfile: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Team × week shrunk EPA-allowed strength of schedule (Tier 2 skill positions)."""
     from draft_api.sos.service import build_tier2_strength_of_schedule_response
@@ -744,6 +781,9 @@ def strength_of_schedule_tier2_dup(
     try:
         wr_role = _parse_sos_wr_role(wrRole, position_key)
         return build_tier2_strength_of_schedule_response(
+            league_id=leagueId,
+            espn_profile=espnProfile,
+            espn_http_json=_espn_roster_http_json_override,
             position=position_key,  # type: ignore[arg-type]
             window=window_key,  # type: ignore[arg-type]
             start_week=startWeek,
@@ -752,6 +792,8 @@ def strength_of_schedule_tier2_dup(
             now=datetime.now(UTC),
             wr_role=wr_role,
         )
+    except LeagueNotFoundError as exc:
+        return error_response(404, "league_not_found", str(exc))
     except (NflverseError, ValueError) as exc:
         status = 400 if isinstance(exc, ValueError) else 503
         code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
@@ -766,6 +808,7 @@ def strength_of_schedule_tier2_opportunity_dup(
     leagueId: str | None = None,
     season: int = 2026,
     wrRole: str | None = None,
+    espnProfile: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Tier 2 player opportunity (EPA softness × snap-filtered usage, optional Vegas script)."""
     from draft_api.espn_leagues import LeagueNotFoundError
@@ -802,6 +845,7 @@ def strength_of_schedule_tier2_opportunity_dup(
             now=datetime.now(UTC),
             espn_http_json=_espn_roster_http_json_override,
             game_lines=odds_games,
+            espn_profile=espnProfile,
             wr_role=wr_role,
         )
     except LeagueNotFoundError as exc:
@@ -825,6 +869,7 @@ def workbook_matchups(
     ownerTeamId: int | None = None,
     owner: str | None = None,
     includeFa: bool = True,
+    espnProfile: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Workbook Net Matchups board for one NFL week."""
     odds_games: list[GameLine] | None = None
@@ -850,6 +895,7 @@ def workbook_matchups(
             owner_team_id=ownerTeamId,
             include_fa=includeFa,
             espn_http_json=_espn_roster_http_json_override,
+            espn_profile=espnProfile,
         )
     except LeagueNotFoundError as exc:
         if leagueId:
@@ -912,6 +958,7 @@ def workbook_injuries(
     week: int,
     season: int = 2026,
     leagueId: str | None = None,
+    espnProfile: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Workbook ESPN injury list for one fantasy league."""
     try:
@@ -922,6 +969,7 @@ def workbook_injuries(
             season=season,
             league_id=leagueId,
             espn_http_json=_espn_roster_http_json_override,
+            espn_profile=espnProfile,
         )
     except LeagueNotFoundError as exc:
         if leagueId:

@@ -509,10 +509,13 @@ def _merge_espn_overlay(
     owner_team_id: int | None,
     include_fa: bool,
     espn_http_json: HttpJsonGetter | None,
+    espn_profile: str | None = None,
 ) -> dict[str, Any]:
     get_league(league_id)
     try:
-        espn_s2, swid, _ = espn_credentials_from_env()
+        espn_s2, swid, _ = espn_credentials_from_env(
+            league_id=league_id, espn_profile=espn_profile
+        )
         if espn_http_json is not None:
             espn_s2 = espn_s2 or "test-espn-s2"
             swid = swid or "{00000000-0000-0000-0000-000000000000}"
@@ -564,6 +567,7 @@ def build_matchups_response(
     owner_team_id: int | None = None,
     include_fa: bool = True,
     espn_http_json: HttpJsonGetter | None = None,
+    espn_profile: str | None = None,
 ) -> dict[str, Any]:
     """Build the Workbook Net Matchups board for one week.
 
@@ -654,6 +658,7 @@ def build_matchups_response(
             owner_team_id=owner_team_id,
             include_fa=include_fa,
             espn_http_json=espn_http_json,
+            espn_profile=espn_profile,
         )
     return payload
 
@@ -988,6 +993,7 @@ def build_injuries_response(
     league_id: str | None = None,
     now: datetime | None = None,
     espn_http_json: HttpJsonGetter | None = None,
+    espn_profile: str | None = None,
 ) -> dict[str, Any]:
     if week < 1 or week > 18:
         raise WorkbookServiceError(f"invalid week {week}")
@@ -999,7 +1005,9 @@ def build_injuries_response(
     warnings: list[str] = []
     injuries: list[dict[str, Any]] = []
     try:
-        espn_s2, swid, _ = espn_credentials_from_env()
+        espn_s2, swid, _ = espn_credentials_from_env(
+            league_id=league_id, espn_profile=espn_profile
+        )
         if espn_http_json is not None:
             espn_s2 = espn_s2 or "test-espn-s2"
             swid = swid or "{00000000-0000-0000-0000-000000000000}"

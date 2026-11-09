@@ -180,6 +180,56 @@ def resolve_owner_team_id(payload: dict[str, Any], *, owner: str) -> int | None:
     return None
 
 
+def resolve_owner_team_id_from_swid(payload: dict[str, Any], *, swid: str) -> int | None:
+    """Resolve fantasy team id owned by the ESPN SWID in ``mTeam`` / members."""
+    needle = (swid or "").strip()
+    if not needle:
+        return None
+    # Members ids are typically the bare UUID or braced SWID.
+    variants = {needle, needle.strip("{}"), "{" + needle.strip("{}") + "}"}
+    for team in payload.get("teams") or []:
+        if not isinstance(team, dict):
+            continue
+        owners = [str(team.get("primaryOwner") or "")]
+        owners.extend(str(oid) for oid in (team.get("owners") or []))
+        if any(owner in variants or owner.strip("{}") in {v.strip("{}") for v in variants} for owner in owners if owner):
+            try:
+                return int(team.get("id"))
+            except (TypeError, ValueError):
+                return None
+    return None
+
+
+def fetch_league_roster_with_owner(
+    *,
+    league_id: str,
+    season: int,
+    espn_s2: str,
+    swid: str,
+    owner: str | None = None,
+    owner_team_id: int | None = None,
+    http_json: HttpJsonGetter | None = None,
+) -> tuple[list[EspnRosterPlayer], int | None]:
+    """League roster plus resolved owner team id (name query or SWID)."""
+    url = _league_url(league_id=league_id, season=season, views=["mTeam", "mRoster"])
+    getter = http_json or default_http_json
+    try:
+        payload = getter(url, _auth_headers(espn_s2=espn_s2, swid=swid))
+    except EspnRosterError:
+        raise
+    except Exception as exc:
+        raise EspnRosterError(f"ESPN request failed: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise EspnRosterError("ESPN returned an unexpected payload")
+    roster = parse_league_roster(payload)
+    resolved = owner_team_id
+    if resolved is None and owner:
+        resolved = resolve_owner_team_id(payload, owner=owner)
+    if resolved is None:
+        resolved = resolve_owner_team_id_from_swid(payload, swid=swid)
+    return roster, resolved
+
+
 def _league_url(*, league_id: str, season: int, views: list[str]) -> str:
     query = urllib.parse.urlencode([("view", view) for view in views])
     return f"{ESPN_READ_HOST}/seasons/{season}/segments/0/leagues/{league_id}?{query}"

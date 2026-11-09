@@ -182,12 +182,21 @@ def fetch_available_k(
     )
 
 
-def espn_credentials_from_env() -> tuple[str | None, str | None, int]:
-    espn_s2 = os.getenv("ESPN_S2", "").strip() or None
-    swid = os.getenv("ESPN_SWID", "").strip() or None
-    season_raw = os.getenv("ESPN_SEASON", "2026").strip() or "2026"
+def espn_credentials_from_env(
+    *,
+    league_id: str | None = None,
+    espn_profile: str | None = None,
+) -> tuple[str | None, str | None, int]:
+    """Resolve ESPN cookies for a league (or explicit profile).
+
+    Girls Who Ball uses Katie's ``ESPN_S2_KATIE`` / ``ESPN_SWID_KATIE`` pair;
+    other leagues use Michael's ``ESPN_S2`` / ``ESPN_SWID``. Pass
+    ``espn_profile='katie'|'michael'`` to override the league map.
+    """
+    from draft_api.espn_profiles import espn_credentials_for_profile, resolve_espn_profile
+
     try:
-        season = int(season_raw)
+        profile = resolve_espn_profile(league_id, espn_profile)
     except ValueError as exc:
-        raise EspnAvailableError(f"ESPN_SEASON must be an int, got {season_raw!r}") from exc
-    return espn_s2, swid, season
+        raise EspnAvailableError(str(exc)) from exc
+    return espn_credentials_for_profile(profile)

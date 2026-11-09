@@ -244,17 +244,26 @@ describe('WeekSosView', () => {
           const params = new URL(url, 'http://localhost').searchParams
           const position = params.get('position') ?? 'RB'
           const window = (params.get('window') ?? 'l8') as StrengthOfScheduleTier1Response['window']
-          return new Response(
-            JSON.stringify(
-              buildTier1Payload({
-                position: position as StrengthOfScheduleTier1Response['position'],
-                window,
-                startWeek: Number(params.get('startWeek') ?? 10),
-                endWeek: Number(params.get('endWeek') ?? 17)
-              })
-            ),
-            { status: 200, headers: { 'Content-Type': 'application/json' } }
-          )
+          const leagueId = params.get('leagueId')
+          const base = buildTier1Payload({
+            position: position as StrengthOfScheduleTier1Response['position'],
+            window,
+            startWeek: Number(params.get('startWeek') ?? 10),
+            endWeek: Number(params.get('endWeek') ?? 17),
+            leagueId: leagueId ?? undefined,
+            leagueName: leagueId ? 'Girls Who Ball' : undefined
+          })
+          if (leagueId) {
+            base.teams = base.teams.map((row) => ({
+              ...row,
+              primaryPlayer: { name: 'Workhorse', position: 'RB', team: row.team },
+              leagueAvailability: 'available' as const
+            }))
+          }
+          return new Response(JSON.stringify(base), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          })
         }
         expect(url).toContain('/api/v1/nfl/strength-of-schedule')
         const params = new URL(url, 'http://localhost').searchParams
@@ -305,6 +314,26 @@ describe('WeekSosView', () => {
       )
     })
     expect(screen.getByTestId('sos-opportunity-join-stats')).toHaveTextContent('matched 1')
+  })
+
+  it('shows primary player and FA badge on the SoS grid when league is selected', async () => {
+    localStorage.removeItem('workbook-league-id')
+    render(<WeekSosView />)
+    await waitFor(() => expect(screen.getByTestId('sos-league-select-grid')).toBeInTheDocument())
+    fireEvent.change(screen.getByTestId('sos-league-select-grid'), { target: { value: '1216398267' } })
+    await waitFor(() => {
+      const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+      expect(
+        calls.some(
+          (url) =>
+            url.includes('/strength-of-schedule/tier1?') &&
+            url.includes('leagueId=1216398267') &&
+            !url.includes('opportunity')
+        )
+      ).toBe(true)
+    })
+    await waitFor(() => expect(screen.getByTestId('sos-primary-CHI')).toHaveTextContent('Workhorse'))
+    expect(screen.getByTestId('sos-avail-CHI')).toHaveTextContent('FA')
   })
 
   it('refetches tier1 with window=l4 when L4 is selected', async () => {
