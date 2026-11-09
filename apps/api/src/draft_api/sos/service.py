@@ -365,8 +365,10 @@ def build_tier2_opportunity_response(
     espn_http_json: HttpGetter | None = None,
     game_lines: list[GameLine] | None = None,
 ) -> dict[str, Any]:
-    if position not in ("QB", "RB"):
-        raise ValueError(f"Tier 2 opportunity supports QB/RB only (got {position!r})")
+    if position not in ("QB", "RB", "WR", "TE"):
+        raise ValueError(
+            f"Tier 2 opportunity supports QB, RB, WR, and TE only (got {position!r})"
+        )
 
     league_meta: dict[str, Any] = {}
     if league_id:

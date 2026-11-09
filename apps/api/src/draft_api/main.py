@@ -612,16 +612,16 @@ def strength_of_schedule_tier2(
     endWeek: int | None = None,
     season: int = 2026,
 ) -> dict[str, Any] | JSONResponse:
-    """Team × week shrunk EPA-allowed strength of schedule (Tier 2, QB/RB only)."""
+    """Team × week shrunk EPA-allowed strength of schedule (Tier 2 skill positions)."""
     from draft_api.sos.service import build_tier2_strength_of_schedule_response
 
     position_key = position.upper()
     window_key = window.lower()
-    if position_key not in ("QB", "RB"):
+    if position_key not in ("QB", "RB", "WR", "TE"):
         return error_response(
             400,
             "invalid_position",
-            f"position must be QB or RB for Tier 2 (got {position!r})",
+            f"position must be QB, RB, WR, or TE for Tier 2 (got {position!r})",
         )
     if window_key not in ("l4", "l8", "season"):
         return error_response(
@@ -659,11 +659,11 @@ def strength_of_schedule_tier2_opportunity(
 
     position_key = position.upper()
     window_key = window.lower()
-    if position_key not in ("QB", "RB"):
+    if position_key not in ("QB", "RB", "WR", "TE"):
         return error_response(
             400,
             "invalid_position",
-            f"position must be QB or RB (got {position!r})",
+            f"position must be QB, RB, WR, or TE (got {position!r})",
         )
     if window_key not in ("l4", "l8", "season"):
         return error_response(
@@ -703,16 +703,16 @@ def strength_of_schedule_tier2(
     endWeek: int | None = None,
     season: int = 2026,
 ) -> dict[str, Any] | JSONResponse:
-    """Team × week shrunk EPA-allowed strength of schedule (Tier 2; QB/RB only)."""
+    """Team × week shrunk EPA-allowed strength of schedule (Tier 2 skill positions)."""
     from draft_api.sos.service import build_tier2_strength_of_schedule_response
 
     position_key = position.upper()
     window_key = window.lower()
-    if position_key not in ("QB", "RB"):
+    if position_key not in ("QB", "RB", "WR", "TE"):
         return error_response(
             400,
             "invalid_position",
-            f"Tier 2 position must be QB or RB (got {position!r})",
+            f"Tier 2 position must be QB, RB, WR, or TE (got {position!r})",
         )
     if window_key not in ("l4", "l8", "season"):
         return error_response(
@@ -749,11 +749,11 @@ def strength_of_schedule_tier2_opportunity(
 
     position_key = position.upper()
     window_key = window.lower()
-    if position_key not in ("QB", "RB"):
+    if position_key not in ("QB", "RB", "WR", "TE"):
         return error_response(
             400,
             "invalid_position",
-            f"Tier 2 position must be QB or RB (got {position!r})",
+            f"Tier 2 position must be QB, RB, WR, or TE (got {position!r})",
         )
     if window_key not in ("l4", "l8", "season"):
         return error_response(

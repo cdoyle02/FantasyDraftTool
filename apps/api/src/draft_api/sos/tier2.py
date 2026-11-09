@@ -85,7 +85,9 @@ def build_tier2_grid(
     shrink_k: int | None = None,
 ) -> Tier2Payload:
     if position not in TIER2_POSITIONS:
-        raise ValueError(f"Tier 2 grid supports QB and RB only (got {position!r})")
+        raise ValueError(
+            f"Tier 2 grid supports QB, RB, WR, and TE only (got {position!r})"
+        )
     if start_week < 1 or end_week > 18 or start_week > end_week:
         raise ValueError(f"invalid week window {start_week}-{end_week}")
     if window not in ("l4", "l8", "season"):

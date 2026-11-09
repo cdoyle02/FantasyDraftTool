@@ -76,10 +76,36 @@ def test_tier2_grid_returns_shrunk_epa_cells():
     assert "softness" in cell
 
 
-def test_tier2_rejects_wr_position():
+WR_EPA_STATS = [
+    {
+        "season": "2026",
+        "week": "1",
+        "season_type": "REG",
+        "position": "WR",
+        "team": "AAA",
+        "opponent_team": "BBB",
+        "player_id": "W1",
+        "player_display_name": "Wide",
+        "targets": "8",
+        "receiving_epa": "5",
+    }
+]
+
+
+def test_tier2_accepts_wr_position():
+    set_sos_stats_rows_override(WR_EPA_STATS)
     response = client.get(
         "/api/v1/nfl/strength-of-schedule/tier2",
-        params={"position": "WR", "season": 2026},
+        params={"position": "WR", "startWeek": 1, "endWeek": 2, "season": 2026},
+    )
+    assert response.status_code == 200
+    assert response.json()["position"] == "WR"
+
+
+def test_tier2_rejects_dst_position():
+    response = client.get(
+        "/api/v1/nfl/strength-of-schedule/tier2",
+        params={"position": "DST", "season": 2026},
     )
     assert response.status_code == 400
 

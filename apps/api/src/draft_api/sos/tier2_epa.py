@@ -1,4 +1,4 @@
-"""Tier 2 defensive EPA-allowed rates (QB passing / RB rushing)."""
+"""Tier 2 defensive EPA-allowed rates (QB/RB/WR/TE)."""
 
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ from draft_api.sos.calculate import (
 from draft_api.sos.nflverse import NFL_TEAMS, normalize_team
 from draft_api.sos.tier1 import DefenseSoftness
 
-EPA_POSITIONS: frozenset[Position] = frozenset({"QB", "RB"})
-Tier2EpaPosition = Literal["QB", "RB"]
+EPA_POSITIONS: frozenset[Position] = frozenset({"QB", "RB", "WR", "TE"})
+Tier2EpaPosition = Literal["QB", "RB", "WR", "TE"]
 
 
 def _parse_int(value: str | None) -> int | None:
@@ -54,6 +54,8 @@ def _epa_column(position: Position) -> str:
         return "passing_epa"
     if position == "RB":
         return "rushing_epa"
+    if position in ("WR", "TE"):
+        return "receiving_epa"
     raise ValueError(f"EPA allowed unsupported for position {position!r}")
 
 

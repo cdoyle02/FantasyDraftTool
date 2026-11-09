@@ -21,6 +21,47 @@ def _qb_stat(*, week: int, team: str, opp: str, epa: str) -> dict[str, str]:
     }
 
 
+def _receiver_stat(
+    *,
+    week: int,
+    team: str,
+    opp: str,
+    position: str,
+    epa: str,
+) -> dict[str, str]:
+    return {
+        "season": "2026",
+        "week": str(week),
+        "season_type": "REG",
+        "position": position,
+        "team": team,
+        "opponent_team": opp,
+        "receiving_epa": epa,
+    }
+
+
+def test_wr_epa_allowed_sums_receiving_per_game():
+    rows = [
+        _receiver_stat(week=1, team="AAA", opp="BBB", position="WR", epa="4"),
+        _receiver_stat(week=1, team="AAA", opp="BBB", position="WR", epa="2"),
+        _receiver_stat(week=1, team="AAA", opp="BBB", position="TE", epa="99"),
+    ]
+    games = defensive_epa_allowed_per_game(rows, position="WR")
+    assert len(games) == 1
+    assert games[0].defense == "BBB"
+    assert games[0].total_epa == 6.0
+
+
+def test_te_epa_allowed_uses_receiving_epa():
+    rows = [
+        _receiver_stat(week=1, team="AAA", opp="BBB", position="TE", epa="3.5"),
+        _receiver_stat(week=1, team="AAA", opp="BBB", position="WR", epa="1"),
+    ]
+    games = defensive_epa_allowed_per_game(rows, position="TE")
+    assert len(games) == 1
+    assert games[0].total_epa == 3.5
+
+
 def test_qb_epa_allowed_sums_per_game():
     rows = [
         _qb_stat(week=1, team="AAA", opp="BBB", epa="5"),
