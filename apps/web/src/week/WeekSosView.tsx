@@ -51,15 +51,41 @@ function isTier2Position(position: SosPosition): position is SosTier2Position {
   return TIER2_POSITIONS.includes(position as SosTier2Position)
 }
 
-function availabilityBadge(status: SosLeagueAvailability | undefined): { label: string; className: string } | null {
+function availabilityBadge(
+  status: SosLeagueAvailability | undefined,
+  position: SosPosition
+): { label: string; title: string; className: string } | null {
   if (!status || status === 'unknown') return null
+  const dst = position === 'DST'
   if (status === 'available') {
-    return { label: 'FA', className: 'bg-mint/20 text-mint' }
+    return {
+      label: 'FA',
+      title: dst ? 'Defense available on waivers/FA' : 'Available on waivers/FA',
+      className: 'border border-mint/40 bg-mint/15 text-mint'
+    }
   }
   if (status === 'on_roster') {
-    return { label: 'Mine', className: 'bg-sky-500/20 text-sky-200' }
+    return {
+      label: 'Mine',
+      title: dst ? 'On your roster' : 'On your roster',
+      className: 'border border-sky-400/40 bg-sky-500/15 text-sky-100'
+    }
   }
-  return { label: 'Taken', className: 'bg-rose-500/20 text-rose-200' }
+  return {
+    label: 'Taken',
+    title: dst ? 'Rostered by another team' : 'Rostered by another team',
+    className: 'border border-rose-400/40 bg-rose-500/15 text-rose-100'
+  }
+}
+
+/** Prefer "M. Stafford" when the sticky team column is tight. */
+function shortPlayerLabel(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean)
+  if (parts.length < 2) return fullName
+  const first = parts[0]
+  const last = parts[parts.length - 1]
+  if (first.length <= 2) return fullName
+  return `${first[0]}. ${last}`
 }
 
 function rankColor(rank: number | null): string {
@@ -623,7 +649,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
             <thead>
               <tr className="border-b border-line text-[10px] uppercase tracking-wider text-muted">
                 <th className="sticky left-0 z-10 bg-panel px-2 py-2">Rank</th>
-                <th className="sticky left-10 z-10 bg-panel px-2 py-2">Team</th>
+                <th className="sticky left-10 z-10 min-w-[7.5rem] bg-panel px-2 py-2">Team</th>
                 <th className="px-2 py-2">Opp avg</th>
                 {Array.from({ length: 18 }, (_, i) => i + 1).map((week) => (
                   <th key={week} className="px-1 py-2 text-center font-semibold">
@@ -636,22 +662,26 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
               {teamRows.map((row) => (
                 <tr key={row.team} className="border-b border-line/60" data-testid={`sos-row-${row.team}`}>
                   <td className="sticky left-0 z-10 bg-panel px-2 py-1.5 font-semibold text-mint">{row.rank}</td>
-                  <td className="sticky left-10 z-10 bg-panel px-2 py-1.5">
+                  <td className="sticky left-10 z-10 min-w-[7.5rem] bg-panel px-2 py-1.5">
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-bold">{row.team}</span>
+                      <span className="font-bold leading-tight">{row.team}</span>
                       {row.primaryPlayer?.name ? (
                         <span
-                          className="flex flex-wrap items-center gap-1 text-[10px] font-medium text-slate-300"
+                          className="flex flex-wrap items-center gap-1 text-[10px] font-medium leading-tight text-slate-300"
                           data-testid={`sos-primary-${row.team}`}
+                          title={row.primaryPlayer.name}
                         >
-                          <span className="max-w-[9rem] truncate">{row.primaryPlayer.name}</span>
+                          <span className="max-w-[6.5rem] truncate">
+                            {shortPlayerLabel(row.primaryPlayer.name)}
+                          </span>
                           {(() => {
-                            const badge = availabilityBadge(row.leagueAvailability)
+                            const badge = availabilityBadge(row.leagueAvailability, position)
                             if (!badge) return null
                             return (
                               <span
-                                className={`rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide ${badge.className}`}
+                                className={`shrink-0 rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide ${badge.className}`}
                                 data-testid={`sos-avail-${row.team}`}
+                                title={badge.title}
                               >
                                 {badge.label}
                               </span>

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { draftApi } from '../api/client'
 import type {
+  WorkbookFeederGroup,
+  WorkbookFeederResponse,
   WorkbookInjuriesResponse,
   WorkbookMatricesResponse,
   WorkbookMatrixGroup,
@@ -21,8 +23,20 @@ export const WORKBOOK_SUB_TABS: Array<{ id: WorkbookSubTab; label: string; testI
   { id: 'pace', label: 'Pace', testId: 'workbook-subnav-pace' },
   { id: 'injuries', label: 'Injuries', testId: 'workbook-subnav-injuries' },
   { id: 'matrices', label: 'Matrices', testId: 'workbook-subnav-matrices' },
+  { id: 'feeders', label: 'Feeders', testId: 'workbook-subnav-feeders' },
   { id: 'pool', label: 'Pool', testId: 'workbook-subnav-pool' },
   { id: 'oldl', label: 'OL/DL', testId: 'workbook-subnav-oldl' }
+]
+
+const FEEDER_GROUPS: Array<{ id: WorkbookFeederGroup; label: string }> = [
+  { id: 'dsr', label: 'DSR' },
+  { id: 'qb', label: 'QB FP/G' },
+  { id: 'wr', label: 'WR FP/G' },
+  { id: 'te', label: 'TE FP/G' },
+  { id: 'rb', label: 'RB FP/G' },
+  { id: 'targets', label: 'Targets/G' },
+  { id: 'yards', label: 'Yards/G' },
+  { id: 'tds', label: 'TDs/G' }
 ]
 
 export interface WorkbookP2Controls {
@@ -596,6 +610,134 @@ export function WorkbookMatricesPanel({ controls }: { controls: WorkbookP2Contro
       </div>
       {data?.attribution && (
         <p className="px-4 pb-3 text-[10px] text-muted" data-testid="workbook-matrices-attribution">
+          {data.attribution}
+        </p>
+      )}
+    </section>
+  )
+}
+
+export function WorkbookFeedersPanel({ controls }: { controls: WorkbookP2Controls }) {
+  const [group, setGroup] = useState<WorkbookFeederGroup>('wr')
+  const [data, setData] = useState<WorkbookFeederResponse | null>(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [sortKey, setSortKey] = useState<'team' | 'net'>('net')
+
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      setLoading(true)
+      setError('')
+      try {
+        const payload = await draftApi.workbookFeeders(group, {
+          ...windowQuery(controls),
+          scoring: controls.scoring
+        })
+        if (cancelled) return
+        setData(payload)
+      } catch (err) {
+        if (cancelled) return
+        setData(null)
+        setError(err instanceof Error ? err.message : 'Could not load feeders.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [group, controls.week, controls.window, controls.customStart, controls.customEnd, controls.scoring])
+
+  const decimals = group === 'dsr' ? 3 : 1
+  const sorted = useMemo(() => {
+    const rows = [...(data?.teams ?? [])]
+    if (sortKey === 'team') {
+      return rows.sort((a, b) => a.team.localeCompare(b.team))
+    }
+    return rows.sort((a, b) => (b.net ?? -Infinity) - (a.net ?? -Infinity))
+  }, [data?.teams, sortKey])
+
+  return (
+    <section className="panel overflow-hidden" data-testid="workbook-feeders-panel">
+      <div className="panel-heading">
+        <div>
+          <p className="eyebrow">Feeder tables</p>
+          <h2>OFF / DEF / Net · one headline metric</h2>
+          <p className="mt-1 text-[11px] text-muted">
+            Same rates as Matrices without tertile colors — Out/Slot drill-down stays on Matchups explain.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-muted">
+            Group
+            <select
+              data-testid="workbook-feeders-group"
+              className="rounded-lg border border-line bg-ink px-2 py-1.5 text-xs font-semibold normal-case tracking-normal text-slate-100"
+              value={group}
+              onChange={(event) => setGroup(event.target.value as WorkbookFeederGroup)}
+            >
+              {FEEDER_GROUPS.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-muted">
+            Sort
+            <select
+              data-testid="workbook-feeders-sort"
+              className="rounded-lg border border-line bg-ink px-2 py-1.5 text-xs font-semibold normal-case tracking-normal text-slate-100"
+              value={sortKey}
+              onChange={(event) => setSortKey(event.target.value as 'team' | 'net')}
+            >
+              <option value="net">Net high → low</option>
+              <option value="team">Team A–Z</option>
+            </select>
+          </label>
+          {loading && <p className="text-xs text-muted">Loading…</p>}
+        </div>
+      </div>
+      {error && (
+        <p role="alert" className="px-4 py-2 text-xs text-rose-200">
+          {error}
+        </p>
+      )}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse text-left text-xs" data-testid="workbook-feeders-table">
+          <thead>
+            <tr className="border-b border-line text-[10px] uppercase tracking-wider text-muted">
+              <th className="px-3 py-2">Team</th>
+              <th className="px-3 py-2 text-right">OFF</th>
+              <th className="px-3 py-2 text-right">DEF</th>
+              <th className="px-3 py-2 text-right">Net</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((row) => (
+              <tr key={row.team} className="border-b border-line/60" data-testid={`workbook-feeder-row-${row.team}`}>
+                <td className="px-3 py-1.5 font-bold">{row.team}</td>
+                <td className="px-3 py-1.5 text-right tabular-nums">{formatValue(row.off, decimals)}</td>
+                <td className="px-3 py-1.5 text-right tabular-nums text-muted">
+                  {formatValue(row.def, decimals)}
+                </td>
+                <td className="px-3 py-1.5 text-right tabular-nums font-semibold">{formatValue(row.net, decimals)}</td>
+              </tr>
+            ))}
+            {!loading && !error && sorted.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-4 py-6 text-center text-muted">
+                  No feeder data for this selection.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {data?.attribution && (
+        <p className="px-4 pb-3 text-[10px] text-muted" data-testid="workbook-feeders-attribution">
           {data.attribution}
         </p>
       )}

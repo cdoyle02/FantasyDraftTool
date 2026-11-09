@@ -68,6 +68,8 @@ export function WorkbookPoolView({ controls }: { controls: WorkbookP2Controls })
   const [rankError, setRankError] = useState('')
   const [ranking, setRanking] = useState(false)
   const [manualTags, setManualTags] = useState<Record<string, PoolManualTag>>(readTags)
+  const [joinFilter, setJoinFilter] = useState<'all' | 'unmatched'>('all')
+
 
   useEffect(() => {
     try {
@@ -93,6 +95,17 @@ export function WorkbookPoolView({ controls }: { controls: WorkbookP2Controls })
   }, [csvText])
 
   const rankedRows = useMemo(() => rankData?.players ?? [], [rankData?.players])
+  const unmatchedCount = useMemo(
+    () => rankedRows.filter((row) => row.joinStatus === 'unmatched').length,
+    [rankedRows]
+  )
+  const visibleRows = useMemo(() => {
+    if (joinFilter === 'unmatched') {
+      return rankedRows.filter((row) => row.joinStatus === 'unmatched')
+    }
+    return rankedRows
+  }, [joinFilter, rankedRows])
+
 
   const rankPool = useCallback(async () => {
     if (parsedPlayers.length === 0) {
@@ -191,67 +204,110 @@ export function WorkbookPoolView({ controls }: { controls: WorkbookP2Controls })
       </div>
 
       {rankData && (
-        <div className="overflow-x-auto border-t border-line">
-          <table className="min-w-full border-collapse text-left text-xs" data-testid="workbook-pool-table">
-            <thead>
-              <tr className="border-b border-line text-[10px] uppercase tracking-wider text-muted">
-                <th className="px-3 py-2">Name</th>
-                <th className="px-3 py-2 text-right">Salary</th>
-                <th className="px-3 py-2">Pos</th>
-                <th className="px-3 py-2">Opp</th>
-                <th className="px-3 py-2 text-right">Net FP/G</th>
-                <th className="px-3 py-2 text-center">Tier</th>
-                <th className="px-3 py-2 text-right">Value</th>
-                <th className="px-3 py-2">Match</th>
-                <th className="px-3 py-2">Tag</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rankedRows.map((row) => {
-                const tag = manualTags[poolPlayerKey(row)]
-                const unmatched = row.joinStatus === 'unmatched'
-                return (
-                  <tr
-                    key={`${row.name}-${row.team}-${row.salary}`}
-                    className={`border-b border-line/60 ${unmatched ? 'bg-rose-500/10' : ''}`}
-                    data-testid={`workbook-pool-row-${row.name.replace(/\s+/g, '-')}`}
-                  >
-                    <td className="px-3 py-1.5 font-semibold">
-                      {row.name}
-                      <span className="ml-1 text-[10px] text-muted">{row.team}</span>
-                    </td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">${row.salary.toLocaleString()}</td>
-                    <td className="px-3 py-1.5">{row.position}</td>
-                    <td className="px-3 py-1.5 text-muted">{row.opponent ?? '—'}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums font-semibold">
-                      {formatValue(row.netFpG, 1)}
-                    </td>
-                    <td className="px-3 py-1.5 text-center font-bold text-muted">{tierAbbrev(row.tier)}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">{formatValue(row.value, 2)}</td>
-                    <td className="px-3 py-1.5">
-                      <span
-                        className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${
-                          unmatched ? 'bg-rose-500/30 text-rose-100' : 'bg-mint/20 text-mint'
-                        }`}
-                      >
-                        {row.joinStatus}
-                      </span>
-                    </td>
-                    <td className="px-3 py-1.5">
-                      <button
-                        type="button"
-                        data-testid={`workbook-pool-tag-${row.name.replace(/\s+/g, '-')}`}
-                        className="rounded border border-line px-2 py-0.5 text-[10px] font-semibold uppercase text-muted hover:text-white"
-                        onClick={() => cycleTag(row)}
-                      >
-                        {tag ?? '—'}
-                      </button>
+        <div className="border-t border-line">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2">
+            <p className="text-xs text-muted" data-testid="workbook-pool-join-stats">
+              {rankedRows.length} ranked
+              {unmatchedCount > 0
+                ? ` · ${unmatchedCount} unmatched`
+                : ' · all matched'}
+            </p>
+            <div
+              className="flex gap-1 rounded-lg border border-line bg-ink/40 p-0.5"
+              role="group"
+              aria-label="Pool join filter"
+            >
+              <button
+                type="button"
+                data-testid="workbook-pool-filter-all"
+                className={`rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase ${
+                  joinFilter === 'all' ? 'bg-mint text-ink' : 'text-muted hover:text-white'
+                }`}
+                onClick={() => setJoinFilter('all')}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                data-testid="workbook-pool-filter-unmatched"
+                className={`rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase ${
+                  joinFilter === 'unmatched' ? 'bg-mint text-ink' : 'text-muted hover:text-white'
+                }`}
+                onClick={() => setJoinFilter('unmatched')}
+              >
+                Unmatched
+              </button>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse text-left text-xs" data-testid="workbook-pool-table">
+              <thead>
+                <tr className="border-b border-line text-[10px] uppercase tracking-wider text-muted">
+                  <th className="px-3 py-2">Name</th>
+                  <th className="px-3 py-2 text-right">Salary</th>
+                  <th className="px-3 py-2">Pos</th>
+                  <th className="px-3 py-2">Opp</th>
+                  <th className="px-3 py-2 text-right">Net FP/G</th>
+                  <th className="px-3 py-2 text-center">Tier</th>
+                  <th className="px-3 py-2 text-right">Value</th>
+                  <th className="px-3 py-2">Match</th>
+                  <th className="px-3 py-2">Tag</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibleRows.map((row) => {
+                  const tag = manualTags[poolPlayerKey(row)]
+                  const unmatched = row.joinStatus === 'unmatched'
+                  return (
+                    <tr
+                      key={`${row.name}-${row.team}-${row.salary}`}
+                      className={`border-b border-line/60 ${unmatched ? 'bg-rose-500/10' : ''}`}
+                      data-testid={`workbook-pool-row-${row.name.replace(/\s+/g, '-')}`}
+                    >
+                      <td className="px-3 py-1.5 font-semibold">
+                        {row.name}
+                        <span className="ml-1 text-[10px] text-muted">{row.team}</span>
+                      </td>
+                      <td className="px-3 py-1.5 text-right tabular-nums">${row.salary.toLocaleString()}</td>
+                      <td className="px-3 py-1.5">{row.position}</td>
+                      <td className="px-3 py-1.5 text-muted">{row.opponent ?? '—'}</td>
+                      <td className="px-3 py-1.5 text-right tabular-nums font-semibold">
+                        {formatValue(row.netFpG, 1)}
+                      </td>
+                      <td className="px-3 py-1.5 text-center font-bold text-muted">{tierAbbrev(row.tier)}</td>
+                      <td className="px-3 py-1.5 text-right tabular-nums">{formatValue(row.value, 2)}</td>
+                      <td className="px-3 py-1.5">
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${
+                            unmatched ? 'bg-rose-500/30 text-rose-100' : 'bg-mint/20 text-mint'
+                          }`}
+                        >
+                          {row.joinStatus}
+                        </span>
+                      </td>
+                      <td className="px-3 py-1.5">
+                        <button
+                          type="button"
+                          data-testid={`workbook-pool-tag-${row.name.replace(/\s+/g, '-')}`}
+                          className="rounded border border-line px-2 py-0.5 text-[10px] font-semibold uppercase text-muted hover:text-white"
+                          onClick={() => cycleTag(row)}
+                        >
+                          {tag ?? '—'}
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
+                {visibleRows.length === 0 && (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-6 text-center text-muted">
+                      {joinFilter === 'unmatched' ? 'No unmatched players.' : 'No ranked players.'}
                     </td>
                   </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

@@ -53,6 +53,18 @@ function buildRankPayload(overrides: Partial<WorkbookPoolRankResponse> = {}): Wo
         tier: 'top',
         joinStatus: 'matched',
         value: 2.64
+      },
+      {
+        name: 'Unknown Guy',
+        team: 'FA',
+        salary: 3000,
+        position: 'WR',
+        matchupTeam: null,
+        opponent: null,
+        netFpG: null,
+        tier: null,
+        joinStatus: 'unmatched',
+        value: null
       }
     ],
     ...overrides
@@ -101,6 +113,11 @@ describe('WorkbookPoolView', () => {
 
     expect(screen.getByTestId("workbook-pool-row-Ja'Marr-Chase")).toHaveTextContent('14.2')
     expect(screen.getByTestId('workbook-pool-row-Ja\'Marr-Chase')).toHaveTextContent('matched')
+    expect(screen.getByTestId('workbook-pool-join-stats')).toHaveTextContent('1 unmatched')
+
+    fireEvent.click(screen.getByTestId('workbook-pool-filter-unmatched'))
+    expect(screen.queryByTestId("workbook-pool-row-Ja'Marr-Chase")).not.toBeInTheDocument()
+    expect(screen.getByTestId('workbook-pool-row-Unknown-Guy')).toBeInTheDocument()
 
     const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
     expect(calls.some((path) => path.includes('/workbook/pool/rank'))).toBe(true)

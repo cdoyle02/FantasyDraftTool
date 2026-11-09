@@ -635,6 +635,7 @@ export type WorkbookSubTab =
   | 'pace'
   | 'injuries'
   | 'matrices'
+  | 'feeders'
   | 'pool'
   | 'oldl'
 

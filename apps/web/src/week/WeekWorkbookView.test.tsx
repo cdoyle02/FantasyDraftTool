@@ -406,6 +406,32 @@ describe('WeekWorkbookView', () => {
           )
         }
 
+        if (parsed.pathname.startsWith('/api/v1/nfl/workbook/feeders/')) {
+          const group = parsed.pathname.split('/').pop() ?? 'wr'
+          return new Response(
+            JSON.stringify({
+              season: 2026,
+              week: 5,
+              window: 'l4',
+              scoring: 'ppr',
+              group,
+              ratedThroughWeek: 4,
+              fetchedAt: '2026-11-08T12:00:00Z',
+              source: 'fixture',
+              stale: false,
+              attribution: 'Feeder fixture',
+              teams: [
+                { team: 'AAA', off: 12.5, def: 10.1, net: 11.3 },
+                { team: 'BBB', off: 9.0, def: 11.0, net: 10.0 }
+              ]
+            }),
+            {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          )
+        }
+
         if (parsed.pathname === '/api/v1/nfl/workbook/oldl') {
           return new Response(JSON.stringify(buildOldlPayload()), {
             status: 200,
@@ -579,6 +605,7 @@ describe('WeekWorkbookView', () => {
     expect(screen.getByTestId('workbook-subnav-pace')).toBeInTheDocument()
     expect(screen.getByTestId('workbook-subnav-injuries')).toBeInTheDocument()
     expect(screen.getByTestId('workbook-subnav-matrices')).toBeInTheDocument()
+    expect(screen.getByTestId('workbook-subnav-feeders')).toBeInTheDocument()
     expect(screen.getByTestId('workbook-subnav-pool')).toBeInTheDocument()
     expect(screen.getByTestId('workbook-subnav-oldl')).toBeInTheDocument()
   })
@@ -627,6 +654,16 @@ describe('WeekWorkbookView', () => {
     expect(calls.some((url) => url.includes('/workbook/matrices/wr'))).toBe(true)
     expect(screen.getByTestId('workbook-matrix-row-AAA')).toHaveTextContent('T')
     expect(screen.getByTestId('workbook-matrix-row-AAA')).toHaveTextContent('11.0')
+  })
+
+  it('loads feeders when the Feeders sub-tab is selected', async () => {
+    render(<WeekWorkbookView />)
+    await waitFor(() => expect(screen.getByTestId('workbook-table')).toBeInTheDocument())
+    fireEvent.click(screen.getByTestId('workbook-subnav-feeders'))
+    await waitFor(() => expect(screen.getByTestId('workbook-feeders-table')).toBeInTheDocument())
+    const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+    expect(calls.some((url) => url.includes('/workbook/feeders/wr'))).toBe(true)
+    expect(screen.getByTestId('workbook-feeder-row-AAA')).toHaveTextContent('11.3')
   })
 
   it('shows pool paste UI on Pool sub-tab without loading matchups again', async () => {
