@@ -339,6 +339,8 @@ def build_tier1_opportunity_response(
             if espn_http_json is not None:
                 espn_s2 = espn_s2 or "test-espn-s2"
                 swid = swid or "{00000000-0000-0000-0000-000000000000}"
+            elif not espn_s2 or not swid:
+                raise EspnRosterError("ESPN credentials are not configured")
             roster = fetch_league_roster(
                 league_id=league_id,
                 season=roster_season,
@@ -502,6 +504,8 @@ def build_tier2_opportunity_response(
             if espn_http_json is not None:
                 espn_s2 = espn_s2 or "test-espn-s2"
                 swid = swid or "{00000000-0000-0000-0000-000000000000}"
+            elif not espn_s2 or not swid:
+                raise EspnRosterError("ESPN credentials are not configured")
             roster = fetch_league_roster(
                 league_id=league_id,
                 season=roster_season,
