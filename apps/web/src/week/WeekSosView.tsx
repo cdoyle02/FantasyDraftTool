@@ -8,7 +8,10 @@ import type {
   SosTier1Window,
   StrengthOfScheduleResponse,
   StrengthOfScheduleTier1OpportunityResponse,
-  StrengthOfScheduleTier1Response
+  StrengthOfScheduleTier1Response,
+  StrengthOfScheduleTier2OpportunityResponse,
+  StrengthOfScheduleTier2Response,
+  SosTier2Position
 } from './types'
 import { WORKBOOK_LEAGUE_STORAGE_KEY } from './WeekWorkbookView'
 
@@ -32,7 +35,13 @@ const RATING_WINDOWS: { key: SosTier1Window; label: string }[] = [
 ]
 
 type WindowPreset = 'ros' | 'playoffs' | 'full' | 'custom'
-type SosViewMode = 'tier1' | 'classic'
+type SosViewMode = 'tier1' | 'tier2' | 'classic'
+
+const TIER2_POSITIONS: SosTier2Position[] = ['QB', 'RB']
+
+function isTier2Position(position: SosPosition): position is SosTier2Position {
+  return TIER2_POSITIONS.includes(position as SosTier2Position)
+}
 
 function rankColor(rank: number | null): string {
   if (rank == null) return 'transparent'
@@ -101,6 +110,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
   const [customEnd, setCustomEnd] = useState(17)
   const [classicData, setClassicData] = useState<StrengthOfScheduleResponse | null>(null)
   const [tier1Data, setTier1Data] = useState<StrengthOfScheduleTier1Response | null>(null)
+  const [tier2Data, setTier2Data] = useState<StrengthOfScheduleTier2Response | null>(null)
   const [leagues, setLeagues] = useState<EspnLeague[]>([])
   const [leagueId, setLeagueId] = useState(() => {
     try {
@@ -109,9 +119,9 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
       return ''
     }
   })
-  const [opportunityData, setOpportunityData] = useState<StrengthOfScheduleTier1OpportunityResponse | null>(
-    null
-  )
+  const [opportunityData, setOpportunityData] = useState<
+    StrengthOfScheduleTier1OpportunityResponse | StrengthOfScheduleTier2OpportunityResponse | null
+  >(null)
   const [opportunityError, setOpportunityError] = useState('')
   const [opportunityLoading, setOpportunityLoading] = useState(false)
   const [error, setError] = useState('')
@@ -128,6 +138,12 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
   }, [preset, ratedThrough, customStart, customEnd])
 
   useEffect(() => {
+    if (viewMode === 'tier2' && !isTier2Position(position)) {
+      setViewMode('tier1')
+    }
+  }, [position, viewMode])
+
+  useEffect(() => {
     let cancelled = false
     const load = async () => {
       setLoading(true)
@@ -142,6 +158,19 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
           })
           if (cancelled) return
           setTier1Data(payload)
+          setTier2Data(null)
+          setClassicData(null)
+          setRatedThrough(payload.ratedThroughWeek)
+        } else if (viewMode === 'tier2' && isTier2Position(position)) {
+          const payload = await draftApi.strengthOfScheduleTier2({
+            position,
+            window: ratingWindow,
+            startWeek: window.startWeek,
+            endWeek: window.endWeek
+          })
+          if (cancelled) return
+          setTier2Data(payload)
+          setTier1Data(null)
           setClassicData(null)
           setRatedThrough(payload.ratedThroughWeek)
         } else {
@@ -154,12 +183,14 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
           if (cancelled) return
           setClassicData(payload)
           setTier1Data(null)
+          setTier2Data(null)
           setRatedThrough(payload.ratedThroughWeek)
         }
       } catch (err) {
         if (cancelled) return
         setClassicData(null)
         setTier1Data(null)
+        setTier2Data(null)
         setError(err instanceof Error ? err.message : 'Could not load strength of schedule.')
       } finally {
         if (!cancelled) setLoading(false)
@@ -200,13 +231,16 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
     }
   }, [leagueId])
 
-  const opportunityWeek = useMemo(
-    () => Math.min(18, Math.max(1, (tier1Data?.ratedThroughWeek ?? ratedThrough) + 1 || 1)),
-    [tier1Data?.ratedThroughWeek, ratedThrough]
-  )
+  const opportunityWeek = useMemo(() => {
+    const through =
+      tier2Data?.ratedThroughWeek ?? tier1Data?.ratedThroughWeek ?? ratedThrough
+    return Math.min(18, Math.max(1, through + 1 || 1))
+  }, [tier1Data?.ratedThroughWeek, tier2Data?.ratedThroughWeek, ratedThrough])
 
   useEffect(() => {
-    if (viewMode !== 'tier1' || position === 'DST') {
+    const tier1Opportunity = viewMode === 'tier1' && position !== 'DST'
+    const tier2Opportunity = viewMode === 'tier2' && isTier2Position(position)
+    if (!tier1Opportunity && !tier2Opportunity) {
       setOpportunityData(null)
       setOpportunityError('')
       return
@@ -216,12 +250,20 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
       setOpportunityLoading(true)
       setOpportunityError('')
       try {
-        const payload = await draftApi.tier1Opportunity({
-          position,
-          window: ratingWindow,
-          week: opportunityWeek,
-          leagueId: leagueId || undefined
-        })
+        const payload =
+          viewMode === 'tier2' && isTier2Position(position)
+            ? await draftApi.tier2Opportunity({
+                position,
+                window: ratingWindow,
+                week: opportunityWeek,
+                leagueId: leagueId || undefined
+              })
+            : await draftApi.tier1Opportunity({
+                position,
+                window: ratingWindow,
+                week: opportunityWeek,
+                leagueId: leagueId || undefined
+              })
         if (cancelled) return
         setOpportunityData(payload)
       } catch (err) {
@@ -256,23 +298,43 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
   }
 
   const activeRatedThrough =
-    viewMode === 'tier1' ? tier1Data?.ratedThroughWeek ?? 0 : classicData?.ratedThroughWeek ?? 0
-  const activeStale = viewMode === 'tier1' ? tier1Data?.stale : classicData?.stale
-  const activeSource = viewMode === 'tier1' ? tier1Data?.source : classicData?.source
+    viewMode === 'tier2'
+      ? tier2Data?.ratedThroughWeek ?? 0
+      : viewMode === 'tier1'
+        ? tier1Data?.ratedThroughWeek ?? 0
+        : classicData?.ratedThroughWeek ?? 0
+  const activeStale =
+    viewMode === 'tier2'
+      ? tier2Data?.stale
+      : viewMode === 'tier1'
+        ? tier1Data?.stale
+        : classicData?.stale
+  const activeSource =
+    viewMode === 'tier2'
+      ? tier2Data?.source
+      : viewMode === 'tier1'
+        ? tier1Data?.source
+        : classicData?.source
 
   const metricLabel =
-    viewMode === 'tier1'
-      ? `Shrunk aFPA · ${ratingWindow.toUpperCase()} rating`
-      : metric === 'fpa'
-        ? 'Points allowed'
-        : 'Schedule adjusted'
+    viewMode === 'tier2'
+      ? `Shrunk EPA allowed · ${ratingWindow.toUpperCase()} rating`
+      : viewMode === 'tier1'
+        ? `Shrunk aFPA · ${ratingWindow.toUpperCase()} rating`
+        : metric === 'fpa'
+          ? 'Points allowed'
+          : 'Schedule adjusted'
   const scoringNote = position === 'DST' ? 'ESPN-style D/ST scoring (nflverse team stats)' : 'Full PPR team totals (nflverse)'
   const sourceLine =
     activeRatedThrough > 0 || activeSource
       ? [
           scoringNote,
           activeRatedThrough > 0 ? `rated through week ${activeRatedThrough}` : 'no completed weeks yet',
-          viewMode === 'tier1' && tier1Data ? `shrink k=${tier1Data.shrinkK}` : null,
+          viewMode === 'tier2' && tier2Data
+            ? `shrink k=${tier2Data.shrinkK} · ${tier2Data.softnessMetric}`
+            : viewMode === 'tier1' && tier1Data
+              ? `shrink k=${tier1Data.shrinkK}`
+              : null,
           activeStale ? 'snapshot fallback' : activeSource
         ]
           .filter(Boolean)
@@ -284,7 +346,16 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
       ? `week ${window.startWeek}`
       : `weeks ${window.startWeek}–${window.endWeek}`
 
-  const teamRows = viewMode === 'tier1' ? tier1Data?.teams ?? [] : classicData?.teams ?? []
+  const teamRows =
+    viewMode === 'tier2'
+      ? tier2Data?.teams ?? []
+      : viewMode === 'tier1'
+        ? tier1Data?.teams ?? []
+        : classicData?.teams ?? []
+  const tier2OpportunityMeta =
+    viewMode === 'tier2' && opportunityData && 'snapFiltered' in opportunityData
+      ? opportunityData
+      : null
   const opportunityPlayers = opportunityData?.players ?? []
   const rosterOverlay = Boolean(leagueId && opportunityData?.leagueId)
 
@@ -314,7 +385,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
           </div>
           <p className="mt-1 text-xs text-muted">
             Household grid ·{' '}
-            {viewMode === 'tier1'
+            {viewMode === 'tier1' || viewMode === 'tier2'
               ? 'S / N / T = soft / neutral / tough defensive buckets'
               : 'green = easy opponent rank · red = tough · not FootClan numbers'}
           </p>
@@ -349,6 +420,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
               onChange={(event) => setViewMode(event.target.value as SosViewMode)}
             >
               <option value="tier1">Tier 1 (shrunk aFPA)</option>
+              <option value="tier2">Tier 2 (EPA + script)</option>
               <option value="classic">Classic (FPA / PAE)</option>
             </select>
           </label>
@@ -366,7 +438,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
               </select>
             </label>
           )}
-          {viewMode === 'tier1' && (
+          {(viewMode === 'tier1' || viewMode === 'tier2') && (
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Rating window</span>
               <div className="flex flex-wrap rounded-lg border border-line p-0.5" role="group" aria-label="Tier1 rating window">
@@ -505,14 +577,18 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
                         </td>
                       )
                     }
-                    if (viewMode === 'tier1' && 'softness' in cell) {
-                      const tier1Cell = cell as (typeof row.weeks)[number] & {
+                    if ((viewMode === 'tier1' || viewMode === 'tier2') && 'softness' in cell) {
+                      const tierCell = cell as (typeof row.weeks)[number] & {
                         shrunkAfpa?: number | null
+                        shrunkEpa?: number | null
                         rank?: number | null
                         softness?: SosSoftness | null
                       }
-                      const oppRank = tier1Cell.rank ?? null
-                      const softness = tier1Cell.softness ?? null
+                      const oppRank = tierCell.rank ?? null
+                      const softness = tierCell.softness ?? null
+                      const metricValue =
+                        viewMode === 'tier2' ? tierCell.shrunkEpa : tierCell.shrunkAfpa
+                      const metricShort = viewMode === 'tier2' ? 'EPA' : 'aFPA'
                       return (
                         <td
                           key={cell.week}
@@ -521,7 +597,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
                           style={{ backgroundColor: softnessColor(softness) }}
                           title={
                             cell.opponent
-                              ? `${cell.opponent} · rank ${oppRank ?? '—'} · ${formatAvg(tier1Cell.shrunkAfpa)} aFPA · ${softness ?? '—'}`
+                              ? `${cell.opponent} · rank ${oppRank ?? '—'} · ${formatAvg(metricValue)} ${metricShort} · ${softness ?? '—'}`
                               : undefined
                           }
                         >
@@ -577,18 +653,28 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
         </div>
       </section>
 
-      {viewMode === 'tier1' && position !== 'DST' && (
+      {((viewMode === 'tier1' && position !== 'DST') ||
+        (viewMode === 'tier2' && isTier2Position(position))) && (
         <section className="panel overflow-hidden" data-testid="sos-opportunity-panel">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">Tier 1 opportunity</p>
+              <p className="eyebrow">{viewMode === 'tier2' ? 'Tier 2 opportunity' : 'Tier 1 opportunity'}</p>
               <h2>
-                {position} · week {opportunityWeek} · softness × usage
+                {position} · week {opportunityWeek} ·{' '}
+                {viewMode === 'tier2' ? 'script-adjusted EPA softness × snap usage' : 'softness × usage'}
               </h2>
               <p className="mt-1 text-[11px] text-muted">
-                {rosterOverlay
-                  ? `ESPN roster overlay · ${opportunityData?.leagueName ?? leagueId}`
-                  : 'nflverse usage pool — pick a league to filter to your roster'}
+                {viewMode === 'tier2' && tier2OpportunityMeta ? (
+                  <>
+                    snap filter {tier2OpportunityMeta.snapFiltered ? 'on' : 'off'}
+                    {tier2OpportunityMeta.gameScriptApplied ? ' · Vegas script on' : ''}
+                    {rosterOverlay ? ` · ESPN ${opportunityData?.leagueName ?? leagueId}` : ''}
+                  </>
+                ) : rosterOverlay ? (
+                  `ESPN roster overlay · ${opportunityData?.leagueName ?? leagueId}`
+                ) : (
+                  'nflverse usage pool — pick a league to filter to your roster'
+                )}
               </p>
             </div>
             <div className="flex flex-wrap items-end gap-3">

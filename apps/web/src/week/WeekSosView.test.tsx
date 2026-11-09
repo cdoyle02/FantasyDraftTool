@@ -1,7 +1,11 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { WeekSosView } from './WeekSosView'
-import type { StrengthOfScheduleResponse, StrengthOfScheduleTier1Response } from './types'
+import type {
+  StrengthOfScheduleResponse,
+  StrengthOfScheduleTier1Response,
+  StrengthOfScheduleTier2Response
+} from './types'
 
 function classicCell(week: number, opponent: string | null, rank: number | null, bye = false, inWindow = true) {
   return {
@@ -69,6 +73,38 @@ function buildClassicPayload(overrides: Partial<StrengthOfScheduleResponse> = {}
   }
 }
 
+function buildTier2Payload(
+  overrides: Partial<StrengthOfScheduleTier2Response> = {}
+): StrengthOfScheduleTier2Response {
+  const payload = buildTier1Payload({ position: 'RB' })
+  const weeks = payload.teams[0].weeks.map((cell) => ({
+    week: cell.week,
+    opponent: cell.opponent,
+    shrunkEpa: cell.shrunkAfpa,
+    rank: cell.rank,
+    softness: cell.softness,
+    softnessScore: cell.softnessScore,
+    bye: cell.bye,
+    inWindow: cell.inWindow
+  }))
+  return {
+    season: payload.season,
+    position: 'RB',
+    window: payload.window,
+    startWeek: payload.startWeek,
+    endWeek: payload.endWeek,
+    ratedThroughWeek: payload.ratedThroughWeek,
+    ratingWeeks: payload.ratingWeeks,
+    shrinkK: payload.shrinkK,
+    softnessMetric: 'epa_allowed',
+    fetchedAt: payload.fetchedAt,
+    source: payload.source,
+    stale: payload.stale,
+    teams: [{ ...payload.teams[0], weeks }],
+    ...overrides
+  }
+}
+
 function buildTier1Payload(
   overrides: Partial<StrengthOfScheduleTier1Response> = {}
 ): StrengthOfScheduleTier1Response {
@@ -112,6 +148,55 @@ describe('WeekSosView', () => {
             JSON.stringify({
               leagues: [{ id: '1216398267', name: 'Girls Who Ball' }]
             }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+        if (url.includes('/strength-of-schedule/tier2/opportunity')) {
+          const params = new URL(url, 'http://localhost').searchParams
+          const position = params.get('position') ?? 'RB'
+          return new Response(
+            JSON.stringify({
+              season: 2026,
+              position,
+              window: params.get('window') ?? 'l8',
+              week: Number(params.get('week') ?? 10),
+              ratedThroughWeek: 9,
+              ratingWeeks: [2, 3, 4, 5, 6, 7, 8, 9],
+              shrinkK: 4,
+              softnessMetric: 'epa_allowed',
+              minOffenseSnapPct: 0.2,
+              snapFiltered: true,
+              gameScriptApplied: false,
+              fetchedAt: '2026-11-08T12:00:00Z',
+              source: 'nflverse',
+              stale: false,
+              players: [
+                {
+                  name: 'Workhorse',
+                  team: 'CHI',
+                  position: 'RB',
+                  week: 10,
+                  opponent: 'GB',
+                  opportunity: 0.68,
+                  usageShare: 0.68,
+                  softness: 'soft',
+                  softnessScore: 1,
+                  adjustedSoftness: 1,
+                  gameScriptDelta: 0
+                }
+              ]
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+        if (url.includes('/strength-of-schedule/tier2')) {
+          const params = new URL(url, 'http://localhost').searchParams
+          return new Response(
+            JSON.stringify(
+              buildTier2Payload({
+                position: (params.get('position') ?? 'RB') as StrengthOfScheduleTier2Response['position']
+              })
+            ),
             { status: 200, headers: { 'Content-Type': 'application/json' } }
           )
         }
@@ -274,6 +359,18 @@ describe('WeekSosView', () => {
 
     expect(sessionStorage.getItem('crossLink.week')).toBe('10')
     expect(navigate).toHaveBeenCalledWith('week-workbook')
+  })
+
+  it('loads tier2 grid and opportunity when tier2 view is selected', async () => {
+    render(<WeekSosView />)
+    await waitFor(() => expect(screen.getByTestId('sos-table')).toBeInTheDocument())
+    fireEvent.change(screen.getByTestId('sos-view-mode'), { target: { value: 'tier2' } })
+    await waitFor(() => {
+      const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+      expect(calls.some((url) => url.includes('/strength-of-schedule/tier2?'))).toBe(true)
+      expect(calls.some((url) => url.includes('/tier2/opportunity'))).toBe(true)
+    })
+    expect(screen.getByTestId('sos-source-line')).toHaveTextContent('epa_allowed')
   })
 
   it('applies position from sessionStorage on mount', async () => {

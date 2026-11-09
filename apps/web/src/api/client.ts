@@ -19,6 +19,10 @@ import type {
   StrengthOfScheduleTier1OpportunityResponse,
   StrengthOfScheduleTier1Query,
   StrengthOfScheduleTier1Response,
+  StrengthOfScheduleTier2OpportunityQuery,
+  StrengthOfScheduleTier2OpportunityResponse,
+  StrengthOfScheduleTier2Query,
+  StrengthOfScheduleTier2Response,
   WeekOddsResponse,
   WorkbookExplainQuery,
   WorkbookExplainResponse,
@@ -364,6 +368,32 @@ export class DraftApiClient {
     if (params.leagueId) query.set('leagueId', params.leagueId)
     return this.request<StrengthOfScheduleTier1OpportunityResponse>(
       `/api/v1/nfl/strength-of-schedule/tier1/opportunity?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
+
+  strengthOfScheduleTier2(params: StrengthOfScheduleTier2Query) {
+    const query = new URLSearchParams({ position: params.position })
+    query.set('window', params.window ?? 'l8')
+    if (params.startWeek != null) query.set('startWeek', String(params.startWeek))
+    if (params.endWeek != null) query.set('endWeek', String(params.endWeek))
+    if (params.season != null) query.set('season', String(params.season))
+    return this.request<StrengthOfScheduleTier2Response>(
+      `/api/v1/nfl/strength-of-schedule/tier2?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
+
+  tier2Opportunity(params: StrengthOfScheduleTier2OpportunityQuery) {
+    const query = new URLSearchParams({ position: params.position })
+    query.set('window', params.window ?? 'l8')
+    if (params.week != null) query.set('week', String(params.week))
+    if (params.season != null) query.set('season', String(params.season))
+    if (params.leagueId) query.set('leagueId', params.leagueId)
+    return this.request<StrengthOfScheduleTier2OpportunityResponse>(
+      `/api/v1/nfl/strength-of-schedule/tier2/opportunity?${query}`,
       { method: 'GET' },
       30_000
     )

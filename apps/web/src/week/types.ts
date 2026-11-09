@@ -226,6 +226,87 @@ export interface StrengthOfScheduleTier1OpportunityQuery {
   leagueId?: string
 }
 
+export type SosTier2Position = 'QB' | 'RB'
+
+export interface SosTier2WeekCell {
+  week: number
+  opponent: string | null
+  shrunkEpa: number | null
+  rank: number | null
+  softness: SosSoftness | null
+  softnessScore: number | null
+  bye: boolean
+  inWindow: boolean
+}
+
+export interface SosTier2TeamRow {
+  team: string
+  rank: number
+  opponentAverage: number | null
+  weeks: SosTier2WeekCell[]
+}
+
+export interface StrengthOfScheduleTier2Response {
+  season: number
+  position: SosTier2Position
+  window: SosTier1Window
+  startWeek: number
+  endWeek: number
+  ratedThroughWeek: number
+  ratingWeeks: number[]
+  shrinkK: number
+  softnessMetric: string
+  fetchedAt: string
+  source: string
+  stale: boolean
+  teams: SosTier2TeamRow[]
+}
+
+export interface StrengthOfScheduleTier2Query {
+  position: SosTier2Position
+  window?: SosTier1Window
+  startWeek?: number
+  endWeek?: number
+  season?: number
+}
+
+export interface Tier2OpportunityPlayer extends Tier1OpportunityPlayer {
+  gameScriptDelta?: number
+  adjustedSoftness?: number | null
+  minOffenseSnapPct?: number
+}
+
+export interface StrengthOfScheduleTier2OpportunityResponse {
+  season: number
+  position: SosTier2Position
+  window: SosTier1Window
+  week: number
+  ratedThroughWeek: number
+  ratingWeeks: number[]
+  shrinkK: number
+  softnessMetric: string
+  minOffenseSnapPct: number
+  snapFiltered: boolean
+  gameScriptApplied: boolean
+  fetchedAt: string
+  source: string
+  stale: boolean
+  players: Tier2OpportunityPlayer[]
+  leagueId?: string
+  leagueName?: string
+  joinStats?: { matched: number; unmatched: number; skippedPosition?: number }
+  overlayError?: string
+  usageUnavailable?: boolean
+}
+
+export interface StrengthOfScheduleTier2OpportunityQuery {
+  position: SosTier2Position
+  window?: SosTier1Window
+  week?: number
+  season?: number
+  leagueId?: string
+}
+
 /** Workbook Net Matchups — see `apps/api/src/draft_api/workbook/README.md` (SSOT for the math). */
 
 export type WorkbookWindow = 'l4' | 'season' | 'custom'
