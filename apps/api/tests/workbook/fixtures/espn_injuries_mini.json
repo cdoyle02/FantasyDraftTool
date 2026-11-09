@@ -1,0 +1,73 @@
+{
+  "teams": [
+    {
+      "id": 7,
+      "abbrev": "MD",
+      "roster": {
+        "entries": [
+          {
+            "playerId": 1001,
+            "playerPoolEntry": {
+              "player": {
+                "id": 1001,
+                "fullName": "Player Out",
+                "defaultPositionId": 3,
+                "proTeamId": 17,
+                "injuryStatus": "O",
+                "injuryBodyPart": "Knee",
+                "injuryPractice": "Did Not Participate"
+              }
+            }
+          },
+          {
+            "playerId": 1002,
+            "playerPoolEntry": {
+              "player": {
+                "id": 1002,
+                "fullName": "Player Healthy",
+                "defaultPositionId": 2,
+                "proTeamId": 17,
+                "injuryStatus": ""
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "abbrev": "KB",
+      "roster": {
+        "entries": [
+          {
+            "playerId": 2001,
+            "playerPoolEntry": {
+              "player": {
+                "id": 2001,
+                "fullName": "Player Questionable",
+                "defaultPositionId": 4,
+                "proTeamId": 25,
+                "injuryStatus": "Q",
+                "injuryBodyPart": "Ankle",
+                "practiceParticipation": "Limited"
+              }
+            }
+          },
+          {
+            "playerId": 2002,
+            "playerPoolEntry": {
+              "player": {
+                "id": 2002,
+                "fullName": "Player Doubtful",
+                "defaultPositionId": 1,
+                "proTeamId": 25,
+                "injuryStatus": "D",
+                "injuryBodyPart": "Shoulder"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
