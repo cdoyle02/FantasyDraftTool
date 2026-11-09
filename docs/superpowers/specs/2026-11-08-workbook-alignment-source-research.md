@@ -2,17 +2,18 @@
 
 **Date:** 2026-11-08  
 **Task:** 5.5, FantasyDraftTool Workbook P0  
-**Decision:** Defer wiring Out/Slot WR for P0. No free, current-season, full-fidelity source is available now. Keep Out/Slot as `null` + `insufficient_alignment_sample` until an alignment-bearing source is licensed or supplied.
+**Decision (updated 2026-11-08):** No free **play-level** source. **P0.5 ships role-based Out/Slot** from the free weekly Mike Clay WR/CB Cheat Sheet PDF — see [clay-role-out-slot design](./2026-11-08-workbook-clay-role-out-slot-design.md). FTN Participation remains the deferred full-fidelity upgrade.
 
 ## Recommendation
 
 Ranked recommendation:
 
-1. **FTN Data Participation Feed, direct paid API/package** - Best full-fidelity source. It documents play-level `gid`/`pid`, `skp(1-5)`, and `skp_pos(1-5)` values including `WR` and `SLT`. Use this when the household accepts the cost and terms, after obtaining a sample schema and confirming the FTN-to-nflverse game/play crosswalk.
-2. **Household-maintained supplemental CSV** - Best implementation shape if data is obtained outside the public releases. Require explicit provenance, license, and stable columns matching `receiver_alignment` keyed by `nflverse_game_id` + `nflverse_play_id` or `game_id` + `play_id`.
-3. **nflverse participation release** - Useful historical participation table, but not current-season and not documented as exposing raw FTN `skp_pos`. Do not wire for P0 Out/Slot.
-4. **SIS / PFF paid exports** - Plausible alternatives only after the vendor confirms per-play target alignment, outside/slot definitions, export rights, and a nflverse join path.
-5. **nflverse FTN charting / nflverse NGS / pass location** - Not sufficient for exact WR Out/Slot. Do not approximate from pass location.
+1. **Mike Clay weekly WR/CB PDF (role-based) — P0.5** - Free ESPN CDN cheat sheet with LWR/Slot/RWR %. Fast household path; not play-level. Spec: [clay-role-out-slot](./2026-11-08-workbook-clay-role-out-slot-design.md).
+2. **FTN Data Participation Feed, direct paid API/package** - Best full-fidelity source (`skp_pos`). Note: **$599 CSV tier does not include Participation**; API (~$5k/yr) does.
+3. **Household-maintained supplemental CSV** - Normalized to `receiver_alignment` if a licensed/play-level file appears.
+4. **nflverse participation release** - Postseason-only for FTN era; not in-season P0.
+5. **SIS / PFF / RotoWire / Fantasy Points Data Suite** - Aggregate or paid; secondary to Clay for speed.
+6. **nflverse FTN charting / NGS / pass_location** - Not sufficient for exact Out/Slot; do not use pass_location as a silent substitute.
 
 ## Ranked Options
 
