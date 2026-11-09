@@ -226,7 +226,7 @@ export interface StrengthOfScheduleTier1OpportunityQuery {
   leagueId?: string
 }
 
-export type SosTier2Position = 'QB' | 'RB'
+export type SosTier2Position = 'QB' | 'RB' | 'WR' | 'TE'
 
 export interface SosTier2WeekCell {
   week: number

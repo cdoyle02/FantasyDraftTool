@@ -37,7 +37,7 @@ const RATING_WINDOWS: { key: SosTier1Window; label: string }[] = [
 type WindowPreset = 'ros' | 'playoffs' | 'full' | 'custom'
 type SosViewMode = 'tier1' | 'tier2' | 'classic'
 
-const TIER2_POSITIONS: SosTier2Position[] = ['QB', 'RB']
+const TIER2_POSITIONS: SosTier2Position[] = ['QB', 'RB', 'WR', 'TE']
 
 function isTier2Position(position: SosPosition): position is SosTier2Position {
   return TIER2_POSITIONS.includes(position as SosTier2Position)

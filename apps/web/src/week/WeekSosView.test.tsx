@@ -361,6 +361,44 @@ describe('WeekSosView', () => {
     expect(navigate).toHaveBeenCalledWith('week-workbook')
   })
 
+  it('keeps tier2 fetches when position is WR', async () => {
+    render(<WeekSosView />)
+    await waitFor(() => expect(screen.getByTestId('sos-table')).toBeInTheDocument())
+    fireEvent.change(screen.getByTestId('sos-view-mode'), { target: { value: 'tier2' } })
+    await waitFor(() => {
+      const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+      expect(calls.some((url) => url.includes('/strength-of-schedule/tier2?'))).toBe(true)
+    })
+    vi.mocked(fetch).mockClear()
+
+    fireEvent.change(screen.getByTestId('sos-position'), { target: { value: 'WR' } })
+    await waitFor(() => {
+      const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+      expect(calls.some((url) => url.includes('/strength-of-schedule/tier2?') && url.includes('position=WR'))).toBe(
+        true
+      )
+      expect(calls.some((url) => url.includes('/tier1?') && url.includes('position=WR'))).toBe(false)
+    })
+    expect(screen.getByTestId('sos-view-mode')).toHaveValue('tier2')
+  })
+
+  it('falls back to tier1 when DST is selected in tier2 mode', async () => {
+    render(<WeekSosView />)
+    await waitFor(() => expect(screen.getByTestId('sos-table')).toBeInTheDocument())
+    fireEvent.change(screen.getByTestId('sos-view-mode'), { target: { value: 'tier2' } })
+    await waitFor(() => expect(screen.getByTestId('sos-view-mode')).toHaveValue('tier2'))
+    vi.mocked(fetch).mockClear()
+
+    fireEvent.change(screen.getByTestId('sos-position'), { target: { value: 'DST' } })
+    await waitFor(() => {
+      expect(screen.getByTestId('sos-view-mode')).toHaveValue('tier1')
+      const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+      expect(calls.some((url) => url.includes('/strength-of-schedule/tier1?') && url.includes('position=DST'))).toBe(
+        true
+      )
+    })
+  })
+
   it('loads tier2 grid and opportunity when tier2 view is selected', async () => {
     render(<WeekSosView />)
     await waitFor(() => expect(screen.getByTestId('sos-table')).toBeInTheDocument())
