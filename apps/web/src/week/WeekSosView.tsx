@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { draftApi } from '../api/client'
 import type {
+  EspnLeague,
   SosMetric,
   SosPosition,
   SosSoftness,
   SosTier1Window,
   StrengthOfScheduleResponse,
+  StrengthOfScheduleTier1OpportunityResponse,
   StrengthOfScheduleTier1Response
 } from './types'
+import { WORKBOOK_LEAGUE_STORAGE_KEY } from './WeekWorkbookView'
 
 /** sessionStorage — Workbook tab reads once on mount (`crossLink.week`). */
 const CROSS_LINK_WEEK_KEY = 'crossLink.week'
@@ -57,6 +60,16 @@ function formatAvg(value: number | null | undefined): string {
   return value.toFixed(1)
 }
 
+function formatShare(value: number | null | undefined): string {
+  if (typeof value !== 'number') return '—'
+  return `${(value * 100).toFixed(0)}%`
+}
+
+function formatOpportunity(value: number | null | undefined): string {
+  if (typeof value !== 'number') return '—'
+  return value.toFixed(3)
+}
+
 function presetWindow(
   preset: Exclude<WindowPreset, 'custom'>,
   ratedThroughWeek: number
@@ -88,6 +101,19 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
   const [customEnd, setCustomEnd] = useState(17)
   const [classicData, setClassicData] = useState<StrengthOfScheduleResponse | null>(null)
   const [tier1Data, setTier1Data] = useState<StrengthOfScheduleTier1Response | null>(null)
+  const [leagues, setLeagues] = useState<EspnLeague[]>([])
+  const [leagueId, setLeagueId] = useState(() => {
+    try {
+      return localStorage.getItem(WORKBOOK_LEAGUE_STORAGE_KEY) ?? ''
+    } catch {
+      return ''
+    }
+  })
+  const [opportunityData, setOpportunityData] = useState<StrengthOfScheduleTier1OpportunityResponse | null>(
+    null
+  )
+  const [opportunityError, setOpportunityError] = useState('')
+  const [opportunityLoading, setOpportunityLoading] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [ratedThrough, setRatedThrough] = useState(0)
@@ -145,6 +171,73 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
     }
   }, [position, viewMode, metric, ratingWindow, window.startWeek, window.endWeek])
 
+  useEffect(() => {
+    let cancelled = false
+    const loadLeagues = async () => {
+      try {
+        const payload = await draftApi.espnLeagues()
+        if (cancelled) return
+        const list = payload.leagues ?? []
+        setLeagues(list)
+        if (!leagueId && list[0]) {
+          setLeagueId(list[0].id)
+        }
+      } catch {
+        // opportunity table still loads nflverse rows without league list
+      }
+    }
+    void loadLeagues()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      if (leagueId) localStorage.setItem(WORKBOOK_LEAGUE_STORAGE_KEY, leagueId)
+    } catch {
+      // private mode
+    }
+  }, [leagueId])
+
+  const opportunityWeek = useMemo(
+    () => Math.min(18, Math.max(1, (tier1Data?.ratedThroughWeek ?? ratedThrough) + 1 || 1)),
+    [tier1Data?.ratedThroughWeek, ratedThrough]
+  )
+
+  useEffect(() => {
+    if (viewMode !== 'tier1' || position === 'DST') {
+      setOpportunityData(null)
+      setOpportunityError('')
+      return
+    }
+    let cancelled = false
+    const loadOpportunity = async () => {
+      setOpportunityLoading(true)
+      setOpportunityError('')
+      try {
+        const payload = await draftApi.tier1Opportunity({
+          position,
+          window: ratingWindow,
+          week: opportunityWeek,
+          leagueId: leagueId || undefined
+        })
+        if (cancelled) return
+        setOpportunityData(payload)
+      } catch (err) {
+        if (cancelled) return
+        setOpportunityData(null)
+        setOpportunityError(err instanceof Error ? err.message : 'Could not load opportunity scores.')
+      } finally {
+        if (!cancelled) setOpportunityLoading(false)
+      }
+    }
+    void loadOpportunity()
+    return () => {
+      cancelled = true
+    }
+  }, [viewMode, position, ratingWindow, opportunityWeek, leagueId])
+
   const applyPreset = (next: Exclude<WindowPreset, 'custom'>) => {
     const resolved = presetWindow(next, ratedThrough)
     setCustomStart(resolved.startWeek)
@@ -192,6 +285,8 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
       : `weeks ${window.startWeek}–${window.endWeek}`
 
   const teamRows = viewMode === 'tier1' ? tier1Data?.teams ?? [] : classicData?.teams ?? []
+  const opportunityPlayers = opportunityData?.players ?? []
+  const rosterOverlay = Boolean(leagueId && opportunityData?.leagueId)
 
   return (
     <div className="space-y-4" data-testid="week-sos-view">
@@ -481,6 +576,104 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
           </table>
         </div>
       </section>
+
+      {viewMode === 'tier1' && position !== 'DST' && (
+        <section className="panel overflow-hidden" data-testid="sos-opportunity-panel">
+          <div className="panel-heading">
+            <div>
+              <p className="eyebrow">Tier 1 opportunity</p>
+              <h2>
+                {position} · week {opportunityWeek} · softness × usage
+              </h2>
+              <p className="mt-1 text-[11px] text-muted">
+                {rosterOverlay
+                  ? `ESPN roster overlay · ${opportunityData?.leagueName ?? leagueId}`
+                  : 'nflverse usage pool — pick a league to filter to your roster'}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-muted">
+                League (optional)
+                <select
+                  data-testid="sos-league-select"
+                  className="min-w-[12rem] rounded-lg border border-line bg-ink px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-100"
+                  value={leagueId}
+                  onChange={(event) => setLeagueId(event.target.value)}
+                >
+                  <option value="">All nflverse {position}s</option>
+                  {leagues.map((league) => (
+                    <option key={league.id} value={league.id}>
+                      {league.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {opportunityLoading && <p className="text-xs text-muted">Loading…</p>}
+            </div>
+          </div>
+          {opportunityError && (
+            <div
+              role="alert"
+              className="mx-4 mb-2 rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-xs text-rose-100"
+            >
+              {opportunityError}
+            </div>
+          )}
+          {opportunityData?.overlayError && leagueId && (
+            <p className="px-4 pb-2 text-xs text-amber-200/90" data-testid="sos-opportunity-overlay-error">
+              ESPN roster unavailable — showing an empty overlay ({opportunityData.overlayError}).
+            </p>
+          )}
+          {rosterOverlay && opportunityData?.joinStats && (
+            <p className="px-4 pb-2 text-[11px] text-muted" data-testid="sos-opportunity-join-stats">
+              matched {opportunityData.joinStats.matched} · unmatched {opportunityData.joinStats.unmatched}
+            </p>
+          )}
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse text-left text-xs" data-testid="sos-opportunity-table">
+              <thead>
+                <tr className="border-b border-line text-[10px] uppercase tracking-wider text-muted">
+                  <th className="px-3 py-2">#</th>
+                  <th className="px-3 py-2">Player</th>
+                  <th className="px-3 py-2">Team</th>
+                  <th className="px-3 py-2">Opp</th>
+                  <th className="px-3 py-2">Soft</th>
+                  <th className="px-3 py-2">Usage</th>
+                  <th className="px-3 py-2">Opp score</th>
+                  {rosterOverlay && <th className="px-3 py-2">Join</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {opportunityPlayers.map((row, index) => (
+                  <tr key={`${row.playerId ?? row.name}-${index}`} className="border-b border-line/60">
+                    <td className="px-3 py-1.5 tabular-nums text-muted">{index + 1}</td>
+                    <td className="px-3 py-1.5 font-semibold">{row.name}</td>
+                    <td className="px-3 py-1.5">{row.team}</td>
+                    <td className="px-3 py-1.5">
+                      {row.bye ? 'BYE' : row.opponent ?? '—'}
+                    </td>
+                    <td className="px-3 py-1.5 uppercase">{softnessBadge(row.softness)}</td>
+                    <td className="px-3 py-1.5 tabular-nums">{formatShare(row.usageShare)}</td>
+                    <td className="px-3 py-1.5 tabular-nums font-semibold text-mint">
+                      {formatOpportunity(row.opportunity)}
+                    </td>
+                    {rosterOverlay && (
+                      <td className="px-3 py-1.5 text-[10px] uppercase text-muted">{row.joinStatus ?? '—'}</td>
+                    )}
+                  </tr>
+                ))}
+                {!opportunityLoading && opportunityPlayers.length === 0 && (
+                  <tr>
+                    <td colSpan={rosterOverlay ? 8 : 7} className="px-4 py-6 text-center text-muted">
+                      No opportunity rows yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

@@ -18,6 +18,10 @@ from draft_api.sos.tier1 import (
     build_tier1_grid,
     tier1_payload_to_dict,
 )
+from draft_api.espn_leagues import get_league
+from draft_api.espn_roster import EspnRosterError, fetch_league_roster
+from draft_api.espn_available_dst import espn_credentials_from_env
+from draft_api.sos.roster_join import join_roster_opportunity
 from draft_api.sos.usage import build_usage_index
 from draft_api.sos.nflverse import STATS_URL, HttpGetter, NflverseError, SosDataset, default_http_get, load_sos_dataset
 from draft_api.sos.snapshot import SnapshotError, read_packaged_snapshot
@@ -174,10 +178,6 @@ def build_tier1_strength_of_schedule_response(
     return tier1_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
 
 
-class LeagueJoinUnavailableError(LookupError):
-    """Raised when opportunity is requested with leagueId before roster join ships."""
-
-
 def build_tier1_opportunity_response(
     *,
     position: Position,
@@ -186,12 +186,15 @@ def build_tier1_opportunity_response(
     season: int = DEFAULT_SEASON,
     league_id: str | None = None,
     now: datetime | None = None,
+    espn_http_json: HttpGetter | None = None,
 ) -> dict[str, Any]:
-    """Nflverse player opportunity rows (softness × usage); ESPN join is wave 3."""
+    """Nflverse player opportunity rows (softness × usage); optional ESPN roster overlay."""
     if position == "DST":
         raise ValueError("DST is excluded from Tier 1 opportunity")
+    league_meta: dict[str, Any] = {}
     if league_id:
-        raise LeagueJoinUnavailableError(f"league roster join not configured for {league_id!r}")
+        league = get_league(league_id)
+        league_meta = {"leagueId": league["id"], "leagueName": league["name"]}
 
     moment = now or datetime.now(timezone.utc)
     dataset, source, stale = resolve_dataset(season, now=moment)
@@ -227,10 +230,34 @@ def build_tier1_opportunity_response(
         schedule=dataset.schedule,
         week=target_week,
     )
+    join_stats: dict[str, int] | None = None
+    overlay_error: str | None = None
+    if league_id:
+        try:
+            espn_s2, swid, cred_season = espn_credentials_from_env()
+            roster_season = season or cred_season
+            if espn_http_json is not None:
+                espn_s2 = espn_s2 or "test-espn-s2"
+                swid = swid or "{00000000-0000-0000-0000-000000000000}"
+            roster = fetch_league_roster(
+                league_id=league_id,
+                season=roster_season,
+                espn_s2=espn_s2,
+                swid=swid,
+                http_json=espn_http_json,
+            )
+            players, join_stats = join_roster_opportunity(
+                roster, players, position=position
+            )
+        except EspnRosterError as exc:
+            logger.warning("SoS Tier1 ESPN roster join unavailable: %s", exc)
+            players = []
+            join_stats = {"matched": 0, "unmatched": 0, "skippedPosition": 0}
+            overlay_error = "espn_unavailable"
     fetched_at = dataset.fetched_at or moment.astimezone(timezone.utc).isoformat().replace(
         "+00:00", "Z"
     )
-    return {
+    body: dict[str, Any] = {
         "season": season,
         "position": position,
         "window": window,
@@ -243,3 +270,9 @@ def build_tier1_opportunity_response(
         "stale": stale,
         "players": players,
     }
+    body.update(league_meta)
+    if join_stats is not None:
+        body["joinStats"] = join_stats
+    if overlay_error:
+        body["overlayError"] = overlay_error
+    return body

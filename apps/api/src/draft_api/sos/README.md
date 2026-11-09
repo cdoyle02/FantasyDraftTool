@@ -53,4 +53,4 @@ Classic FPA/PAE endpoint is unchanged.
 
 `GET /api/v1/nfl/strength-of-schedule/tier1?position=RB&window=l8&startWeek=10&endWeek=17&season=2026`
 
-`GET /api/v1/nfl/strength-of-schedule/tier1/opportunity?position=RB&window=l8&week=10&season=2026` — nflverse players sorted by `opportunity` desc; optional `leagueId` reserved for ESPN roster join (wave 3).
+`GET /api/v1/nfl/strength-of-schedule/tier1/opportunity?position=RB&window=l8&week=10&season=2026` — nflverse players sorted by `opportunity` desc. With `leagueId` (household league from `espn_leagues.json`), returns ESPN roster rows joined by normalized name+team (`joinStatus`, `joinStats`); ESPN failures set `overlayError: espn_unavailable` and empty `players`.

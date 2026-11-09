@@ -179,6 +179,53 @@ export interface StrengthOfScheduleTier1Query {
   season?: number
 }
 
+export type Tier1JoinStatus = 'matched' | 'unmatched'
+
+export interface Tier1OpportunityPlayer {
+  playerId: number | null
+  name: string
+  team: string
+  position: SosPosition
+  week: number
+  opponent: string | null
+  opponentRank: number | null
+  softness: SosSoftness | null
+  softnessScore: number | null
+  usageShare: number | null
+  opportunity: number | null
+  bye?: boolean
+  joinStatus?: Tier1JoinStatus
+  lineupSlot?: string | null
+  injuryStatus?: string | null
+  espnTeamId?: number | null
+}
+
+export interface StrengthOfScheduleTier1OpportunityResponse {
+  season: number
+  position: SosPosition
+  window: SosTier1Window
+  week: number
+  ratedThroughWeek: number
+  ratingWeeks: number[]
+  shrinkK: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  players: Tier1OpportunityPlayer[]
+  leagueId?: string
+  leagueName?: string
+  joinStats?: { matched: number; unmatched: number; skippedPosition?: number }
+  overlayError?: string
+}
+
+export interface StrengthOfScheduleTier1OpportunityQuery {
+  position: SosPosition
+  window?: SosTier1Window
+  week?: number
+  season?: number
+  leagueId?: string
+}
+
 /** Workbook Net Matchups — see `apps/api/src/draft_api/workbook/README.md` (SSOT for the math). */
 
 export type WorkbookWindow = 'l4' | 'season' | 'custom'

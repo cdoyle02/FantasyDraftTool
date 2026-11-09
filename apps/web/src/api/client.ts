@@ -15,6 +15,8 @@ import type {
   KyleDstRankingsResponse,
   StrengthOfScheduleQuery,
   StrengthOfScheduleResponse,
+  StrengthOfScheduleTier1OpportunityQuery,
+  StrengthOfScheduleTier1OpportunityResponse,
   StrengthOfScheduleTier1Query,
   StrengthOfScheduleTier1Response,
   WeekOddsResponse,
@@ -346,6 +348,19 @@ export class DraftApiClient {
     if (params.season != null) query.set('season', String(params.season))
     return this.request<StrengthOfScheduleTier1Response>(
       `/api/v1/nfl/strength-of-schedule/tier1?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
+
+  tier1Opportunity(params: StrengthOfScheduleTier1OpportunityQuery) {
+    const query = new URLSearchParams({ position: params.position })
+    query.set('window', params.window ?? 'l8')
+    if (params.week != null) query.set('week', String(params.week))
+    if (params.season != null) query.set('season', String(params.season))
+    if (params.leagueId) query.set('leagueId', params.leagueId)
+    return this.request<StrengthOfScheduleTier1OpportunityResponse>(
+      `/api/v1/nfl/strength-of-schedule/tier1/opportunity?${query}`,
       { method: 'GET' },
       30_000
     )

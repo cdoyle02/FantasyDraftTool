@@ -107,6 +107,54 @@ describe('WeekSosView', () => {
       'fetch',
       vi.fn(async (input: RequestInfo | URL) => {
         const url = String(input)
+        if (url.includes('/espn/leagues')) {
+          return new Response(
+            JSON.stringify({
+              leagues: [{ id: '1216398267', name: 'Girls Who Ball' }]
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+        if (url.includes('/strength-of-schedule/tier1/opportunity')) {
+          const params = new URL(url, 'http://localhost').searchParams
+          const position = params.get('position') ?? 'RB'
+          const window = (params.get('window') ?? 'l8') as StrengthOfScheduleTier1Response['window']
+          const leagueId = params.get('leagueId')
+          return new Response(
+            JSON.stringify({
+              season: 2026,
+              position,
+              window,
+              week: Number(params.get('week') ?? 10),
+              ratedThroughWeek: 9,
+              ratingWeeks: [2, 3, 4, 5, 6, 7, 8, 9],
+              shrinkK: 4,
+              fetchedAt: '2026-11-08T12:00:00Z',
+              source: 'nflverse',
+              stale: false,
+              leagueId: leagueId ?? undefined,
+              leagueName: leagueId ? 'Girls Who Ball' : undefined,
+              joinStats: leagueId ? { matched: 1, unmatched: 0 } : undefined,
+              players: [
+                {
+                  playerId: leagueId ? 9001 : null,
+                  name: 'Workhorse',
+                  team: 'CHI',
+                  position: 'RB',
+                  week: 10,
+                  opponent: 'GB',
+                  opponentRank: 3,
+                  softness: 'soft',
+                  softnessScore: 1,
+                  usageShare: 0.72,
+                  opportunity: 0.72,
+                  joinStatus: leagueId ? 'matched' : undefined
+                }
+              ]
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
         if (url.includes('/strength-of-schedule/tier1')) {
           const params = new URL(url, 'http://localhost').searchParams
           const position = params.get('position') ?? 'RB'
@@ -155,6 +203,23 @@ describe('WeekSosView', () => {
     expect(screen.getByTestId('sos-badge-CHI-1')).toHaveTextContent('S')
     expect(screen.getByTestId('sos-source-line')).toHaveTextContent('shrink k=4')
     expect(screen.getByTestId('sos-source-line')).toHaveTextContent('rated through week 9')
+    await waitFor(() => expect(screen.getByTestId('sos-opportunity-table')).toBeInTheDocument())
+    const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+    expect(calls.some((url) => url.includes('/tier1/opportunity') && url.includes('window=l8'))).toBe(true)
+  })
+
+  it('refetches opportunity with leagueId when league is selected', async () => {
+    localStorage.removeItem('workbook-league-id')
+    render(<WeekSosView />)
+    await waitFor(() => expect(screen.getByTestId('sos-league-select')).toBeInTheDocument())
+    fireEvent.change(screen.getByTestId('sos-league-select'), { target: { value: '1216398267' } })
+    await waitFor(() => {
+      const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+      expect(calls.some((url) => url.includes('tier1/opportunity') && url.includes('leagueId=1216398267'))).toBe(
+        true
+      )
+    })
+    expect(screen.getByTestId('sos-opportunity-join-stats')).toHaveTextContent('matched 1')
   })
 
   it('refetches tier1 with window=l4 when L4 is selected', async () => {
