@@ -71,10 +71,11 @@ CI: `.github/workflows/ci.yml` (python + web + e2e). **espn-mcp tests are not in
 
 ## Cloud Day-0 defaults (household)
 
-- Three services: Cloudflare Pages (web) + Railway API + Railway `espn-mcp-http` — do not merge API and MCP.
-- Decent security first: secrets in platform env, MCP bearer/OAuth, CORS allowlist; harden API auth in Phase-1.
+- Three Railway services in one project: `web` (Caddy/static PWA) + `api` (FastAPI) + `fantasy-draft-mcp` (hosted ESPN MCP) — do not merge API and MCP.
+- Decent security first: secrets in platform env, MCP bearer/OAuth, CORS allowlist, and `FANTASY_DRAFT_API_TOKEN` (web sends `X-Api-Token` from `localStorage`).
 - No Postgres until multi-device draft sync or accounts are required.
 - `.cursor/` is gitignored — do not rely on local skills/MCP config being in git.
+- Details: [docs/deployment.md](docs/deployment.md).
 
 ## Prune
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { draftApi } from '../api/client'
+import { ApiTokenPrompt } from '../api/ApiTokenPrompt'
+import { draftApi, isApiAuthError } from '../api/client'
 import type {
   EspnLeague,
   KyleDstAvailableResponse,
@@ -136,12 +137,14 @@ function KyleDstSection() {
   const [available, setAvailable] = useState<KyleDstAvailableResponse | null>(null)
   const [error, setError] = useState('')
   const [availableError, setAvailableError] = useState('')
+  const [needsToken, setNeedsToken] = useState(false)
   const [loading, setLoading] = useState(true)
   const [availableLoading, setAvailableLoading] = useState(false)
 
   const loadRankings = async () => {
     setLoading(true)
     setError('')
+    setNeedsToken(false)
     try {
       const [leaguePayload, rankingPayload] = await Promise.all([
         draftApi.espnLeagues(),
@@ -154,6 +157,7 @@ function KyleDstSection() {
       }
     } catch (err) {
       setRankings(null)
+      setNeedsToken(isApiAuthError(err))
       setError(err instanceof Error ? err.message : 'Could not load Kyle DST rankings.')
     } finally {
       setLoading(false)
@@ -234,7 +238,16 @@ function KyleDstSection() {
         </button>
       </div>
 
-      {error && (
+      {needsToken && (
+        <ApiTokenPrompt
+          onSaved={() => {
+            void loadRankings()
+            void loadAvailable(leagueId)
+          }}
+        />
+      )}
+
+      {error && !needsToken && (
         <div role="alert" data-testid="kyle-error" className="rounded-lg border border-rose-300/30 bg-rose-300/5 px-4 py-3 text-sm text-rose-200">
           {error}
         </div>
@@ -343,6 +356,7 @@ function KyleDstSection() {
 export function WeekDstView() {
   const [data, setData] = useState<WeekOddsResponse | null>(null)
   const [error, setError] = useState('')
+  const [needsToken, setNeedsToken] = useState(false)
   const [loading, setLoading] = useState(true)
   const [sortKey, setSortKey] = useState<WeekOddsSortKey>('underdogImplied')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
@@ -350,11 +364,13 @@ export function WeekDstView() {
   const load = async () => {
     setLoading(true)
     setError('')
+    setNeedsToken(false)
     try {
       const payload = await draftApi.weekOdds()
       setData(payload)
     } catch (err) {
       setData(null)
+      setNeedsToken(isApiAuthError(err))
       setError(err instanceof Error ? err.message : 'Could not load week odds.')
     } finally {
       setLoading(false)
@@ -407,7 +423,9 @@ export function WeekDstView() {
         </button>
       </section>
 
-      {error && (
+      {needsToken && <ApiTokenPrompt onSaved={() => void load()} />}
+
+      {error && !needsToken && (
         <div role="alert" className="rounded-lg border border-rose-300/30 bg-rose-300/5 px-4 py-3 text-sm text-rose-200">
           {error}
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { draftApi } from '../api/client'
+import { ApiTokenPrompt } from '../api/ApiTokenPrompt'
+import { draftApi, isApiAuthError } from '../api/client'
 import type {
   EspnLeague,
   SosLeagueAvailability,
@@ -170,6 +171,8 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
   const [opportunityError, setOpportunityError] = useState('')
   const [opportunityLoading, setOpportunityLoading] = useState(false)
   const [error, setError] = useState('')
+  const [needsToken, setNeedsToken] = useState(false)
+  const [authRetry, setAuthRetry] = useState(0)
   const [loading, setLoading] = useState(true)
   const [ratedThrough, setRatedThrough] = useState(0)
   const [wrRole, setWrRole] = useState<SosWrRole>('all')
@@ -200,6 +203,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
     const load = async () => {
       setLoading(true)
       setError('')
+      setNeedsToken(false)
       try {
         if (viewMode === 'tier1') {
           const payload = await draftApi.strengthOfScheduleTier1({
@@ -248,6 +252,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
         setClassicData(null)
         setTier1Data(null)
         setTier2Data(null)
+        setNeedsToken(isApiAuthError(err))
         setError(err instanceof Error ? err.message : 'Could not load strength of schedule.')
       } finally {
         if (!cancelled) setLoading(false)
@@ -257,7 +262,7 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
     return () => {
       cancelled = true
     }
-  }, [position, viewMode, metric, ratingWindow, window.startWeek, window.endWeek, wrRole, leagueId])
+  }, [position, viewMode, metric, ratingWindow, window.startWeek, window.endWeek, wrRole, leagueId, authRetry])
 
   useEffect(() => {
     let cancelled = false
@@ -628,7 +633,9 @@ export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
         </div>
       </section>
 
-      {error && (
+      {needsToken && <ApiTokenPrompt onSaved={() => setAuthRetry((n) => n + 1)} />}
+
+      {error && !needsToken && (
         <div role="alert" className="rounded-lg border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-xs text-rose-100">
           {error}
         </div>

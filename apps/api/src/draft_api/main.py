@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hmac
 import json
 import logging
 import os
@@ -165,6 +166,33 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Household shared-token gate. When FANTASY_DRAFT_API_TOKEN is unset the gate is off
+# (local/dev and existing tests). Production should always set the variable.
+_API_TOKEN_OPEN_PATHS = frozenset({"/health", "/api/v1/health", "/api/v1/version"})
+
+
+def _expected_api_token() -> str:
+    return os.getenv("FANTASY_DRAFT_API_TOKEN", "").strip()
+
+
+@app.middleware("http")
+async def api_token_gate(
+    request: Request, call_next: RequestResponseEndpoint
+) -> Response:
+    expected = _expected_api_token()
+    if not expected:
+        return await call_next(request)
+    if request.method == "OPTIONS":
+        return await call_next(request)
+    path = request.url.path
+    if path in _API_TOKEN_OPEN_PATHS or not path.startswith("/api/v1/"):
+        return await call_next(request)
+    provided = request.headers.get("x-api-token", "").strip()
+    if not provided or not hmac.compare_digest(provided, expected):
+        return error_response(401, "unauthorized", "Invalid or missing API token")
+    return await call_next(request)
+
 
 # Odds provider is injectable for tests; production uses The Odds API + TTL cache.
 _odds_provider_override: OddsProvider | None = None

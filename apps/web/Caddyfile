@@ -1,0 +1,17 @@
+{
+	auto_https off
+	admin off
+}
+
+:{$PORT:8080} {
+	root * /srv
+	encode gzip
+	try_files {path} /index.html
+	file_server
+
+	# Keep the app shell and service worker fresh; hashed assets stay cached.
+	@nocache {
+		path / /index.html /sw.js /manifest.webmanifest
+	}
+	header @nocache Cache-Control "no-cache"
+}

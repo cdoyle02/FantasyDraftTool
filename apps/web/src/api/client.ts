@@ -249,12 +249,52 @@ export function normalizeRecommendationResponse(response: EngineRecommendationRe
   }
 }
 
+/** localStorage key for the household shared API token (never baked into the bundle). */
+export const API_TOKEN_STORAGE_KEY = 'fdt.apiToken'
+
+export class ApiAuthError extends Error {
+  readonly status = 401 as const
+
+  constructor(message = 'Invalid or missing API token') {
+    super(message)
+    this.name = 'ApiAuthError'
+  }
+}
+
+export function getApiToken(): string {
+  try {
+    return localStorage.getItem(API_TOKEN_STORAGE_KEY)?.trim() ?? ''
+  } catch {
+    return ''
+  }
+}
+
+export function setApiToken(token: string): void {
+  const trimmed = token.trim()
+  try {
+    if (trimmed) localStorage.setItem(API_TOKEN_STORAGE_KEY, trimmed)
+    else localStorage.removeItem(API_TOKEN_STORAGE_KEY)
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
+export function isApiAuthError(err: unknown): err is ApiAuthError {
+  return err instanceof ApiAuthError
+}
+
 export class DraftApiClient {
   constructor(private readonly baseUrl = '') {}
 
   private async request<T>(path: string, init: RequestInit = {}, timeoutMs = 4_000): Promise<T> {
+    const headers = new Headers(init.headers)
+    const token = getApiToken()
+    if (token && !headers.has('X-Api-Token')) {
+      headers.set('X-Api-Token', token)
+    }
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...init,
+      headers,
       signal: init.signal ?? AbortSignal.timeout(timeoutMs)
     })
     if (!response.ok) {
@@ -264,6 +304,9 @@ export class DraftApiClient {
         if (body.error?.message) detail = body.error.message
       } catch {
         // keep status-based message
+      }
+      if (response.status === 401) {
+        throw new ApiAuthError(detail)
       }
       throw new Error(detail)
     }

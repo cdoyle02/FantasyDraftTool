@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { draftApi } from '../api/client'
+import { ApiTokenPrompt } from '../api/ApiTokenPrompt'
+import { draftApi, isApiAuthError } from '../api/client'
 import {
   WorkbookFeedersPanel,
   WorkbookInjuriesPanel,
@@ -183,6 +184,8 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
   const [subTab, setSubTab] = useState<WorkbookSubTab>('matchups')
   const [data, setData] = useState<WorkbookMatchupsResponse | null>(null)
   const [error, setError] = useState('')
+  const [needsToken, setNeedsToken] = useState(false)
+  const [authRetry, setAuthRetry] = useState(0)
   const [loading, setLoading] = useState(true)
 
   const [explainTarget, setExplainTarget] = useState<{ team: string; metric: WorkbookExplainMetric; label: string } | null>(null)
@@ -225,6 +228,7 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
     const load = async () => {
       setLoading(true)
       setError('')
+      setNeedsToken(false)
       try {
         const payload = await draftApi.workbookMatchups({
           week,
@@ -241,6 +245,7 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
       } catch (err) {
         if (cancelled) return
         setData(null)
+        setNeedsToken(isApiAuthError(err))
         setError(err instanceof Error ? err.message : 'Could not load the Workbook board.')
       } finally {
         if (!cancelled) setLoading(false)
@@ -250,7 +255,7 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
     return () => {
       cancelled = true
     }
-  }, [subTab, week, window, scoring, slate, customStart, customEnd, leagueId, includeFa])
+  }, [subTab, week, window, scoring, slate, customStart, customEnd, leagueId, includeFa, authRetry])
 
   const p2Controls = useMemo(
     () => ({ week, window, customStart, customEnd, scoring }),
@@ -485,7 +490,11 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
 
       <WorkbookSubNav active={subTab} onChange={setSubTab} />
 
-      {subTab === 'matchups' && error && (
+      {subTab === 'matchups' && needsToken && (
+        <ApiTokenPrompt onSaved={() => setAuthRetry((n) => n + 1)} />
+      )}
+
+      {subTab === 'matchups' && error && !needsToken && (
         <div role="alert" className="rounded-lg border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-xs text-rose-100">
           {error}
         </div>

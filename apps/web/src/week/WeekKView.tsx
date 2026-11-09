@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { draftApi } from '../api/client'
+import { ApiTokenPrompt } from '../api/ApiTokenPrompt'
+import { draftApi, isApiAuthError } from '../api/client'
 import type {
   EspnLeague,
   JaredKAvailableResponse,
@@ -26,12 +27,14 @@ export function WeekKView() {
   const [available, setAvailable] = useState<JaredKAvailableResponse | null>(null)
   const [error, setError] = useState('')
   const [availableError, setAvailableError] = useState('')
+  const [needsToken, setNeedsToken] = useState(false)
   const [loading, setLoading] = useState(true)
   const [availableLoading, setAvailableLoading] = useState(false)
 
   const loadRankings = async () => {
     setLoading(true)
     setError('')
+    setNeedsToken(false)
     try {
       const [leaguePayload, rankingPayload] = await Promise.all([
         draftApi.espnLeagues(),
@@ -44,6 +47,7 @@ export function WeekKView() {
       }
     } catch (err) {
       setRankings(null)
+      setNeedsToken(isApiAuthError(err))
       setError(err instanceof Error ? err.message : 'Could not load Jared K rankings.')
     } finally {
       setLoading(false)
@@ -124,7 +128,16 @@ export function WeekKView() {
         </button>
       </section>
 
-      {error && (
+      {needsToken && (
+        <ApiTokenPrompt
+          onSaved={() => {
+            void loadRankings()
+            void loadAvailable(leagueId)
+          }}
+        />
+      )}
+
+      {error && !needsToken && (
         <div
           role="alert"
           data-testid="jared-error"
