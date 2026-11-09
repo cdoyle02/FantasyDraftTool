@@ -1,0 +1,3802 @@
+{
+  "season": 2026,
+  "fetchedAt": "2026-11-08T22:12:40.076509Z",
+  "teams": [
+    "ARI",
+    "ATL",
+    "BAL",
+    "BUF",
+    "CAR",
+    "CHI",
+    "CIN",
+    "CLE",
+    "DAL",
+    "DEN",
+    "DET",
+    "GB",
+    "HOU",
+    "IND",
+    "JAX",
+    "KC",
+    "LAC",
+    "LAR",
+    "LV",
+    "MIA",
+    "MIN",
+    "NE",
+    "NO",
+    "NYG",
+    "NYJ",
+    "PHI",
+    "PIT",
+    "SEA",
+    "SF",
+    "TB",
+    "TEN",
+    "WAS"
+  ],
+  "schedule": {
+    "ARI": {
+      "1": "LAC",
+      "2": "SEA",
+      "3": "SF",
+      "4": "NYG",
+      "5": "DET",
+      "6": "LAR",
+      "7": "DEN",
+      "8": "DAL",
+      "9": "SEA",
+      "10": "LAR",
+      "11": "KC",
+      "12": "WAS",
+      "13": "PHI",
+      "14": null,
+      "15": "NYJ",
+      "16": "NO",
+      "17": "LV",
+      "18": "SF"
+    },
+    "ATL": {
+      "1": "PIT",
+      "2": "CAR",
+      "3": "GB",
+      "4": "NO",
+      "5": "BAL",
+      "6": "CHI",
+      "7": "SF",
+      "8": "TB",
+      "9": "CIN",
+      "10": "KC",
+      "11": null,
+      "12": "MIN",
+      "13": "DET",
+      "14": "CLE",
+      "15": "WAS",
+      "16": "TB",
+      "17": "NO",
+      "18": "CAR"
+    },
+    "BAL": {
+      "1": "IND",
+      "2": "NO",
+      "3": "DAL",
+      "4": "TEN",
+      "5": "ATL",
+      "6": "CLE",
+      "7": "CIN",
+      "8": "BUF",
+      "9": "JAX",
+      "10": "LAC",
+      "11": "CAR",
+      "12": "HOU",
+      "13": null,
+      "14": "TB",
+      "15": "PIT",
+      "16": "CLE",
+      "17": "CIN",
+      "18": "PIT"
+    },
+    "BUF": {
+      "1": "HOU",
+      "2": "DET",
+      "3": "LAC",
+      "4": "NE",
+      "5": "LAR",
+      "6": "LV",
+      "7": null,
+      "8": "BAL",
+      "9": "MIN",
+      "10": "NYJ",
+      "11": "MIA",
+      "12": "KC",
+      "13": "NE",
+      "14": "GB",
+      "15": "CHI",
+      "16": "DEN",
+      "17": "MIA",
+      "18": "NYJ"
+    },
+    "CAR": {
+      "1": "CHI",
+      "2": "ATL",
+      "3": "CLE",
+      "4": "DET",
+      "5": null,
+      "6": "PHI",
+      "7": "TB",
+      "8": "GB",
+      "9": "DEN",
+      "10": "NO",
+      "11": "BAL",
+      "12": "TB",
+      "13": "MIN",
+      "14": "NO",
+      "15": "CIN",
+      "16": "PIT",
+      "17": "SEA",
+      "18": "ATL"
+    },
+    "CHI": {
+      "1": "CAR",
+      "2": "MIN",
+      "3": "PHI",
+      "4": "NYJ",
+      "5": "GB",
+      "6": "ATL",
+      "7": "NE",
+      "8": "SEA",
+      "9": "TB",
+      "10": null,
+      "11": "NO",
+      "12": "DET",
+      "13": "JAX",
+      "14": "MIA",
+      "15": "BUF",
+      "16": "GB",
+      "17": "DET",
+      "18": "MIN"
+    },
+    "CIN": {
+      "1": "TB",
+      "2": "HOU",
+      "3": "PIT",
+      "4": "JAX",
+      "5": "MIA",
+      "6": null,
+      "7": "BAL",
+      "8": "TEN",
+      "9": "ATL",
+      "10": "PIT",
+      "11": "WAS",
+      "12": "NO",
+      "13": "CLE",
+      "14": "KC",
+      "15": "CAR",
+      "16": "IND",
+      "17": "BAL",
+      "18": "CLE"
+    },
+    "CLE": {
+      "1": "JAX",
+      "2": "TB",
+      "3": "CAR",
+      "4": "PIT",
+      "5": "NYJ",
+      "6": "BAL",
+      "7": "TEN",
+      "8": "PIT",
+      "9": "NO",
+      "10": "HOU",
+      "11": null,
+      "12": "LV",
+      "13": "CIN",
+      "14": "ATL",
+      "15": "NYG",
+      "16": "BAL",
+      "17": "IND",
+      "18": "CIN"
+    },
+    "DAL": {
+      "1": "NYG",
+      "2": "WAS",
+      "3": "BAL",
+      "4": "HOU",
+      "5": "TB",
+      "6": "GB",
+      "7": "PHI",
+      "8": "ARI",
+      "9": "IND",
+      "10": "SF",
+      "11": "TEN",
+      "12": "PHI",
+      "13": "SEA",
+      "14": null,
+      "15": "LAR",
+      "16": "JAX",
+      "17": "NYG",
+      "18": "WAS"
+    },
+    "DEN": {
+      "1": "KC",
+      "2": "JAX",
+      "3": "LAR",
+      "4": "SF",
+      "5": "LAC",
+      "6": "SEA",
+      "7": "ARI",
+      "8": "KC",
+      "9": "CAR",
+      "10": null,
+      "11": "LV",
+      "12": "PIT",
+      "13": "MIA",
+      "14": "NYJ",
+      "15": "LV",
+      "16": "BUF",
+      "17": "NE",
+      "18": "LAC"
+    },
+    "DET": {
+      "1": "NO",
+      "2": "BUF",
+      "3": "NYJ",
+      "4": "CAR",
+      "5": "ARI",
+      "6": null,
+      "7": "GB",
+      "8": "MIN",
+      "9": "MIA",
+      "10": "NE",
+      "11": "TB",
+      "12": "CHI",
+      "13": "ATL",
+      "14": "TEN",
+      "15": "MIN",
+      "16": "NYG",
+      "17": "CHI",
+      "18": "GB"
+    },
+    "GB": {
+      "1": "MIN",
+      "2": "NYJ",
+      "3": "ATL",
+      "4": "TB",
+      "5": "CHI",
+      "6": "DAL",
+      "7": "DET",
+      "8": "CAR",
+      "9": "NE",
+      "10": "MIN",
+      "11": null,
+      "12": "LAR",
+      "13": "NO",
+      "14": "BUF",
+      "15": "MIA",
+      "16": "CHI",
+      "17": "HOU",
+      "18": "DET"
+    },
+    "HOU": {
+      "1": "BUF",
+      "2": "CIN",
+      "3": "IND",
+      "4": "DAL",
+      "5": "TEN",
+      "6": "JAX",
+      "7": "NYG",
+      "8": null,
+      "9": "LAC",
+      "10": "CLE",
+      "11": "IND",
+      "12": "BAL",
+      "13": "PIT",
+      "14": "WAS",
+      "15": "JAX",
+      "16": "PHI",
+      "17": "GB",
+      "18": "TEN"
+    },
+    "IND": {
+      "1": "BAL",
+      "2": "KC",
+      "3": "HOU",
+      "4": "WAS",
+      "5": "PIT",
+      "6": "TEN",
+      "7": "MIN",
+      "8": "JAX",
+      "9": "DAL",
+      "10": "MIA",
+      "11": "HOU",
+      "12": "NYG",
+      "13": null,
+      "14": "PHI",
+      "15": "TEN",
+      "16": "CIN",
+      "17": "CLE",
+      "18": "JAX"
+    },
+    "JAX": {
+      "1": "CLE",
+      "2": "DEN",
+      "3": "NE",
+      "4": "CIN",
+      "5": "PHI",
+      "6": "HOU",
+      "7": null,
+      "8": "IND",
+      "9": "BAL",
+      "10": "TEN",
+      "11": "NYG",
+      "12": "TEN",
+      "13": "CHI",
+      "14": "PIT",
+      "15": "HOU",
+      "16": "DAL",
+      "17": "WAS",
+      "18": "IND"
+    },
+    "KC": {
+      "1": "DEN",
+      "2": "IND",
+      "3": "MIA",
+      "4": "LV",
+      "5": null,
+      "6": "LAC",
+      "7": "SEA",
+      "8": "DEN",
+      "9": "NYJ",
+      "10": "ATL",
+      "11": "ARI",
+      "12": "BUF",
+      "13": "LAR",
+      "14": "CIN",
+      "15": "NE",
+      "16": "SF",
+      "17": "LAC",
+      "18": "LV"
+    },
+    "LAC": {
+      "1": "ARI",
+      "2": "LV",
+      "3": "BUF",
+      "4": "SEA",
+      "5": "DEN",
+      "6": "KC",
+      "7": null,
+      "8": "LAR",
+      "9": "HOU",
+      "10": "BAL",
+      "11": "NYJ",
+      "12": "NE",
+      "13": "TB",
+      "14": "LV",
+      "15": "SF",
+      "16": "MIA",
+      "17": "KC",
+      "18": "DEN"
+    },
+    "LAR": {
+      "1": "SF",
+      "2": "NYG",
+      "3": "DEN",
+      "4": "PHI",
+      "5": "BUF",
+      "6": "ARI",
+      "7": "LV",
+      "8": "LAC",
+      "9": "WAS",
+      "10": "ARI",
+      "11": null,
+      "12": "GB",
+      "13": "KC",
+      "14": "SF",
+      "15": "DAL",
+      "16": "SEA",
+      "17": "TB",
+      "18": "SEA"
+    },
+    "LV": {
+      "1": "MIA",
+      "2": "LAC",
+      "3": "NO",
+      "4": "KC",
+      "5": "NE",
+      "6": "BUF",
+      "7": "LAR",
+      "8": "NYJ",
+      "9": "SF",
+      "10": "SEA",
+      "11": "DEN",
+      "12": "CLE",
+      "13": null,
+      "14": "LAC",
+      "15": "DEN",
+      "16": "TEN",
+      "17": "ARI",
+      "18": "KC"
+    },
+    "MIA": {
+      "1": "LV",
+      "2": "SF",
+      "3": "KC",
+      "4": "MIN",
+      "5": "CIN",
+      "6": null,
+      "7": "NYJ",
+      "8": "NE",
+      "9": "DET",
+      "10": "IND",
+      "11": "BUF",
+      "12": "NYJ",
+      "13": "DEN",
+      "14": "CHI",
+      "15": "GB",
+      "16": "LAC",
+      "17": "BUF",
+      "18": "NE"
+    },
+    "MIN": {
+      "1": "GB",
+      "2": "CHI",
+      "3": "TB",
+      "4": "MIA",
+      "5": "NO",
+      "6": null,
+      "7": "IND",
+      "8": "DET",
+      "9": "BUF",
+      "10": "GB",
+      "11": "SF",
+      "12": "ATL",
+      "13": "CAR",
+      "14": "NE",
+      "15": "DET",
+      "16": "WAS",
+      "17": "NYJ",
+      "18": "CHI"
+    },
+    "NE": {
+      "1": "SEA",
+      "2": "PIT",
+      "3": "JAX",
+      "4": "BUF",
+      "5": "LV",
+      "6": "NYJ",
+      "7": "CHI",
+      "8": "MIA",
+      "9": "GB",
+      "10": "DET",
+      "11": null,
+      "12": "LAC",
+      "13": "BUF",
+      "14": "MIN",
+      "15": "KC",
+      "16": "NYJ",
+      "17": "DEN",
+      "18": "MIA"
+    },
+    "NO": {
+      "1": "DET",
+      "2": "BAL",
+      "3": "LV",
+      "4": "ATL",
+      "5": "MIN",
+      "6": "NYG",
+      "7": "PIT",
+      "8": null,
+      "9": "CLE",
+      "10": "CAR",
+      "11": "CHI",
+      "12": "CIN",
+      "13": "GB",
+      "14": "CAR",
+      "15": "TB",
+      "16": "ARI",
+      "17": "ATL",
+      "18": "TB"
+    },
+    "NYG": {
+      "1": "DAL",
+      "2": "LAR",
+      "3": "TEN",
+      "4": "ARI",
+      "5": "WAS",
+      "6": "NO",
+      "7": "HOU",
+      "8": null,
+      "9": "PHI",
+      "10": "WAS",
+      "11": "JAX",
+      "12": "IND",
+      "13": "SF",
+      "14": "SEA",
+      "15": "CLE",
+      "16": "DET",
+      "17": "DAL",
+      "18": "PHI"
+    },
+    "NYJ": {
+      "1": "TEN",
+      "2": "GB",
+      "3": "DET",
+      "4": "CHI",
+      "5": "CLE",
+      "6": "NE",
+      "7": "MIA",
+      "8": "LV",
+      "9": "KC",
+      "10": "BUF",
+      "11": "LAC",
+      "12": "MIA",
+      "13": null,
+      "14": "DEN",
+      "15": "ARI",
+      "16": "NE",
+      "17": "MIN",
+      "18": "BUF"
+    },
+    "PHI": {
+      "1": "WAS",
+      "2": "TEN",
+      "3": "CHI",
+      "4": "LAR",
+      "5": "JAX",
+      "6": "CAR",
+      "7": "DAL",
+      "8": "WAS",
+      "9": "NYG",
+      "10": null,
+      "11": "PIT",
+      "12": "DAL",
+      "13": "ARI",
+      "14": "IND",
+      "15": "SEA",
+      "16": "HOU",
+      "17": "SF",
+      "18": "NYG"
+    },
+    "PIT": {
+      "1": "ATL",
+      "2": "NE",
+      "3": "CIN",
+      "4": "CLE",
+      "5": "IND",
+      "6": "TB",
+      "7": "NO",
+      "8": "CLE",
+      "9": null,
+      "10": "CIN",
+      "11": "PHI",
+      "12": "DEN",
+      "13": "HOU",
+      "14": "JAX",
+      "15": "BAL",
+      "16": "CAR",
+      "17": "TEN",
+      "18": "BAL"
+    },
+    "SEA": {
+      "1": "NE",
+      "2": "ARI",
+      "3": "WAS",
+      "4": "LAC",
+      "5": "SF",
+      "6": "DEN",
+      "7": "KC",
+      "8": "CHI",
+      "9": "ARI",
+      "10": "LV",
+      "11": null,
+      "12": "SF",
+      "13": "DAL",
+      "14": "NYG",
+      "15": "PHI",
+      "16": "LAR",
+      "17": "CAR",
+      "18": "LAR"
+    },
+    "SF": {
+      "1": "LAR",
+      "2": "MIA",
+      "3": "ARI",
+      "4": "DEN",
+      "5": "SEA",
+      "6": "WAS",
+      "7": "ATL",
+      "8": null,
+      "9": "LV",
+      "10": "DAL",
+      "11": "MIN",
+      "12": "SEA",
+      "13": "NYG",
+      "14": "LAR",
+      "15": "LAC",
+      "16": "KC",
+      "17": "PHI",
+      "18": "ARI"
+    },
+    "TB": {
+      "1": "CIN",
+      "2": "CLE",
+      "3": "MIN",
+      "4": "GB",
+      "5": "DAL",
+      "6": "PIT",
+      "7": "CAR",
+      "8": "ATL",
+      "9": "CHI",
+      "10": null,
+      "11": "DET",
+      "12": "CAR",
+      "13": "LAC",
+      "14": "BAL",
+      "15": "NO",
+      "16": "ATL",
+      "17": "LAR",
+      "18": "NO"
+    },
+    "TEN": {
+      "1": "NYJ",
+      "2": "PHI",
+      "3": "NYG",
+      "4": "BAL",
+      "5": "HOU",
+      "6": "IND",
+      "7": "CLE",
+      "8": "CIN",
+      "9": null,
+      "10": "JAX",
+      "11": "DAL",
+      "12": "JAX",
+      "13": "WAS",
+      "14": "DET",
+      "15": "IND",
+      "16": "LV",
+      "17": "PIT",
+      "18": "HOU"
+    },
+    "WAS": {
+      "1": "PHI",
+      "2": "DAL",
+      "3": "SEA",
+      "4": "IND",
+      "5": "NYG",
+      "6": "SF",
+      "7": null,
+      "8": "PHI",
+      "9": "LAR",
+      "10": "NYG",
+      "11": "CIN",
+      "12": "ARI",
+      "13": "TEN",
+      "14": "HOU",
+      "15": "ATL",
+      "16": "MIN",
+      "17": "JAX",
+      "18": "DAL"
+    }
+  },
+  "games": [
+    {
+      "week": 1,
+      "offense": "ARI",
+      "defense": "LAC",
+      "points": {
+        "QB": 16.48,
+        "RB": 22.0,
+        "WR": 30.400000000000002,
+        "TE": 24.5,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "ATL",
+      "defense": "PIT",
+      "points": {
+        "QB": 5.72,
+        "RB": 34.4,
+        "WR": 9.9,
+        "TE": 0.0,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "BAL",
+      "defense": "IND",
+      "points": {
+        "QB": 24.96,
+        "RB": 39.099999999999994,
+        "WR": 37.9,
+        "TE": 12.600000000000001,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "BUF",
+      "defense": "HOU",
+      "points": {
+        "QB": 35.66,
+        "RB": 10.500000000000002,
+        "WR": 41.5,
+        "TE": 19.7,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "CAR",
+      "defense": "CHI",
+      "points": {
+        "QB": 33.84,
+        "RB": 33.7,
+        "WR": 44.3,
+        "TE": 12.200000000000001,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "CHI",
+      "defense": "CAR",
+      "points": {
+        "QB": 37.26,
+        "RB": 52.8,
+        "WR": 40.199999999999996,
+        "TE": 11.5,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "CIN",
+      "defense": "TB",
+      "points": {
+        "QB": 14.16,
+        "RB": 26.8,
+        "WR": 19.1,
+        "TE": 25.1,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "CLE",
+      "defense": "JAX",
+      "points": {
+        "QB": 14.0,
+        "RB": 12.6,
+        "WR": 26.3,
+        "TE": 6.5,
+        "DST": -3.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "DAL",
+      "defense": "NYG",
+      "points": {
+        "QB": 14.4,
+        "RB": 25.599999999999998,
+        "WR": 29.2,
+        "TE": 8.200000000000001,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "DEN",
+      "defense": "KC",
+      "points": {
+        "QB": 5.44,
+        "RB": 11.7,
+        "WR": 13.0,
+        "TE": 17.3,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "DET",
+      "defense": "NO",
+      "points": {
+        "QB": 16.44,
+        "RB": 36.4,
+        "WR": 37.2,
+        "TE": 11.3,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "GB",
+      "defense": "MIN",
+      "points": {
+        "QB": 19.48,
+        "RB": 6.6,
+        "WR": 55.2,
+        "TE": 16.5,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "HOU",
+      "defense": "BUF",
+      "points": {
+        "QB": 16.46,
+        "RB": 33.9,
+        "WR": 40.0,
+        "TE": 14.4,
+        "DST": -3.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "IND",
+      "defense": "BAL",
+      "points": {
+        "QB": 9.04,
+        "RB": 26.1,
+        "WR": 24.999999999999996,
+        "TE": 10.3,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "JAX",
+      "defense": "CLE",
+      "points": {
+        "QB": 25.8,
+        "RB": 16.3,
+        "WR": 48.5,
+        "TE": 12.200000000000001,
+        "DST": 13.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "KC",
+      "defense": "DEN",
+      "points": {
+        "QB": 21.66,
+        "RB": 42.900000000000006,
+        "WR": 14.7,
+        "TE": 13.5,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "LAC",
+      "defense": "ARI",
+      "points": {
+        "QB": 13.26,
+        "RB": 9.200000000000001,
+        "WR": 27.9,
+        "TE": 16.0,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "LAR",
+      "defense": "SF",
+      "points": {
+        "QB": 5.52,
+        "RB": 24.299999999999997,
+        "WR": 19.8,
+        "TE": 5.1,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "LV",
+      "defense": "MIA",
+      "points": {
+        "QB": 13.8,
+        "RB": 36.800000000000004,
+        "WR": 22.500000000000004,
+        "TE": 9.2,
+        "DST": 13.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "MIA",
+      "defense": "LV",
+      "points": {
+        "QB": 16.7,
+        "RB": 10.5,
+        "WR": 24.2,
+        "TE": 3.8,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "MIN",
+      "defense": "GB",
+      "points": {
+        "QB": 18.84,
+        "RB": 23.0,
+        "WR": 31.2,
+        "TE": 17.8,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "NE",
+      "defense": "SEA",
+      "points": {
+        "QB": 9.82,
+        "RB": 18.5,
+        "WR": 21.7,
+        "TE": 12.8,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "NO",
+      "defense": "DET",
+      "points": {
+        "QB": 23.2,
+        "RB": 25.0,
+        "WR": 55.599999999999994,
+        "TE": 27.700000000000003,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "NYG",
+      "defense": "DAL",
+      "points": {
+        "QB": 26.6,
+        "RB": 27.3,
+        "WR": 22.1,
+        "TE": 29.7,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "NYJ",
+      "defense": "TEN",
+      "points": {
+        "QB": 9.3,
+        "RB": 23.8,
+        "WR": 28.6,
+        "TE": 14.600000000000001,
+        "DST": 9.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "PHI",
+      "defense": "WAS",
+      "points": {
+        "QB": 24.72,
+        "RB": 11.5,
+        "WR": 26.1,
+        "TE": 23.7,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "PIT",
+      "defense": "ATL",
+      "points": {
+        "QB": 12.54,
+        "RB": 14.4,
+        "WR": 22.4,
+        "TE": 19.4,
+        "DST": 18.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "SEA",
+      "defense": "NE",
+      "points": {
+        "QB": 13.299999999999999,
+        "RB": 15.0,
+        "WR": 33.1,
+        "TE": 3.3,
+        "DST": 13.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "SF",
+      "defense": "LAR",
+      "points": {
+        "QB": 21.1,
+        "RB": 21.8,
+        "WR": 47.9,
+        "TE": 7.1,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "TB",
+      "defense": "CIN",
+      "points": {
+        "QB": 11.64,
+        "RB": 23.1,
+        "WR": 25.800000000000004,
+        "TE": 5.6,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "TEN",
+      "defense": "NYJ",
+      "points": {
+        "QB": 11.7,
+        "RB": 8.8,
+        "WR": 26.4,
+        "TE": 8.5,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 1,
+      "offense": "WAS",
+      "defense": "PHI",
+      "points": {
+        "QB": 17.66,
+        "RB": 18.900000000000002,
+        "WR": 36.699999999999996,
+        "TE": 6.9,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "ARI",
+      "defense": "SEA",
+      "points": {
+        "QB": 6.5,
+        "RB": 13.8,
+        "WR": 6.9,
+        "TE": 18.1,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "ATL",
+      "defense": "CAR",
+      "points": {
+        "QB": -0.6000000000000001,
+        "RB": 19.799999999999997,
+        "WR": 18.3,
+        "TE": 6.5,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "BAL",
+      "defense": "NO",
+      "points": {
+        "QB": 14.8,
+        "RB": 21.5,
+        "WR": 31.5,
+        "TE": 10.9,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "BUF",
+      "defense": "DET",
+      "points": {
+        "QB": 40.82,
+        "RB": 20.9,
+        "WR": 30.3,
+        "TE": 31.0,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "CAR",
+      "defense": "ATL",
+      "points": {
+        "QB": 23.68,
+        "RB": 16.2,
+        "WR": 38.1,
+        "TE": 22.0,
+        "DST": 25.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "CHI",
+      "defense": "MIN",
+      "points": {
+        "QB": 9.879999999999999,
+        "RB": 20.7,
+        "WR": 22.5,
+        "TE": 3.2,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "CIN",
+      "defense": "HOU",
+      "points": {
+        "QB": 16.18,
+        "RB": 14.399999999999999,
+        "WR": 44.400000000000006,
+        "TE": 2.5,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "CLE",
+      "defense": "TB",
+      "points": {
+        "QB": 19.72,
+        "RB": 12.200000000000001,
+        "WR": 30.7,
+        "TE": 19.1,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "DAL",
+      "defense": "WAS",
+      "points": {
+        "QB": 29.76,
+        "RB": 8.9,
+        "WR": 52.699999999999996,
+        "TE": 20.3,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "DEN",
+      "defense": "JAX",
+      "points": {
+        "QB": 14.12,
+        "RB": 23.3,
+        "WR": 32.6,
+        "TE": 15.5,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "DET",
+      "defense": "BUF",
+      "points": {
+        "QB": 29.78,
+        "RB": 26.3,
+        "WR": 45.1,
+        "TE": 17.2,
+        "DST": -3.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "GB",
+      "defense": "NYJ",
+      "points": {
+        "QB": 13.8,
+        "RB": 15.399999999999999,
+        "WR": 27.9,
+        "TE": 3.5,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "HOU",
+      "defense": "CIN",
+      "points": {
+        "QB": 17.02,
+        "RB": 12.9,
+        "WR": 24.1,
+        "TE": 31.4,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "IND",
+      "defense": "KC",
+      "points": {
+        "QB": 11.4,
+        "RB": 29.2,
+        "WR": 28.299999999999997,
+        "TE": 14.4,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "JAX",
+      "defense": "DEN",
+      "points": {
+        "QB": 6.16,
+        "RB": 17.799999999999997,
+        "WR": 27.6,
+        "TE": 5.4,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "KC",
+      "defense": "IND",
+      "points": {
+        "QB": 28.98,
+        "RB": 29.3,
+        "WR": 47.0,
+        "TE": 25.1,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "LAC",
+      "defense": "LV",
+      "points": {
+        "QB": 7.88,
+        "RB": 22.4,
+        "WR": 17.5,
+        "TE": 16.8,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "LAR",
+      "defense": "NYG",
+      "points": {
+        "QB": 26.98,
+        "RB": 25.9,
+        "WR": 44.6,
+        "TE": 22.599999999999998,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "LV",
+      "defense": "LAC",
+      "points": {
+        "QB": 20.22,
+        "RB": 11.0,
+        "WR": 49.39999999999999,
+        "TE": 7.4,
+        "DST": 12.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "MIA",
+      "defense": "SF",
+      "points": {
+        "QB": 12.48,
+        "RB": 16.9,
+        "WR": 27.299999999999997,
+        "TE": 5.1,
+        "DST": -5.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "MIN",
+      "defense": "CHI",
+      "points": {
+        "QB": 6.32,
+        "RB": 14.7,
+        "WR": 12.6,
+        "TE": 9.3,
+        "DST": 17.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "NE",
+      "defense": "PIT",
+      "points": {
+        "QB": 8.02,
+        "RB": 18.6,
+        "WR": 21.099999999999998,
+        "TE": 11.0,
+        "DST": 15.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "NO",
+      "defense": "BAL",
+      "points": {
+        "QB": 22.38,
+        "RB": 14.5,
+        "WR": 37.5,
+        "TE": 12.4,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "NYG",
+      "defense": "LAR",
+      "points": {
+        "QB": 3.34,
+        "RB": 11.0,
+        "WR": 12.9,
+        "TE": 8.3,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "NYJ",
+      "defense": "GB",
+      "points": {
+        "QB": 15.58,
+        "RB": 22.7,
+        "WR": 39.8,
+        "TE": 6.2,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "PHI",
+      "defense": "TEN",
+      "points": {
+        "QB": 16.16,
+        "RB": 19.700000000000003,
+        "WR": 53.8,
+        "TE": 4.199999999999999,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "PIT",
+      "defense": "NE",
+      "points": {
+        "QB": 4.28,
+        "RB": 17.7,
+        "WR": 23.2,
+        "TE": 9.1,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "SEA",
+      "defense": "ARI",
+      "points": {
+        "QB": 21.4,
+        "RB": 16.7,
+        "WR": 53.4,
+        "TE": 10.600000000000001,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "SF",
+      "defense": "MIA",
+      "points": {
+        "QB": 28.28,
+        "RB": 26.6,
+        "WR": 24.1,
+        "TE": 18.0,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "TB",
+      "defense": "CLE",
+      "points": {
+        "QB": 12.18,
+        "RB": 17.5,
+        "WR": 29.7,
+        "TE": 8.8,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "TEN",
+      "defense": "PHI",
+      "points": {
+        "QB": 20.02,
+        "RB": 17.5,
+        "WR": 22.0,
+        "TE": 3.3,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 2,
+      "offense": "WAS",
+      "defense": "DAL",
+      "points": {
+        "QB": 23.48,
+        "RB": 22.5,
+        "WR": 38.199999999999996,
+        "TE": 4.0,
+        "DST": -3.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "ARI",
+      "defense": "SF",
+      "points": {
+        "QB": 25.6,
+        "RB": 26.799999999999997,
+        "WR": 37.099999999999994,
+        "TE": 23.0,
+        "DST": -3.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "ATL",
+      "defense": "GB",
+      "points": {
+        "QB": 14.04,
+        "RB": 46.3,
+        "WR": 37.1,
+        "TE": 10.6,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "BAL",
+      "defense": "DAL",
+      "points": {
+        "QB": 20.44,
+        "RB": 25.2,
+        "WR": 28.5,
+        "TE": 18.1,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "BUF",
+      "defense": "LAC",
+      "points": {
+        "QB": 17.46,
+        "RB": 28.4,
+        "WR": 19.0,
+        "TE": 5.3,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "CAR",
+      "defense": "CLE",
+      "points": {
+        "QB": 13.64,
+        "RB": 17.4,
+        "WR": 29.700000000000003,
+        "TE": 23.799999999999997,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "CHI",
+      "defense": "PHI",
+      "points": {
+        "QB": 24.48,
+        "RB": 13.9,
+        "WR": 49.300000000000004,
+        "TE": 9.7,
+        "DST": 12.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "CIN",
+      "defense": "PIT",
+      "points": {
+        "QB": 22.58,
+        "RB": 11.3,
+        "WR": 52.9,
+        "TE": 17.0,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "CLE",
+      "defense": "CAR",
+      "points": {
+        "QB": 20.26,
+        "RB": 19.0,
+        "WR": 11.0,
+        "TE": 24.1,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "DAL",
+      "defense": "BAL",
+      "points": {
+        "QB": 18.94,
+        "RB": 21.0,
+        "WR": 48.400000000000006,
+        "TE": 14.100000000000001,
+        "DST": -4.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "DEN",
+      "defense": "LAR",
+      "points": {
+        "QB": 24.14,
+        "RB": 19.4,
+        "WR": 31.5,
+        "TE": 7.8,
+        "DST": 13.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "DET",
+      "defense": "NYJ",
+      "points": {
+        "QB": 19.36,
+        "RB": 46.1,
+        "WR": 30.4,
+        "TE": 11.900000000000002,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "GB",
+      "defense": "ATL",
+      "points": {
+        "QB": 18.48,
+        "RB": 7.799999999999999,
+        "WR": 54.900000000000006,
+        "TE": 10.2,
+        "DST": -3.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "HOU",
+      "defense": "IND",
+      "points": {
+        "QB": 11.68,
+        "RB": 15.899999999999999,
+        "WR": 20.1,
+        "TE": 14.7,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "IND",
+      "defense": "HOU",
+      "points": {
+        "QB": 7.9,
+        "RB": 10.6,
+        "WR": 34.0,
+        "TE": 17.3,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "JAX",
+      "defense": "NE",
+      "points": {
+        "QB": 19.78,
+        "RB": 29.799999999999997,
+        "WR": 42.39999999999999,
+        "TE": 6.2,
+        "DST": 15.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "KC",
+      "defense": "MIA",
+      "points": {
+        "QB": 15.94,
+        "RB": 24.4,
+        "WR": 26.1,
+        "TE": 20.8,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "LAC",
+      "defense": "BUF",
+      "points": {
+        "QB": 12.74,
+        "RB": 22.299999999999997,
+        "WR": 31.200000000000003,
+        "TE": 0.0,
+        "DST": 13.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "LAR",
+      "defense": "DEN",
+      "points": {
+        "QB": 20.9,
+        "RB": 25.3,
+        "WR": 40.0,
+        "TE": 25.999999999999996,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "LV",
+      "defense": "NO",
+      "points": {
+        "QB": 22.22,
+        "RB": 23.700000000000003,
+        "WR": 18.3,
+        "TE": 39.8,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "MIA",
+      "defense": "KC",
+      "points": {
+        "QB": 10.0,
+        "RB": 16.2,
+        "WR": 26.599999999999998,
+        "TE": 10.5,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "MIN",
+      "defense": "TB",
+      "points": {
+        "QB": 10.42,
+        "RB": 14.499999999999998,
+        "WR": 32.3,
+        "TE": 3.1,
+        "DST": 17.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "NE",
+      "defense": "JAX",
+      "points": {
+        "QB": 5.16,
+        "RB": 14.4,
+        "WR": 33.540000000000006,
+        "TE": 1.5,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "NO",
+      "defense": "LV",
+      "points": {
+        "QB": 23.8,
+        "RB": 18.5,
+        "WR": 26.6,
+        "TE": 42.6,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "NYG",
+      "defense": "TEN",
+      "points": {
+        "QB": 6.12,
+        "RB": 18.5,
+        "WR": 16.4,
+        "TE": 3.3,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "NYJ",
+      "defense": "DET",
+      "points": {
+        "QB": 26.04,
+        "RB": 13.2,
+        "WR": 33.1,
+        "TE": 41.4,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "PHI",
+      "defense": "CHI",
+      "points": {
+        "QB": 10.62,
+        "RB": 10.6,
+        "WR": 23.6,
+        "TE": 3.3,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "PIT",
+      "defense": "CIN",
+      "points": {
+        "QB": 22.68,
+        "RB": 20.6,
+        "WR": 42.4,
+        "TE": 16.0,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "SEA",
+      "defense": "WAS",
+      "points": {
+        "QB": 27.66,
+        "RB": 16.400000000000002,
+        "WR": 61.16,
+        "TE": 20.200000000000003,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "SF",
+      "defense": "ARI",
+      "points": {
+        "QB": 31.28,
+        "RB": 23.3,
+        "WR": 35.8,
+        "TE": 26.2,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "TB",
+      "defense": "MIN",
+      "points": {
+        "QB": 10.18,
+        "RB": 10.8,
+        "WR": 29.5,
+        "TE": 8.6,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "TEN",
+      "defense": "NYG",
+      "points": {
+        "QB": 9.44,
+        "RB": 14.1,
+        "WR": 33.900000000000006,
+        "TE": 7.0,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 3,
+      "offense": "WAS",
+      "defense": "SEA",
+      "points": {
+        "QB": 20.42,
+        "RB": 16.4,
+        "WR": 42.9,
+        "TE": 3.0999999999999996,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "ARI",
+      "defense": "NYG",
+      "points": {
+        "QB": 10.44,
+        "RB": 19.4,
+        "WR": 24.7,
+        "TE": 22.0,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "ATL",
+      "defense": "NO",
+      "points": {
+        "QB": 12.72,
+        "RB": 53.4,
+        "WR": 31.0,
+        "TE": 9.6,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "BAL",
+      "defense": "TEN",
+      "points": {
+        "QB": 23.0,
+        "RB": 20.4,
+        "WR": 37.599999999999994,
+        "TE": 19.1,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "BUF",
+      "defense": "NE",
+      "points": {
+        "QB": 18.52,
+        "RB": 21.2,
+        "WR": 40.8,
+        "TE": 5.0,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "CAR",
+      "defense": "DET",
+      "points": {
+        "QB": 21.46,
+        "RB": 27.599999999999998,
+        "WR": 57.1,
+        "TE": 13.600000000000001,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "CHI",
+      "defense": "NYJ",
+      "points": {
+        "QB": 8.82,
+        "RB": 38.7,
+        "WR": 29.4,
+        "TE": 16.8,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "CIN",
+      "defense": "JAX",
+      "points": {
+        "QB": 23.72,
+        "RB": 19.8,
+        "WR": 55.5,
+        "TE": 14.2,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "CLE",
+      "defense": "PIT",
+      "points": {
+        "QB": 12.92,
+        "RB": 34.0,
+        "WR": 32.1,
+        "TE": 11.7,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "DAL",
+      "defense": "HOU",
+      "points": {
+        "QB": 18.1,
+        "RB": 33.7,
+        "WR": 58.5,
+        "TE": 4.1,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "DEN",
+      "defense": "SF",
+      "points": {
+        "QB": 13.56,
+        "RB": 34.400000000000006,
+        "WR": 25.599999999999998,
+        "TE": 1.6,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "DET",
+      "defense": "CAR",
+      "points": {
+        "QB": 20.48,
+        "RB": 20.4,
+        "WR": 45.2,
+        "TE": 24.2,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "GB",
+      "defense": "TB",
+      "points": {
+        "QB": 13.08,
+        "RB": 16.6,
+        "WR": 20.2,
+        "TE": 24.299999999999997,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "HOU",
+      "defense": "DAL",
+      "points": {
+        "QB": 23.08,
+        "RB": 12.5,
+        "WR": 56.9,
+        "TE": 9.3,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "IND",
+      "defense": "WAS",
+      "points": {
+        "QB": 7.92,
+        "RB": 27.5,
+        "WR": 21.3,
+        "TE": 9.1,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "JAX",
+      "defense": "CIN",
+      "points": {
+        "QB": 13.08,
+        "RB": 20.6,
+        "WR": 24.2,
+        "TE": 19.0,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "KC",
+      "defense": "LV",
+      "points": {
+        "QB": 17.0,
+        "RB": 32.9,
+        "WR": 39.1,
+        "TE": 7.2,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "LAC",
+      "defense": "SEA",
+      "points": {
+        "QB": 9.56,
+        "RB": 36.2,
+        "WR": 15.6,
+        "TE": 8.8,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "LAR",
+      "defense": "PHI",
+      "points": {
+        "QB": 9.68,
+        "RB": 39.800000000000004,
+        "WR": 39.800000000000004,
+        "TE": 11.7,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "LV",
+      "defense": "KC",
+      "points": {
+        "QB": 22.6,
+        "RB": 21.3,
+        "WR": 17.9,
+        "TE": 48.0,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "MIA",
+      "defense": "MIN",
+      "points": {
+        "QB": 2.5,
+        "RB": 18.7,
+        "WR": 13.3,
+        "TE": 2.5,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "MIN",
+      "defense": "MIA",
+      "points": {
+        "QB": 11.48,
+        "RB": 20.0,
+        "WR": 16.1,
+        "TE": 26.299999999999997,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "NE",
+      "defense": "BUF",
+      "points": {
+        "QB": 26.16,
+        "RB": 22.599999999999998,
+        "WR": 47.8,
+        "TE": 13.399999999999999,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "NO",
+      "defense": "ATL",
+      "points": {
+        "QB": 15.94,
+        "RB": 29.0,
+        "WR": 38.2,
+        "TE": 11.9,
+        "DST": -4.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "NYG",
+      "defense": "ARI",
+      "points": {
+        "QB": 18.0,
+        "RB": 11.6,
+        "WR": 36.4,
+        "TE": 21.7,
+        "DST": 13.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "NYJ",
+      "defense": "CHI",
+      "points": {
+        "QB": 8.76,
+        "RB": 8.7,
+        "WR": 21.0,
+        "TE": 2.1,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "PHI",
+      "defense": "LAR",
+      "points": {
+        "QB": 13.52,
+        "RB": 9.8,
+        "WR": 28.8,
+        "TE": 3.3,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "PIT",
+      "defense": "CLE",
+      "points": {
+        "QB": 21.96,
+        "RB": 15.5,
+        "WR": 41.199999999999996,
+        "TE": 22.4,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "SEA",
+      "defense": "LAC",
+      "points": {
+        "QB": 13.32,
+        "RB": 30.0,
+        "WR": 34.800000000000004,
+        "TE": 2.2,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "SF",
+      "defense": "DEN",
+      "points": {
+        "QB": 19.62,
+        "RB": 17.3,
+        "WR": 30.8,
+        "TE": 17.0,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "TB",
+      "defense": "GB",
+      "points": {
+        "QB": 11.42,
+        "RB": 23.799999999999997,
+        "WR": 22.9,
+        "TE": 7.7,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "TEN",
+      "defense": "BAL",
+      "points": {
+        "QB": 15.58,
+        "RB": 14.799999999999999,
+        "WR": 40.5,
+        "TE": 4.7,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 4,
+      "offense": "WAS",
+      "defense": "IND",
+      "points": {
+        "QB": 16.38,
+        "RB": 12.5,
+        "WR": 34.8,
+        "TE": 2.5,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "ARI",
+      "defense": "DET",
+      "points": {
+        "QB": 25.28,
+        "RB": 6.6000000000000005,
+        "WR": 27.78,
+        "TE": 45.8,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "ATL",
+      "defense": "BAL",
+      "points": {
+        "QB": 13.76,
+        "RB": 17.400000000000002,
+        "WR": 29.700000000000003,
+        "TE": 17.5,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "BAL",
+      "defense": "ATL",
+      "points": {
+        "QB": 24.04,
+        "RB": 30.8,
+        "WR": 34.699999999999996,
+        "TE": 9.399999999999999,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "BUF",
+      "defense": "LAR",
+      "points": {
+        "QB": 30.5,
+        "RB": 38.3,
+        "WR": 18.7,
+        "TE": 5.300000000000001,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "CHI",
+      "defense": "GB",
+      "points": {
+        "QB": 1.9,
+        "RB": 26.3,
+        "WR": 20.5,
+        "TE": 5.7,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "CIN",
+      "defense": "MIA",
+      "points": {
+        "QB": 24.6,
+        "RB": 22.8,
+        "WR": 27.099999999999998,
+        "TE": 24.8,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "CLE",
+      "defense": "NYJ",
+      "points": {
+        "QB": 12.2,
+        "RB": 10.3,
+        "WR": 30.4,
+        "TE": 1.4,
+        "DST": 9.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "DAL",
+      "defense": "TB",
+      "points": {
+        "QB": 12.64,
+        "RB": 14.7,
+        "WR": 51.1,
+        "TE": 6.800000000000001,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "DEN",
+      "defense": "LAC",
+      "points": {
+        "QB": 7.92,
+        "RB": 17.2,
+        "WR": 22.900000000000002,
+        "TE": 9.5,
+        "DST": 12.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "DET",
+      "defense": "ARI",
+      "points": {
+        "QB": 28.94,
+        "RB": 38.800000000000004,
+        "WR": 31.6,
+        "TE": 21.900000000000002,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "GB",
+      "defense": "CHI",
+      "points": {
+        "QB": 25.080000000000002,
+        "RB": 24.1,
+        "WR": 58.599999999999994,
+        "TE": 11.6,
+        "DST": 18.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "HOU",
+      "defense": "TEN",
+      "points": {
+        "QB": 20.94,
+        "RB": 13.6,
+        "WR": 43.099999999999994,
+        "TE": 8.8,
+        "DST": 15.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "IND",
+      "defense": "PIT",
+      "points": {
+        "QB": 11.08,
+        "RB": 14.1,
+        "WR": 22.6,
+        "TE": 26.2,
+        "DST": -3.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "JAX",
+      "defense": "PHI",
+      "points": {
+        "QB": 21.74,
+        "RB": 13.7,
+        "WR": 43.4,
+        "TE": 17.8,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "LAC",
+      "defense": "DEN",
+      "points": {
+        "QB": 10.24,
+        "RB": 23.4,
+        "WR": 10.4,
+        "TE": 12.4,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "LAR",
+      "defense": "BUF",
+      "points": {
+        "QB": 27.32,
+        "RB": 35.8,
+        "WR": 61.2,
+        "TE": 19.0,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "LV",
+      "defense": "NE",
+      "points": {
+        "QB": 15.940000000000001,
+        "RB": 24.2,
+        "WR": 17.3,
+        "TE": 26.1,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "MIA",
+      "defense": "CIN",
+      "points": {
+        "QB": 18.88,
+        "RB": 15.9,
+        "WR": 29.900000000000002,
+        "TE": 11.2,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "MIN",
+      "defense": "NO",
+      "points": {
+        "QB": 18.26,
+        "RB": 22.400000000000002,
+        "WR": 30.7,
+        "TE": 12.0,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "NE",
+      "defense": "LV",
+      "points": {
+        "QB": 39.46,
+        "RB": 27.2,
+        "WR": 54.1,
+        "TE": 24.1,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "NO",
+      "defense": "MIN",
+      "points": {
+        "QB": -0.16,
+        "RB": 14.6,
+        "WR": 15.2,
+        "TE": 7.3,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "NYG",
+      "defense": "WAS",
+      "points": {
+        "QB": 25.939999999999998,
+        "RB": 14.6,
+        "WR": 36.5,
+        "TE": 37.9,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "NYJ",
+      "defense": "CLE",
+      "points": {
+        "QB": 9.98,
+        "RB": 21.3,
+        "WR": 30.9,
+        "TE": 5.7,
+        "DST": 16.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "PHI",
+      "defense": "JAX",
+      "points": {
+        "QB": 13.0,
+        "RB": 11.5,
+        "WR": 35.7,
+        "TE": 9.8,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "PIT",
+      "defense": "IND",
+      "points": {
+        "QB": 21.8,
+        "RB": 37.4,
+        "WR": 19.7,
+        "TE": 24.7,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "SEA",
+      "defense": "SF",
+      "points": {
+        "QB": 8.3,
+        "RB": 18.299999999999997,
+        "WR": 30.6,
+        "TE": 5.0,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "SF",
+      "defense": "SEA",
+      "points": {
+        "QB": 16.16,
+        "RB": 18.900000000000002,
+        "WR": 38.4,
+        "TE": 7.4,
+        "DST": 9.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "TB",
+      "defense": "DAL",
+      "points": {
+        "QB": 13.86,
+        "RB": 39.1,
+        "WR": 31.6,
+        "TE": 7.0,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "TEN",
+      "defense": "HOU",
+      "points": {
+        "QB": 5.0,
+        "RB": 15.3,
+        "WR": 26.700000000000003,
+        "TE": 1.5,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 5,
+      "offense": "WAS",
+      "defense": "NYG",
+      "points": {
+        "QB": 32.26,
+        "RB": 19.6,
+        "WR": 24.1,
+        "TE": 11.1,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "ARI",
+      "defense": "LAR",
+      "points": {
+        "QB": 6.92,
+        "RB": 17.6,
+        "WR": 21.9,
+        "TE": 18.1,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "ATL",
+      "defense": "CHI",
+      "points": {
+        "QB": 23.1,
+        "RB": 10.3,
+        "WR": 34.8,
+        "TE": 24.6,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "BAL",
+      "defense": "CLE",
+      "points": {
+        "QB": 13.4,
+        "RB": 8.9,
+        "WR": 20.7,
+        "TE": 15.8,
+        "DST": 9.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "BUF",
+      "defense": "LV",
+      "points": {
+        "QB": 18.3,
+        "RB": 30.9,
+        "WR": 34.0,
+        "TE": 11.8,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "CAR",
+      "defense": "PHI",
+      "points": {
+        "QB": 19.84,
+        "RB": 19.0,
+        "WR": 38.4,
+        "TE": 20.700000000000003,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "CHI",
+      "defense": "ATL",
+      "points": {
+        "QB": 16.5,
+        "RB": 37.5,
+        "WR": 33.7,
+        "TE": 20.8,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "CLE",
+      "defense": "BAL",
+      "points": {
+        "QB": 9.46,
+        "RB": 17.4,
+        "WR": 23.5,
+        "TE": 3.7,
+        "DST": 9.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "DAL",
+      "defense": "GB",
+      "points": {
+        "QB": 11.02,
+        "RB": 18.8,
+        "WR": 46.3,
+        "TE": 10.8,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "DEN",
+      "defense": "SEA",
+      "points": {
+        "QB": 4.48,
+        "RB": 28.799999999999997,
+        "WR": 14.8,
+        "TE": 3.3,
+        "DST": 12.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "GB",
+      "defense": "DAL",
+      "points": {
+        "QB": 20.24,
+        "RB": 12.5,
+        "WR": 39.9,
+        "TE": 8.7,
+        "DST": 9.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "HOU",
+      "defense": "JAX",
+      "points": {
+        "QB": 22.98,
+        "RB": 22.1,
+        "WR": 44.599999999999994,
+        "TE": 23.4,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "IND",
+      "defense": "TEN",
+      "points": {
+        "QB": 13.76,
+        "RB": 23.8,
+        "WR": 35.8,
+        "TE": 12.799999999999999,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "JAX",
+      "defense": "HOU",
+      "points": {
+        "QB": 27.34,
+        "RB": 30.299999999999997,
+        "WR": 23.700000000000003,
+        "TE": 18.200000000000003,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "KC",
+      "defense": "LAC",
+      "points": {
+        "QB": 10.48,
+        "RB": 32.3,
+        "WR": 25.7,
+        "TE": 17.6,
+        "DST": 15.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "LAC",
+      "defense": "KC",
+      "points": {
+        "QB": 8.76,
+        "RB": 15.3,
+        "WR": 20.1,
+        "TE": 9.7,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "LAR",
+      "defense": "ARI",
+      "points": {
+        "QB": 16.88,
+        "RB": 23.7,
+        "WR": 24.4,
+        "TE": 18.3,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "LV",
+      "defense": "BUF",
+      "points": {
+        "QB": 18.52,
+        "RB": 22.7,
+        "WR": 28.599999999999998,
+        "TE": 27.5,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "NE",
+      "defense": "NYJ",
+      "points": {
+        "QB": 23.8,
+        "RB": 12.3,
+        "WR": 38.7,
+        "TE": 16.900000000000002,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "NO",
+      "defense": "NYG",
+      "points": {
+        "QB": 26.96,
+        "RB": 25.799999999999997,
+        "WR": 31.9,
+        "TE": 3.0,
+        "DST": 12.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "NYG",
+      "defense": "NO",
+      "points": {
+        "QB": 22.8,
+        "RB": 23.0,
+        "WR": 43.0,
+        "TE": 23.9,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "NYJ",
+      "defense": "NE",
+      "points": {
+        "QB": 11.98,
+        "RB": 16.0,
+        "WR": 33.6,
+        "TE": 11.399999999999999,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "PHI",
+      "defense": "CAR",
+      "points": {
+        "QB": 12.6,
+        "RB": 16.4,
+        "WR": 33.099999999999994,
+        "TE": 13.5,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "PIT",
+      "defense": "TB",
+      "points": {
+        "QB": 16.02,
+        "RB": 17.700000000000003,
+        "WR": 46.0,
+        "TE": 15.6,
+        "DST": 9.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "SEA",
+      "defense": "DEN",
+      "points": {
+        "QB": 11.02,
+        "RB": 16.1,
+        "WR": 49.5,
+        "TE": 4.6,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "SF",
+      "defense": "WAS",
+      "points": {
+        "QB": 17.36,
+        "RB": 35.4,
+        "WR": 17.9,
+        "TE": 17.9,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "TB",
+      "defense": "PIT",
+      "points": {
+        "QB": 11.16,
+        "RB": 10.3,
+        "WR": 35.2,
+        "TE": 4.5,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "TEN",
+      "defense": "IND",
+      "points": {
+        "QB": 6.78,
+        "RB": 9.4,
+        "WR": 25.5,
+        "TE": 0.0,
+        "DST": 20.0
+      }
+    },
+    {
+      "week": 6,
+      "offense": "WAS",
+      "defense": "SF",
+      "points": {
+        "QB": 21.0,
+        "RB": 19.7,
+        "WR": 40.3,
+        "TE": 15.3,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "ARI",
+      "defense": "DEN",
+      "points": {
+        "QB": 16.48,
+        "RB": 17.200000000000003,
+        "WR": 19.0,
+        "TE": 31.8,
+        "DST": -3.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "ATL",
+      "defense": "SF",
+      "points": {
+        "QB": 20.42,
+        "RB": 21.0,
+        "WR": 23.900000000000002,
+        "TE": 27.7,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "BAL",
+      "defense": "CIN",
+      "points": {
+        "QB": 15.12,
+        "RB": 14.1,
+        "WR": 41.0,
+        "TE": 10.8,
+        "DST": -4.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "CAR",
+      "defense": "TB",
+      "points": {
+        "QB": 8.8,
+        "RB": 22.8,
+        "WR": 13.9,
+        "TE": 19.700000000000003,
+        "DST": -5.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "CHI",
+      "defense": "NE",
+      "points": {
+        "QB": 22.12,
+        "RB": 20.3,
+        "WR": 34.6,
+        "TE": 25.7,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "CIN",
+      "defense": "BAL",
+      "points": {
+        "QB": 28.88,
+        "RB": 18.0,
+        "WR": 45.7,
+        "TE": 23.6,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "CLE",
+      "defense": "TEN",
+      "points": {
+        "QB": 18.22,
+        "RB": 34.099999999999994,
+        "WR": 35.0,
+        "TE": 13.1,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "DAL",
+      "defense": "PHI",
+      "points": {
+        "QB": 23.28,
+        "RB": 25.6,
+        "WR": 51.099999999999994,
+        "TE": 3.1,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "DEN",
+      "defense": "ARI",
+      "points": {
+        "QB": 26.18,
+        "RB": 31.200000000000003,
+        "WR": 25.4,
+        "TE": 1.2,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "DET",
+      "defense": "GB",
+      "points": {
+        "QB": 18.02,
+        "RB": 17.8,
+        "WR": 52.3,
+        "TE": 4.199999999999999,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "GB",
+      "defense": "DET",
+      "points": {
+        "QB": 16.96,
+        "RB": 25.6,
+        "WR": 30.1,
+        "TE": 16.7,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "HOU",
+      "defense": "NYG",
+      "points": {
+        "QB": 16.52,
+        "RB": 9.1,
+        "WR": 32.800000000000004,
+        "TE": 12.4,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "IND",
+      "defense": "MIN",
+      "points": {
+        "QB": 3.62,
+        "RB": 24.8,
+        "WR": 15.9,
+        "TE": 3.2,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "KC",
+      "defense": "SEA",
+      "points": {
+        "QB": 6.0,
+        "RB": 13.399999999999999,
+        "WR": 9.899999999999999,
+        "TE": 15.8,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "LAR",
+      "defense": "LV",
+      "points": {
+        "QB": 17.5,
+        "RB": 35.2,
+        "WR": 24.3,
+        "TE": 31.200000000000003,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "LV",
+      "defense": "LAR",
+      "points": {
+        "QB": 20.4,
+        "RB": 24.3,
+        "WR": 26.1,
+        "TE": 21.3,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "MIA",
+      "defense": "NYJ",
+      "points": {
+        "QB": 26.02,
+        "RB": 18.1,
+        "WR": 33.0,
+        "TE": 13.6,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "MIN",
+      "defense": "IND",
+      "points": {
+        "QB": 13.9,
+        "RB": 10.4,
+        "WR": 18.1,
+        "TE": 16.2,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "NE",
+      "defense": "CHI",
+      "points": {
+        "QB": 27.44,
+        "RB": 28.1,
+        "WR": 15.7,
+        "TE": 28.7,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "NO",
+      "defense": "PIT",
+      "points": {
+        "QB": 13.82,
+        "RB": 19.0,
+        "WR": 39.9,
+        "TE": 6.0,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "NYG",
+      "defense": "HOU",
+      "points": {
+        "QB": 16.58,
+        "RB": 42.3,
+        "WR": 32.1,
+        "TE": 7.1,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "NYJ",
+      "defense": "MIA",
+      "points": {
+        "QB": 23.48,
+        "RB": 27.799999999999997,
+        "WR": 27.1,
+        "TE": 27.7,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "PHI",
+      "defense": "DAL",
+      "points": {
+        "QB": 10.54,
+        "RB": 33.3,
+        "WR": 31.0,
+        "TE": 9.8,
+        "DST": -5.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "PIT",
+      "defense": "NO",
+      "points": {
+        "QB": 13.08,
+        "RB": 31.299999999999997,
+        "WR": 17.7,
+        "TE": 11.4,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "SEA",
+      "defense": "KC",
+      "points": {
+        "QB": 13.98,
+        "RB": 22.6,
+        "WR": 37.4,
+        "TE": 11.3,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "SF",
+      "defense": "ATL",
+      "points": {
+        "QB": 12.02,
+        "RB": 35.6,
+        "WR": 18.7,
+        "TE": 17.2,
+        "DST": -4.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "TB",
+      "defense": "CAR",
+      "points": {
+        "QB": 6.36,
+        "RB": 44.0,
+        "WR": 19.4,
+        "TE": 0.0,
+        "DST": 19.0
+      }
+    },
+    {
+      "week": 7,
+      "offense": "TEN",
+      "defense": "CLE",
+      "points": {
+        "QB": 5.74,
+        "RB": 38.9,
+        "WR": 22.0,
+        "TE": 6.800000000000001,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "ARI",
+      "defense": "DAL",
+      "points": {
+        "QB": 22.98,
+        "RB": 39.199999999999996,
+        "WR": 36.8,
+        "TE": 23.2,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "ATL",
+      "defense": "TB",
+      "points": {
+        "QB": -1.9,
+        "RB": 10.1,
+        "WR": 14.7,
+        "TE": 4.5,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "BAL",
+      "defense": "BUF",
+      "points": {
+        "QB": -2.0599999999999996,
+        "RB": 22.0,
+        "WR": 5.5,
+        "TE": 6.9,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "BUF",
+      "defense": "BAL",
+      "points": {
+        "QB": 26.36,
+        "RB": 26.400000000000002,
+        "WR": 29.4,
+        "TE": 21.900000000000002,
+        "DST": 14.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "CAR",
+      "defense": "GB",
+      "points": {
+        "QB": 10.36,
+        "RB": 25.0,
+        "WR": 29.900000000000002,
+        "TE": 9.2,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "CHI",
+      "defense": "SEA",
+      "points": {
+        "QB": 13.98,
+        "RB": 31.7,
+        "WR": 40.0,
+        "TE": 11.5,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "CIN",
+      "defense": "TEN",
+      "points": {
+        "QB": 39.48,
+        "RB": 19.0,
+        "WR": 75.0,
+        "TE": 24.700000000000003,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "CLE",
+      "defense": "PIT",
+      "points": {
+        "QB": 11.24,
+        "RB": 19.8,
+        "WR": 17.7,
+        "TE": 25.299999999999997,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "DAL",
+      "defense": "ARI",
+      "points": {
+        "QB": 19.8,
+        "RB": 12.0,
+        "WR": 32.7,
+        "TE": 7.1,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "DEN",
+      "defense": "KC",
+      "points": {
+        "QB": 19.28,
+        "RB": 21.7,
+        "WR": 32.4,
+        "TE": 13.4,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "DET",
+      "defense": "MIN",
+      "points": {
+        "QB": 9.04,
+        "RB": 32.8,
+        "WR": 29.6,
+        "TE": 8.2,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "GB",
+      "defense": "CAR",
+      "points": {
+        "QB": 21.52,
+        "RB": 26.0,
+        "WR": 44.1,
+        "TE": 17.3,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "IND",
+      "defense": "JAX",
+      "points": {
+        "QB": 7.18,
+        "RB": 13.9,
+        "WR": 30.3,
+        "TE": 5.8,
+        "DST": 0.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "JAX",
+      "defense": "IND",
+      "points": {
+        "QB": 19.72,
+        "RB": 44.0,
+        "WR": 16.2,
+        "TE": 19.4,
+        "DST": 20.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "KC",
+      "defense": "DEN",
+      "points": {
+        "QB": 25.44,
+        "RB": 37.7,
+        "WR": 28.0,
+        "TE": 22.8,
+        "DST": -3.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "LAC",
+      "defense": "LAR",
+      "points": {
+        "QB": 7.78,
+        "RB": 15.0,
+        "WR": 26.4,
+        "TE": 13.2,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "LAR",
+      "defense": "LAC",
+      "points": {
+        "QB": 8.28,
+        "RB": 26.200000000000003,
+        "WR": 32.2,
+        "TE": 5.199999999999999,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "LV",
+      "defense": "NYJ",
+      "points": {
+        "QB": 28.18,
+        "RB": 24.6,
+        "WR": 13.8,
+        "TE": 38.5,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "MIA",
+      "defense": "NE",
+      "points": {
+        "QB": 14.64,
+        "RB": 7.4,
+        "WR": 45.6,
+        "TE": 8.3,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "MIN",
+      "defense": "DET",
+      "points": {
+        "QB": 19.9,
+        "RB": 8.4,
+        "WR": 29.0,
+        "TE": 19.2,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "NE",
+      "defense": "MIA",
+      "points": {
+        "QB": 22.46,
+        "RB": 16.400000000000002,
+        "WR": 34.6,
+        "TE": 7.5,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "NYJ",
+      "defense": "LV",
+      "points": {
+        "QB": 18.0,
+        "RB": 24.8,
+        "WR": 50.3,
+        "TE": 8.100000000000001,
+        "DST": -4.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "PHI",
+      "defense": "WAS",
+      "points": {
+        "QB": 6.98,
+        "RB": 22.0,
+        "WR": 19.299999999999997,
+        "TE": 15.5,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "PIT",
+      "defense": "CLE",
+      "points": {
+        "QB": 4.88,
+        "RB": 32.9,
+        "WR": 11.3,
+        "TE": 24.0,
+        "DST": 19.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "SEA",
+      "defense": "CHI",
+      "points": {
+        "QB": 17.52,
+        "RB": 12.5,
+        "WR": 39.1,
+        "TE": 4.3,
+        "DST": -1.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "TB",
+      "defense": "ATL",
+      "points": {
+        "QB": 1.4,
+        "RB": 35.0,
+        "WR": 0.0,
+        "TE": 0.0,
+        "DST": 18.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "TEN",
+      "defense": "CIN",
+      "points": {
+        "QB": 26.26,
+        "RB": 28.7,
+        "WR": 42.2,
+        "TE": 21.2,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 8,
+      "offense": "WAS",
+      "defense": "PHI",
+      "points": {
+        "QB": 14.98,
+        "RB": 23.4,
+        "WR": 34.3,
+        "TE": 3.2,
+        "DST": 13.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "ATL",
+      "defense": "CIN",
+      "points": {
+        "QB": 13.48,
+        "RB": 29.599999999999998,
+        "WR": 16.900000000000002,
+        "TE": 12.399999999999999,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "BAL",
+      "defense": "JAX",
+      "points": {
+        "QB": -0.3,
+        "RB": 23.78,
+        "WR": 9.3,
+        "TE": 5.4,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "CAR",
+      "defense": "DEN",
+      "points": {
+        "QB": 20.34,
+        "RB": 14.299999999999999,
+        "WR": 28.2,
+        "TE": 39.4,
+        "DST": 2.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "CIN",
+      "defense": "ATL",
+      "points": {
+        "QB": 29.54,
+        "RB": 14.8,
+        "WR": 61.400000000000006,
+        "TE": 4.5,
+        "DST": 3.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "CLE",
+      "defense": "NO",
+      "points": {
+        "QB": 22.68,
+        "RB": 13.3,
+        "WR": 41.900000000000006,
+        "TE": 12.2,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "DAL",
+      "defense": "IND",
+      "points": {
+        "QB": 19.5,
+        "RB": 30.099999999999998,
+        "WR": 44.099999999999994,
+        "TE": 14.1,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "DEN",
+      "defense": "CAR",
+      "points": {
+        "QB": 15.68,
+        "RB": 22.0,
+        "WR": 41.9,
+        "TE": 10.8,
+        "DST": 7.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "DET",
+      "defense": "MIA",
+      "points": {
+        "QB": 5.3,
+        "RB": 17.5,
+        "WR": 27.1,
+        "TE": 7.2,
+        "DST": 9.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "IND",
+      "defense": "DAL",
+      "points": {
+        "QB": 10.3,
+        "RB": 20.6,
+        "WR": 28.4,
+        "TE": 8.4,
+        "DST": 6.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "JAX",
+      "defense": "BAL",
+      "points": {
+        "QB": 13.58,
+        "RB": 23.1,
+        "WR": 26.200000000000003,
+        "TE": 15.8,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "KC",
+      "defense": "NYJ",
+      "points": {
+        "QB": 14.38,
+        "RB": 47.599999999999994,
+        "WR": 24.500000000000004,
+        "TE": 20.700000000000003,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "LAR",
+      "defense": "WAS",
+      "points": {
+        "QB": 11.22,
+        "RB": 20.9,
+        "WR": 42.6,
+        "TE": 7.6,
+        "DST": 12.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "MIA",
+      "defense": "DET",
+      "points": {
+        "QB": 3.82,
+        "RB": 14.700000000000001,
+        "WR": 18.700000000000003,
+        "TE": 5.0,
+        "DST": 5.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "NO",
+      "defense": "CLE",
+      "points": {
+        "QB": 19.7,
+        "RB": 23.1,
+        "WR": 31.7,
+        "TE": 13.600000000000001,
+        "DST": 4.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "NYG",
+      "defense": "PHI",
+      "points": {
+        "QB": 15.22,
+        "RB": 7.9,
+        "WR": 24.3,
+        "TE": 16.3,
+        "DST": 13.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "NYJ",
+      "defense": "KC",
+      "points": {
+        "QB": 7.4,
+        "RB": 17.1,
+        "WR": 14.200000000000001,
+        "TE": 11.0,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "PHI",
+      "defense": "NYG",
+      "points": {
+        "QB": 13.16,
+        "RB": 13.799999999999999,
+        "WR": 19.9,
+        "TE": 10.0,
+        "DST": 8.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "WAS",
+      "defense": "LAR",
+      "points": {
+        "QB": 14.52,
+        "RB": 14.3,
+        "WR": 34.2,
+        "TE": 13.2,
+        "DST": 5.0
+      }
+    }
+  ]
+}
