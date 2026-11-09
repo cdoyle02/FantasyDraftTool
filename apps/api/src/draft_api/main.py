@@ -51,7 +51,9 @@ from .workbook.service import (
     build_injuries_response,
     build_matchups_response,
     build_matrix_response,
+    build_oldl_response,
     build_pace_response,
+    build_pool_rank_response,
     build_top_response,
 )
 
@@ -567,10 +569,8 @@ def strength_of_schedule_tier1_opportunity(
     season: int = 2026,
 ) -> dict[str, Any] | JSONResponse:
     """Player opportunity scores (shrunk softness × nflverse usage share)."""
-    from draft_api.sos.service import (
-        LeagueJoinUnavailableError,
-        build_tier1_opportunity_response,
-    )
+    from draft_api.espn_leagues import LeagueNotFoundError
+    from draft_api.sos.service import build_tier1_opportunity_response
 
     position_key = position.upper()
     window_key = window.lower()
@@ -594,8 +594,9 @@ def strength_of_schedule_tier1_opportunity(
             season=season,
             league_id=leagueId,
             now=datetime.now(UTC),
+            espn_http_json=_espn_roster_http_json_override,
         )
-    except LeagueJoinUnavailableError as exc:
+    except LeagueNotFoundError as exc:
         return error_response(404, "league_not_found", str(exc))
     except (NflverseError, ValueError) as exc:
         status = 400 if isinstance(exc, ValueError) else 503
@@ -799,6 +800,68 @@ def workbook_explain(
             custom_start_week=startWeek,
             custom_end_week=endWeek,
             scoring=scoring,
+            season=season,
+        )
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+    except WorkbookNflverseError as exc:
+        return error_response(503, "workbook_unavailable", str(exc))
+
+
+class WorkbookPoolPlayerPayload(ApiModel):
+    name: str = Field(min_length=1)
+    team: str = Field(min_length=1)
+    salary: int = Field(ge=0)
+    position: str = Field(min_length=1)
+    opponent: str | None = None
+
+
+class WorkbookPoolRankRequest(ApiModel):
+    week: int = Field(ge=1, le=18)
+    window: str = "l4"
+    scoring: str | None = None
+    players: list[WorkbookPoolPlayerPayload]
+
+
+@app.post("/api/v1/nfl/workbook/pool/rank", response_model=None)
+def workbook_pool_rank(
+    request: WorkbookPoolRankRequest,
+    season: int = 2026,
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+) -> dict[str, Any] | JSONResponse:
+    """Rank a pasted DFS salary pool against Workbook Net matchup metrics."""
+    try:
+        return build_pool_rank_response(
+            week=request.week,
+            window=request.window,
+            scoring=request.scoring,
+            players=[p.model_dump() for p in request.players],
+            season=season,
+            custom_start_week=startWeek,
+            custom_end_week=endWeek,
+        )
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+    except WorkbookNflverseError as exc:
+        return error_response(503, "workbook_unavailable", str(exc))
+
+
+@app.get("/api/v1/nfl/workbook/oldl", response_model=None)
+def workbook_oldl(
+    week: int,
+    window: str = "l4",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Workbook OL/DL proxy metrics (nflverse pass pressure / EPA, not FO)."""
+    try:
+        return build_oldl_response(
+            week=week,
+            window=window,
+            custom_start_week=startWeek,
+            custom_end_week=endWeek,
             season=season,
         )
     except WorkbookServiceError as exc:

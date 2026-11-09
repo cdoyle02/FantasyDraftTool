@@ -286,6 +286,39 @@ mean_net(...)`, verified in `test_service.py`). `metric` is one of `dsr`,
 looked up from `schedule[week][team]`; if the team has a bye that week, `def`
 and `net` are `null` and only `off` is returned.
 
+## P3 DFS pool rank + OL/DL proxy (API)
+
+### DFS pool rank
+
+`POST /api/v1/nfl/workbook/pool/rank` — client pastes DK/FD-style player rows;
+**salaries stay client-side** until this POST. Body: `week`, `window`, optional
+`scoring` (defaults **`half_ppr`**), and `players[]` with `name`, `team`,
+`salary`, `position`, optional `opponent`.
+
+- **Limit:** 400 when more than **500** players.
+- **Join:** `normalize_player_name` + `normalize_team`; `joinStatus` is
+  `matched` only when the team is on the board and the position maps to QB/RB/WR/TE.
+  Unmatched names still return with `netFpG: null`.
+- **Net:** Positional matchup Net headline (`fpG` / `fpGTot`) for the player's
+  team vs scheduled opponent — same math as the Net Matchups board, not individual
+  season box-score FPG.
+- **Value:** `netFpG / salary * 1000` when both are known; default sort **value**
+  descending, then `netFpG`.
+- **Tier:** Pool-local tertiles via `assign_tertile` on `netFpG` (not league matrix).
+
+### OL/DL proxy
+
+`GET /api/v1/nfl/workbook/oldl?week=&window=` — **Proxy** OL/DL board from
+nflverse dropback samples (sack + qb hit pressure rate, sack rate, mean EPA per
+dropback on offense). Response includes `disclaimer`:
+`OL/DL proxy from nflverse; not Football Outsiders.`
+
+- **Primary:** PBP-derived `PassDropback` rows when pressure columns are present.
+- **Fallback:** `team_env_off.pass_plays` with mean `epa_pass` per play when PBP
+  pressure is unavailable (pressure/sack rates may be null).
+- **Games:** Each scheduled game lists home `offense_ol` vs away `defense_dl` rows
+  mirroring the matchups pairing pattern.
+
 ## Known P0 gaps (tracked, not silently guessed)
 
 - **Out/Slot alignment** — see above; always `null` against the current

@@ -1082,3 +1082,126 @@ def build_matrix_response(
     )
     payload["teams"] = matrix["teams"]
     return payload
+
+
+# --- P3: DFS pool rank + OL/DL proxy ----------------------------------------
+
+
+def build_pool_rank_response(
+    *,
+    week: int,
+    window: str,
+    scoring: str | None,
+    players: Sequence[dict[str, Any]],
+    season: int = DEFAULT_SEASON,
+    now: datetime | None = None,
+    custom_start_week: int | None = None,
+    custom_end_week: int | None = None,
+) -> dict[str, Any]:
+    """Rank a pasted DFS pool using Workbook Net matchup metrics."""
+    from draft_api.workbook.pool import (
+        MAX_POOL_PLAYERS,
+        PoolPlayerInput,
+        rank_pool,
+        row_to_json,
+    )
+
+    if week < 1 or week > 18:
+        raise WorkbookServiceError(f"invalid week {week}")
+    _validate_choice(window, _WINDOWS, field_name="window")
+    scoring_value = scoring or "half_ppr"
+    _validate_choice(scoring_value, _SCORINGS, field_name="scoring")
+    if len(players) > MAX_POOL_PLAYERS:
+        raise WorkbookServiceError(f"pool exceeds {MAX_POOL_PLAYERS} players")
+
+    scoring_literal = cast(Scoring, scoring_value)
+    moment = now or datetime.now(UTC)
+    dataset, source, stale = resolve_dataset(season, now=moment)
+    rated_through_week = _rated_through_week(week)
+    weeks = _resolve_weeks(
+        window=window,
+        rated_through_week=rated_through_week,
+        custom_start_week=custom_start_week,
+        custom_end_week=custom_end_week,
+    )
+
+    inputs = [
+        PoolPlayerInput(
+            name=str(item.get("name") or ""),
+            team=str(item.get("team") or ""),
+            salary=int(item.get("salary") or 0),
+            position=str(item.get("position") or ""),
+            opponent=(
+                str(item["opponent"]) if item.get("opponent") is not None else None
+            ),
+        )
+        for item in players
+    ]
+    try:
+        ranked = rank_pool(
+            inputs,
+            dataset=dataset,
+            week=week,
+            weeks=weeks,
+            scoring=scoring_literal,
+        )
+    except ValueError as exc:
+        raise WorkbookServiceError(str(exc)) from exc
+
+    payload = _p2_workbook_meta(
+        dataset,
+        week=week,
+        window=window,
+        moment=moment,
+        source=source,
+        stale=stale,
+        scoring=scoring_value,
+    )
+    payload["players"] = [row_to_json(row) for row in ranked]
+    return payload
+
+
+def build_oldl_response(
+    *,
+    week: int,
+    window: str,
+    season: int = DEFAULT_SEASON,
+    now: datetime | None = None,
+    custom_start_week: int | None = None,
+    custom_end_week: int | None = None,
+) -> dict[str, Any]:
+    """Build OL/DL proxy tab for one NFL week."""
+    from draft_api.workbook.oldl import (
+        OLDL_DISCLAIMER,
+        build_oldl_games,
+        build_oldl_team_rows,
+        row_to_json as oldl_row_to_json,
+    )
+
+    if week < 1 or week > 18:
+        raise WorkbookServiceError(f"invalid week {week}")
+    _validate_choice(window, _WINDOWS, field_name="window")
+
+    moment = now or datetime.now(UTC)
+    dataset, source, stale = resolve_dataset(season, now=moment)
+    rated_through_week = _rated_through_week(week)
+    weeks = _resolve_weeks(
+        window=window,
+        rated_through_week=rated_through_week,
+        custom_start_week=custom_start_week,
+        custom_end_week=custom_end_week,
+    )
+    team_rows_list = build_oldl_team_rows(dataset, weeks=weeks)
+    team_rows = {row.team: row for row in team_rows_list}
+    payload = _p2_workbook_meta(
+        dataset,
+        week=week,
+        window=window,
+        moment=moment,
+        source=source,
+        stale=stale,
+    )
+    payload["disclaimer"] = OLDL_DISCLAIMER
+    payload["teams"] = [oldl_row_to_json(row) for row in team_rows_list]
+    payload["games"] = build_oldl_games(dataset, week=week, team_rows=team_rows)
+    return payload
