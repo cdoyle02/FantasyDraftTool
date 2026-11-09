@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import re
-import unicodedata
 from typing import Literal
 
 from draft_api.workbook.clay_pdf import ClayWrRow
-from draft_api.workbook.identity import normalize_team
+from draft_api.workbook.identity import normalize_player_name, normalize_team
 
 ClayRole = Literal["slot", "outside"]
 Role = ClayRole
@@ -37,16 +35,6 @@ def classify_clay_role(row: ClayWrRow) -> ClayRole:
     if row.pos == "S":
         return "slot"
     return "outside"
-
-
-def normalize_player_name(name: str) -> str:
-    """Lowercase join key: strip accents, punctuation, and suffixes."""
-    text = unicodedata.normalize("NFKD", name or "")
-    text = "".join(ch for ch in text if not unicodedata.combining(ch))
-    text = text.lower()
-    text = re.sub(r"[^a-z0-9 ]+", "", text)
-    text = re.sub(r"\s+(jr|sr|ii|iii|iv)$", "", text)
-    return re.sub(r"\s+", " ", text).strip()
 
 
 def build_role_index(rows: list[ClayWrRow]) -> dict[str, Role]:
