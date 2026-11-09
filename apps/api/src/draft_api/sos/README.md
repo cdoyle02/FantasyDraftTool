@@ -86,3 +86,9 @@ Per defense, mean **passing EPA allowed** (QB) or **rushing EPA allowed** (RB) p
 `GET /api/v1/nfl/strength-of-schedule/tier2?position=QB|RB&window=l8&startWeek=10&endWeek=17&season=2026` — EPA-allowed grid (`shrunkEpa`).
 
 `GET /api/v1/nfl/strength-of-schedule/tier2/opportunity?position=QB|RB&window=l8&week=10&season=2026` — snap-filtered usage × game-script-adjusted EPA softness; same optional `leagueId` overlay as Tier 1. Stats download failures fall back to packaged `usageStats`; if that is also empty, `usageUnavailable: true`.
+
+## Tier 2 Phase B
+
+- Packaged snapshots embed trimmed `snapCounts` (live → packaged fallback for Tier 2 opportunity).
+- `usageStats` trim includes `passing_epa` / `rushing_epa` / `receiving_epa`.
+- Tier 2 EPA grid and opportunity support **QB, RB, WR, TE** (`receiving_epa` for WR/TE). DST remains Tier 1 / classic only.
