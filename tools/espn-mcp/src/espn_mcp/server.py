@@ -67,6 +67,7 @@ Roster and show tools:
   executed), including player names when resolve_names is true.
 - kyle_dst_available / jared_k_available — weekly DST and kicker rankings crossed
   with free agents in one league.
+- workbook_week — Net Matchups board for one week with optional ESPN highlights.
 - week_odds — current-week NFL spreads and implied totals.
 - ballers_latest — newest Fantasy Footballers episode summary, plus YouTube captions
   when they are published.
@@ -965,6 +966,35 @@ def week_odds() -> str:
     from .draft_bridge import week_odds as _week_odds
 
     return _week_odds()
+
+
+@server.tool(
+    description=(
+        "Workbook Net Matchups board for one NFL week with optional ESPN roster/FA "
+        "highlights for a configured league. Uses the authenticated profile's ESPN cookies."
+    )
+)
+def workbook_week(
+    league: str,
+    week: int | None = None,
+    owner: str | None = None,
+    window: str = "l4",
+    scoring: str = "ppr",
+    slate: str = "main",
+    include_highlights: bool = True,
+) -> str:
+    """Args: league — id or name; week — defaults to current fantasy week; owner — optional filter."""
+    from .draft_bridge import workbook_week as _workbook_week
+
+    return _workbook_week(
+        league,
+        week=week,
+        owner=owner,
+        window=window,
+        scoring=scoring,
+        slate=slate,
+        include_highlights=include_highlights,
+    )
 
 
 @server.tool(

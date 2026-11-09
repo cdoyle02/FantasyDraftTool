@@ -25,6 +25,7 @@ small set of normalized read tools.
 | `kyle_dst_available` | Kyle Krajewski weekly DST ranks crossed with free-agent defenses in one league. |
 | `jared_k_available` | Jared Smola weekly kicker ranks crossed with free-agent kickers in one league. |
 | `week_odds` | Current-week NFL spreads, totals, and ranked favorite D/ST plays. |
+| `workbook_week` | Workbook Net Matchups board for one week; optional ESPN roster/FA highlights for a league (and owner). |
 | `ballers_latest` | Newest Fantasy Footballers episode summary, plus YouTube captions when published. |
 
 ## Configuration
