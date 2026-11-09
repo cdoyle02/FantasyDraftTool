@@ -26,6 +26,8 @@ small set of normalized read tools.
 | `jared_k_available` | Jared Smola weekly kicker ranks crossed with free-agent kickers in one league. |
 | `week_odds` | Current-week NFL spreads, totals, and ranked favorite D/ST plays. |
 | `workbook_week` | Workbook Net Matchups board for one week; optional ESPN roster/FA highlights for a league (and owner). |
+| `sos_grid` | Tier 1/2 SoS team grid with primary-player FA/Mine/Taken for a league; remaining weeks trimmed. |
+| `sos_opportunity` | Tier 1/2 opportunity (softness × usage) joined to one league; returns top_n players. |
 | `ballers_latest` | Newest Fantasy Footballers episode summary, plus YouTube captions when published. |
 
 ## Configuration
@@ -92,11 +94,23 @@ machine and uses an absolute path:
   "mcpServers": {
     "espn-fantasy": {
       "command": "uv",
-      "args": ["--directory", "<repo>/tools/espn-mcp", "run", "espn-mcp"]
+      "args": [
+        "--directory",
+        "<repo>/tools/espn-mcp",
+        "run",
+        "--with-editable",
+        "<repo>/apps/api",
+        "--with-editable",
+        "<repo>/packages/dvs-engine",
+        "espn-mcp"
+      ]
     }
   }
 }
 ```
+
+`--with-editable` pulls in `draft_api` (Workbook / Kyle / Jared / odds bridges).
+Docker already installs those packages; bare `uv run espn-mcp` alone does not.
 
 Reload the Cursor window after editing that file or `.env`, since the server
 reads its environment at startup.

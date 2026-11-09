@@ -68,6 +68,8 @@ Roster and show tools:
 - kyle_dst_available / jared_k_available — weekly DST and kicker rankings crossed
   with free agents in one league.
 - workbook_week — Net Matchups board for one week with optional ESPN highlights.
+- sos_grid — Tier 1/2 strength-of-schedule team grid with league FA/Mine/Taken badges.
+- sos_opportunity — Tier 1/2 opportunity scores joined to one league's rosters.
 - week_odds — current-week NFL spreads and implied totals.
 - ballers_latest — newest Fantasy Footballers episode summary, plus YouTube captions
   when they are published.
@@ -994,6 +996,63 @@ def workbook_week(
         scoring=scoring,
         slate=slate,
         include_highlights=include_highlights,
+    )
+
+
+@server.tool(
+    description=(
+        "Tier 1 (aFPA) or Tier 2 (EPA) strength-of-schedule team grid for one position, "
+        "with primary-player FA/Mine/Taken badges for a configured league. Remaining "
+        "weeks are trimmed from ratedThroughWeek+1 unless from_week is set."
+    )
+)
+def sos_grid(
+    league: str,
+    position: str,
+    tier: int = 1,
+    window: str = "l8",
+    wr_role: str = "all",
+    from_week: int | None = None,
+) -> str:
+    """Args: league — id or name; position — QB/RB/WR/TE/DST (DST Tier 1 only); wr_role — all|outside|slot for WR."""
+    from .draft_bridge import sos_grid as _sos_grid
+
+    return _sos_grid(
+        league,
+        position,
+        tier=tier,
+        window=window,
+        wr_role=wr_role,
+        from_week=from_week,
+    )
+
+
+@server.tool(
+    description=(
+        "Tier 1 or Tier 2 strength-of-schedule opportunity list (softness × usage) for "
+        "one position, joined to ESPN rosters in a configured league. Returns top_n rows."
+    )
+)
+def sos_opportunity(
+    league: str,
+    position: str,
+    tier: int = 1,
+    week: int | None = None,
+    window: str = "l8",
+    wr_role: str = "all",
+    top_n: int = 40,
+) -> str:
+    """Args: league — id or name; position — QB/RB/WR/TE; week — defaults to current fantasy week."""
+    from .draft_bridge import sos_opportunity as _sos_opportunity
+
+    return _sos_opportunity(
+        league,
+        position,
+        tier=tier,
+        week=week,
+        window=window,
+        wr_role=wr_role,
+        top_n=top_n,
     )
 
 

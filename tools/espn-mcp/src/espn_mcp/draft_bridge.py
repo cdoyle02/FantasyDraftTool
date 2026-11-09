@@ -201,3 +201,224 @@ def workbook_week(
     if warnings:
         payload["warnings"] = warnings
     return _dump(payload)
+
+
+def _normalize_sos_position(position: str) -> str:
+    key = position.strip().upper()
+    if key in {"D/ST", "DEF", "D"}:
+        return "DST"
+    return key
+
+
+def _trim_sos_week_cell(cell: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "week": cell.get("week"),
+        "opponent": cell.get("opponent"),
+        "rank": cell.get("rank"),
+        "softness": cell.get("softness"),
+        "bye": cell.get("bye"),
+        "inWindow": cell.get("inWindow"),
+        "shrunkAfpa": cell.get("shrunkAfpa"),
+        "shrunkEpa": cell.get("shrunkEpa"),
+    }
+
+
+def _trim_sos_team_row(row: dict[str, Any], *, from_week: int | None) -> dict[str, Any]:
+    weeks = row.get("weeks") or []
+    if from_week is not None:
+        weeks = [w for w in weeks if isinstance(w.get("week"), int) and w["week"] >= from_week]
+    return {
+        "team": row.get("team"),
+        "rank": row.get("rank"),
+        "opponentAverage": row.get("opponentAverage"),
+        "primaryPlayer": row.get("primaryPlayer"),
+        "leagueAvailability": row.get("leagueAvailability"),
+        "weeks": [_trim_sos_week_cell(w) for w in weeks],
+    }
+
+
+def _trim_sos_opportunity_player(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "name": row.get("name"),
+        "team": row.get("team"),
+        "position": row.get("position"),
+        "week": row.get("week"),
+        "opponent": row.get("opponent"),
+        "opponentRank": row.get("opponentRank"),
+        "softness": row.get("softness"),
+        "usageShare": row.get("usageShare"),
+        "opportunity": row.get("opportunity"),
+        "bye": row.get("bye"),
+        "joinStatus": row.get("joinStatus"),
+        "lineupSlot": row.get("lineupSlot"),
+        "injuryStatus": row.get("injuryStatus"),
+        "gameScriptApplied": row.get("gameScriptApplied"),
+        "snapFiltered": row.get("snapFiltered"),
+    }
+
+
+def sos_grid(
+    league: str,
+    position: str,
+    *,
+    tier: int = 1,
+    window: str = "l8",
+    wr_role: str = "all",
+    from_week: int | None = None,
+) -> str:
+    """Tier 1/2 SoS team grid with optional league FA/Mine/Taken availability."""
+    from draft_api.sos.clay_roles import parse_wr_role
+    from draft_api.sos.service import (
+        build_tier1_strength_of_schedule_response,
+        build_tier2_strength_of_schedule_response,
+    )
+
+    config = active_config()
+    selected = _league(league)
+    position_key = _normalize_sos_position(position)
+    window_key = window.strip().lower()
+    if window_key not in {"l4", "l8", "season"}:
+        raise EspnError(f"window must be l4, l8, or season (got {window!r})")
+    if tier not in {1, 2}:
+        raise EspnError(f"tier must be 1 or 2 (got {tier!r})")
+
+    try:
+        role = parse_wr_role(wr_role)
+    except ValueError as exc:
+        raise EspnError(str(exc)) from exc
+
+    if tier == 1:
+        if position_key not in {"QB", "RB", "WR", "TE", "DST"}:
+            raise EspnError(f"Tier 1 position must be QB, RB, WR, TE, or DST (got {position!r})")
+        board = build_tier1_strength_of_schedule_response(
+            position=position_key,  # type: ignore[arg-type]
+            window=window_key,  # type: ignore[arg-type]
+            season=config.season,
+            wr_role=role,
+            league_id=selected["id"],
+        )
+    else:
+        if position_key not in {"QB", "RB", "WR", "TE"}:
+            raise EspnError(f"Tier 2 position must be QB, RB, WR, or TE (got {position!r})")
+        board = build_tier2_strength_of_schedule_response(
+            position=position_key,  # type: ignore[arg-type]
+            window=window_key,  # type: ignore[arg-type]
+            season=config.season,
+            wr_role=role,
+            league_id=selected["id"],
+        )
+
+    rated = board.get("ratedThroughWeek")
+    start = from_week
+    if start is None and isinstance(rated, int):
+        start = min(18, max(1, rated + 1))
+
+    payload: dict[str, Any] = {
+        "tier": tier,
+        "season": board.get("season"),
+        "position": board.get("position"),
+        "window": board.get("window"),
+        "startWeek": board.get("startWeek"),
+        "endWeek": board.get("endWeek"),
+        "ratedThroughWeek": rated,
+        "ratingWeeks": board.get("ratingWeeks"),
+        "shrinkK": board.get("shrinkK"),
+        "source": board.get("source"),
+        "stale": board.get("stale"),
+        "fetchedAt": board.get("fetchedAt"),
+        "wrRole": board.get("wrRole", role if role != "all" else None),
+        "league": selected,
+        "leagueId": board.get("leagueId"),
+        "leagueName": board.get("leagueName"),
+        "fromWeek": start,
+        "teams": [_trim_sos_team_row(row, from_week=start) for row in board.get("teams") or []],
+    }
+    # Drop null wrRole for cleaner chat payloads.
+    if payload["wrRole"] is None:
+        del payload["wrRole"]
+    return _dump(payload)
+
+
+def sos_opportunity(
+    league: str,
+    position: str,
+    *,
+    tier: int = 1,
+    week: int | None = None,
+    window: str = "l8",
+    wr_role: str = "all",
+    top_n: int = 40,
+) -> str:
+    """Tier 1/2 SoS opportunity list joined to one league's rosters."""
+    from draft_api.sos.clay_roles import parse_wr_role
+    from draft_api.sos.service import (
+        build_tier1_opportunity_response,
+        build_tier2_opportunity_response,
+    )
+
+    config = active_config()
+    selected = _league(league)
+    position_key = _normalize_sos_position(position)
+    window_key = window.strip().lower()
+    if window_key not in {"l4", "l8", "season"}:
+        raise EspnError(f"window must be l4, l8, or season (got {window!r})")
+    if tier not in {1, 2}:
+        raise EspnError(f"tier must be 1 or 2 (got {tier!r})")
+    if position_key not in {"QB", "RB", "WR", "TE"}:
+        raise EspnError(f"opportunity position must be QB, RB, WR, or TE (got {position!r})")
+    if top_n < 1 or top_n > 200:
+        raise EspnError(f"top_n must be 1–200 (got {top_n!r})")
+
+    try:
+        role = parse_wr_role(wr_role)
+    except ValueError as exc:
+        raise EspnError(str(exc)) from exc
+
+    resolved_week = week if week is not None else _default_workbook_week()
+    if tier == 1:
+        board = build_tier1_opportunity_response(
+            position=position_key,  # type: ignore[arg-type]
+            window=window_key,  # type: ignore[arg-type]
+            week=resolved_week,
+            season=config.season,
+            league_id=selected["id"],
+            wr_role=role,
+        )
+    else:
+        board = build_tier2_opportunity_response(
+            position=position_key,  # type: ignore[arg-type]
+            window=window_key,  # type: ignore[arg-type]
+            week=resolved_week,
+            season=config.season,
+            league_id=selected["id"],
+            wr_role=role,
+        )
+
+    players = [_trim_sos_opportunity_player(p) for p in (board.get("players") or [])[:top_n]]
+    payload: dict[str, Any] = {
+        "tier": tier,
+        "season": board.get("season"),
+        "position": board.get("position"),
+        "window": board.get("window"),
+        "week": board.get("week"),
+        "ratedThroughWeek": board.get("ratedThroughWeek"),
+        "ratingWeeks": board.get("ratingWeeks"),
+        "source": board.get("source"),
+        "stale": board.get("stale"),
+        "fetchedAt": board.get("fetchedAt"),
+        "wrRole": board.get("wrRole", role if role != "all" else None),
+        "league": selected,
+        "leagueId": board.get("leagueId"),
+        "leagueName": board.get("leagueName"),
+        "joinStats": board.get("joinStats"),
+        "players": players,
+        "playerCount": len(board.get("players") or []),
+        "returned": len(players),
+    }
+    if board.get("overlayError"):
+        payload["overlayError"] = board["overlayError"]
+    if board.get("usageUnavailable"):
+        payload["usageUnavailable"] = True
+    if payload["wrRole"] is None:
+        del payload["wrRole"]
+    return _dump(payload)
