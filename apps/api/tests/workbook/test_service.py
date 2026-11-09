@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 
 import pytest
 from draft_api.implied_totals import GameLine
+from draft_api.workbook.calculate import mean_net
 from draft_api.workbook.nflverse import PositionalWeekRate, ScheduledGame, WorkbookDataset
 from draft_api.workbook.service import (
     WorkbookServiceError,
@@ -320,6 +321,7 @@ def test_explain_response_net_matches_matchups_net() -> None:
     assert explain["off"] == pytest.approx(16.0)
     assert explain["def"] == pytest.approx(8.0)
     assert explain["net"] == pytest.approx(12.0)
+    assert explain["net"] == pytest.approx(mean_net(explain["off"], explain["def"]))
 
     matchups = build_matchups_response(
         week=WEEK, window="l4", scoring="ppr", slate="all", season=SEASON

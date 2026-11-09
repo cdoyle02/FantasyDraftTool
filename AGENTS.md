@@ -28,6 +28,7 @@ CI: `.github/workflows/ci.yml` (python + web + e2e). **espn-mcp tests are not in
 |------|---------|
 | `apps/web` | Draft UI, Dexie persistence, Pyodide offline DVS, Week D/ST + K |
 | `apps/api` | Stateless recommendations + week odds / Kyle / Jared / ESPN leagues |
+| `apps/api/src/draft_api/workbook/` | Workbook Net Matchups SSOT + `/api/v1/nfl/workbook/*` |
 | `packages/dvs-engine` | Pure scoring; no network/DB |
 | `tools/espn-mcp` | ESPN MCP stdio + hosted HTTP (separate Railway) |
 | `tools/rankings` | Offline rankings → web seed JSON |

@@ -20,6 +20,19 @@ API response always carries this as the `attribution` field.
 | Alignment (Out/Slot) | nflverse `ftn_charting_{season}.csv` | **Deferred** — the public release has no per-target alignment column (see below) |
 | Vegas | `week_odds` / `OddsProvider` (`GameLine`) | **Optional** — passed in by the caller; `null` implied points if unavailable |
 
+### nflverse download URLs (code constants)
+
+These are the live release URLs the loader fetches (`workbook/nflverse.py` unless noted). Keep this table aligned with the constants when nflverse renames an asset.
+
+| Asset | Constant (module) | URL template |
+|---|---|---|
+| Play-by-play | `PBP_URL` (`workbook/nflverse.py`) | `https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{season}.csv.gz` |
+| Weekly player stats | `STATS_URL` (`sos/nflverse.py`, shared) | `https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_{season}.csv.gz` |
+| Schedule | `SCHEDULES_URL` (`sos/nflverse.py`, shared) | `https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv` |
+| FTN charting | `FTN_CHARTING_URL` (`workbook/nflverse.py`) | `https://github.com/nflverse/nflverse-data/releases/download/ftn_charting/ftn_charting_{season}.csv` (plain `.csv`, not `.csv.gz`) |
+
+Packaged fallback: `draft_api/data/workbook_{season}.json` (see **Cache / stale / snapshot**). Refresh with `uv run python -m draft_api.workbook.refresh --season {season}` from repo root.
+
 ## Rolling window
 
 `resolve_stat_weeks(mode, rated_through_week, custom_start, custom_end)`
@@ -50,6 +63,25 @@ half-computed value — never fabricate the missing side.
 - **Comb Net DSR** = mean of both teams' own Net DSR for that game
   (`comb_net_dsr`).
 - **Net DSR Diff** = team Net DSR − opponent Net DSR (`net_dsr_diff`).
+
+## P0 Net Matchups board columns
+
+Each `games[].rows[]` entry (`build_matchups_response`) is one team in a scheduled game. P0 UI headline cells (`WeekWorkbookView`) and explain-on-click targets:
+
+| UI label | JSON path | Explain `metric` | Notes |
+|---|---|---|---|
+| Vegas Impl | `gameEnvironment.vegasImpliedPoints` | — | Display-only; not a Net average |
+| Net DSR | `gameEnvironment.netDsr` | `dsr` | `mean_net` of team OFF DSR + opponent DEF allowed DSR |
+| Comb DSR | `gameEnvironment.combNetDsr` | — | Mean of both teams' `netDsr` for the game |
+| DSR Diff | `gameEnvironment.netDsrDiff` | — | Team `netDsr` − opponent `netDsr` |
+| QB | `qb.fpGTot` | `qb_fp` | Full positional block available via API; board shows headline only |
+| ALL WR | `allWr.fpG` | `wr_fp` | |
+| Out WR | `outWr.fpG` | `out_wr_fp` | `reason: insufficient_alignment_sample` when alignment sample is thin |
+| Slot WR | `slotWr.fpG` | `slot_wr_fp` | Same gating as Out WR |
+| TE | `te.fpG` | `te_fp` | |
+| RB | `rb.fpGTot` | `rb_fp` | |
+
+Additional `gameEnvironment` Net env rates (`netProe`, `netPassPlays`, `netEpaPass`, `netXplsvPass`, `netRunPlays`, `netEpaRun`, `netXplsvRun`) are computed for P0 but not shown as board columns yet.
 
 ## Game Environment
 
