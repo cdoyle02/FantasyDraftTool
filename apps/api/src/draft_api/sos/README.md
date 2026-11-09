@@ -49,10 +49,40 @@ Offline Spearman backtest: `draft_api.sos.backtest.run_tier1_backtest` (see `app
 
 Classic FPA/PAE endpoint is unchanged.
 
+## Tier 2 Phase A (EPA + snap + game script)
+
+**Positions:** QB and RB only (grid + opportunity).
+
+### Snap-filtered usage
+
+- Source: nflverse `snap_counts` (`offense_pct`).
+- Default **`minOffenseSnapPct = 0.20`** — player-weeks below this are excluded from team carry/target denominators (Tier 1 opportunity unchanged when snap data is not used).
+- API fields: `snapFiltered`, `minOffenseSnapPct` on Tier 2 opportunity.
+
+### Game-script adjustment
+
+When Vegas lines are available (`week_odds`):
+
+```
+delta = clamp((teamImplied - 22) / 40, -0.15, +0.15)
+adjustedSoftness = clamp(softnessScore + delta, 0, 1)
+opportunity = adjustedSoftness × usageShare
+```
+
+Response: `gameScriptApplied`, per-player `gameScriptDelta`, `adjustedSoftness`, optional `teamImplied`.
+
+### EPA allowed (shrunk)
+
+Per defense, mean **passing EPA allowed** (QB) or **rushing EPA allowed** (RB) per game in the rating window, with the same shrink formula and softness buckets as Tier 1 aFPA. Grid cells expose `shrunkEpa` instead of `shrunkAfpa`; `softnessMetric: "epa_allowed"`.
+
 ## Endpoints
 
 `GET /api/v1/nfl/strength-of-schedule?position=RB&metric=fpa&startWeek=10&endWeek=17&season=2026`
 
 `GET /api/v1/nfl/strength-of-schedule/tier1?position=RB&window=l8&startWeek=10&endWeek=17&season=2026`
 
-`GET /api/v1/nfl/strength-of-schedule/tier1/opportunity?position=RB&window=l8&week=10&season=2026` — nflverse players sorted by `opportunity` desc. With `leagueId` (household league from `espn_leagues.json`), returns ESPN roster rows joined by normalized name+team (`joinStatus`, `joinStats`); ESPN failures set `overlayError: espn_unavailable` and empty `players`. Stats download failures fall back to packaged `usageStats`; if that is also empty, `usageUnavailable: true`.
+`GET /api/v1/nfl/strength-of-schedule/tier1/opportunity?position=RB&window=l8&week=10&season=2026` — nflverse players sorted by `opportunity` desc. With `leagueId` (household league from `espn_leagues.json`), returns ESPN roster rows joined by normalized name+team (`joinStatus`, `joinStats`); ESPN failures set `overlayError: espn_unavailable` and empty `players`.
+
+`GET /api/v1/nfl/strength-of-schedule/tier2?position=QB|RB&window=l8&startWeek=10&endWeek=17&season=2026` — EPA-allowed grid (`shrunkEpa`).
+
+`GET /api/v1/nfl/strength-of-schedule/tier2/opportunity?position=QB|RB&window=l8&week=10&season=2026` — snap-filtered usage × game-script-adjusted EPA softness; same optional `leagueId` overlay as Tier 1. Stats download failures fall back to packaged `usageStats`; if that is also empty, `usageUnavailable: true`.

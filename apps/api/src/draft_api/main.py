@@ -604,6 +604,188 @@ def strength_of_schedule_tier1_opportunity(
         return error_response(status, code, str(exc))
 
 
+@app.get("/api/v1/nfl/strength-of-schedule/tier2", response_model=None)
+def strength_of_schedule_tier2(
+    position: str = "RB",
+    window: str = "l8",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Team × week shrunk EPA-allowed strength of schedule (Tier 2, QB/RB only)."""
+    from draft_api.sos.service import build_tier2_strength_of_schedule_response
+
+    position_key = position.upper()
+    window_key = window.lower()
+    if position_key not in ("QB", "RB"):
+        return error_response(
+            400,
+            "invalid_position",
+            f"position must be QB or RB for Tier 2 (got {position!r})",
+        )
+    if window_key not in ("l4", "l8", "season"):
+        return error_response(
+            400,
+            "invalid_window",
+            f"window must be l4, l8, or season (got {window!r})",
+        )
+    try:
+        return build_tier2_strength_of_schedule_response(
+            position=position_key,  # type: ignore[arg-type]
+            window=window_key,  # type: ignore[arg-type]
+            start_week=startWeek,
+            end_week=endWeek,
+            season=season,
+            now=datetime.now(UTC),
+        )
+    except (NflverseError, ValueError) as exc:
+        status = 400 if isinstance(exc, ValueError) else 503
+        code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
+        return error_response(status, code, str(exc))
+
+
+@app.get("/api/v1/nfl/strength-of-schedule/tier2/opportunity", response_model=None)
+def strength_of_schedule_tier2_opportunity(
+    position: str = "RB",
+    window: str = "l8",
+    week: int | None = None,
+    leagueId: str | None = None,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Tier 2 opportunity: EPA softness × snap-filtered usage × game script."""
+    from draft_api.espn_leagues import LeagueNotFoundError
+    from draft_api.odds.the_odds_api import OddsApiError
+    from draft_api.sos.service import build_tier2_opportunity_response
+
+    position_key = position.upper()
+    window_key = window.lower()
+    if position_key not in ("QB", "RB"):
+        return error_response(
+            400,
+            "invalid_position",
+            f"position must be QB or RB (got {position!r})",
+        )
+    if window_key not in ("l4", "l8", "season"):
+        return error_response(
+            400,
+            "invalid_window",
+            f"window must be l4, l8, or season (got {window!r})",
+        )
+    odds_games: list[GameLine] | None = None
+    try:
+        odds_games = get_odds_provider().fetch_nfl_odds()
+    except OddsApiError as exc:
+        logger.warning("tier2 opportunity odds unavailable: %s", exc)
+    try:
+        return build_tier2_opportunity_response(
+            position=position_key,  # type: ignore[arg-type]
+            window=window_key,  # type: ignore[arg-type]
+            week=week,
+            season=season,
+            league_id=leagueId,
+            now=datetime.now(UTC),
+            espn_http_json=_espn_roster_http_json_override,
+            game_lines=odds_games,
+        )
+    except LeagueNotFoundError as exc:
+        return error_response(404, "league_not_found", str(exc))
+    except (NflverseError, ValueError) as exc:
+        status = 400 if isinstance(exc, ValueError) else 503
+        code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
+        return error_response(status, code, str(exc))
+
+
+@app.get("/api/v1/nfl/strength-of-schedule/tier2", response_model=None)
+def strength_of_schedule_tier2(
+    position: str = "RB",
+    window: str = "l8",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Team × week shrunk EPA-allowed strength of schedule (Tier 2; QB/RB only)."""
+    from draft_api.sos.service import build_tier2_strength_of_schedule_response
+
+    position_key = position.upper()
+    window_key = window.lower()
+    if position_key not in ("QB", "RB"):
+        return error_response(
+            400,
+            "invalid_position",
+            f"Tier 2 position must be QB or RB (got {position!r})",
+        )
+    if window_key not in ("l4", "l8", "season"):
+        return error_response(
+            400,
+            "invalid_window",
+            f"window must be l4, l8, or season (got {window!r})",
+        )
+    try:
+        return build_tier2_strength_of_schedule_response(
+            position=position_key,  # type: ignore[arg-type]
+            window=window_key,  # type: ignore[arg-type]
+            start_week=startWeek,
+            end_week=endWeek,
+            season=season,
+            now=datetime.now(UTC),
+        )
+    except (NflverseError, ValueError) as exc:
+        status = 400 if isinstance(exc, ValueError) else 503
+        code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
+        return error_response(status, code, str(exc))
+
+
+@app.get("/api/v1/nfl/strength-of-schedule/tier2/opportunity", response_model=None)
+def strength_of_schedule_tier2_opportunity(
+    position: str = "RB",
+    window: str = "l8",
+    week: int | None = None,
+    leagueId: str | None = None,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Tier 2 player opportunity (EPA softness × snap-filtered usage, optional Vegas script)."""
+    from draft_api.espn_leagues import LeagueNotFoundError
+    from draft_api.sos.service import build_tier2_opportunity_response
+
+    position_key = position.upper()
+    window_key = window.lower()
+    if position_key not in ("QB", "RB"):
+        return error_response(
+            400,
+            "invalid_position",
+            f"Tier 2 position must be QB or RB (got {position!r})",
+        )
+    if window_key not in ("l4", "l8", "season"):
+        return error_response(
+            400,
+            "invalid_window",
+            f"window must be l4, l8, or season (got {window!r})",
+        )
+    odds_games: list[GameLine] | None = None
+    try:
+        odds_games = get_odds_provider().fetch_nfl_odds()
+    except OddsApiError as exc:
+        logger.warning("tier2 opportunity odds unavailable: %s", exc)
+
+    try:
+        return build_tier2_opportunity_response(
+            position=position_key,  # type: ignore[arg-type]
+            window=window_key,  # type: ignore[arg-type]
+            week=week,
+            season=season,
+            league_id=leagueId,
+            now=datetime.now(UTC),
+            espn_http_json=_espn_roster_http_json_override,
+            game_lines=odds_games,
+        )
+    except LeagueNotFoundError as exc:
+        return error_response(404, "league_not_found", str(exc))
+    except (NflverseError, ValueError) as exc:
+        status = 400 if isinstance(exc, ValueError) else 503
+        code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
+        return error_response(status, code, str(exc))
+
+
 @app.get("/api/v1/nfl/workbook/matchups", response_model=None)
 def workbook_matchups(
     week: int,
