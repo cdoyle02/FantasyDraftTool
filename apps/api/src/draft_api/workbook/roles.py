@@ -10,6 +10,7 @@ from draft_api.workbook.clay_pdf import ClayWrRow
 from draft_api.workbook.identity import normalize_team
 
 ClayRole = Literal["slot", "outside"]
+Role = ClayRole
 
 SLOT_PCT_THRESHOLD = 45
 
@@ -46,3 +47,23 @@ def normalize_player_name(name: str) -> str:
     text = re.sub(r"[^a-z0-9 ]+", "", text)
     text = re.sub(r"\s+(jr|sr|ii|iii|iv)$", "", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def build_role_index(rows: list[ClayWrRow]) -> dict[str, Role]:
+    """Map normalized player name to Clay slot/outside role."""
+    return {normalize_player_name(row.name): classify_clay_role(row) for row in rows}
+
+
+def merge_last_known(
+    current: dict[str, Role],
+    previous: dict[str, Role] | None,
+) -> dict[str, Role]:
+    """Current week wins; retain previous roles for players absent this week."""
+    merged = dict(previous or ())
+    merged.update(current)
+    return merged
+
+
+def lookup_role(index: dict[str, Role], player_display_name: str) -> Role | None:
+    """Resolve role for an ESPN/display name via the normalized index key."""
+    return index.get(normalize_player_name(player_display_name))
