@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "fetchedAt": "2026-11-08T22:12:40.076509Z",
+  "fetchedAt": "2026-11-09T01:23:55.852177Z",
   "teams": [
     "ARI",
     "ATL",
@@ -3584,6 +3584,18 @@
     },
     {
       "week": 9,
+      "offense": "ARI",
+      "defense": "SEA",
+      "points": {
+        "QB": 7.04,
+        "RB": 6.6,
+        "WR": 18.3,
+        "TE": 17.3,
+        "DST": 1.0
+      }
+    },
+    {
+      "week": 9,
       "offense": "ATL",
       "defense": "CIN",
       "points": {
@@ -3680,6 +3692,30 @@
     },
     {
       "week": 9,
+      "offense": "GB",
+      "defense": "NE",
+      "points": {
+        "QB": 36.18,
+        "RB": 18.6,
+        "WR": 75.30000000000001,
+        "TE": 1.9,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "HOU",
+      "defense": "LAC",
+      "points": {
+        "QB": 35.44,
+        "RB": 13.100000000000001,
+        "WR": 80.4,
+        "TE": 6.2,
+        "DST": 11.0
+      }
+    },
+    {
+      "week": 9,
       "offense": "IND",
       "defense": "DAL",
       "points": {
@@ -3716,6 +3752,18 @@
     },
     {
       "week": 9,
+      "offense": "LAC",
+      "defense": "HOU",
+      "points": {
+        "QB": 15.379999999999999,
+        "RB": 18.3,
+        "WR": 31.400000000000002,
+        "TE": 10.100000000000001,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 9,
       "offense": "LAR",
       "defense": "WAS",
       "points": {
@@ -3728,6 +3776,18 @@
     },
     {
       "week": 9,
+      "offense": "LV",
+      "defense": "SF",
+      "points": {
+        "QB": 12.64,
+        "RB": 6.7,
+        "WR": 14.3,
+        "TE": 27.0,
+        "DST": -2.0
+      }
+    },
+    {
+      "week": 9,
       "offense": "MIA",
       "defense": "DET",
       "points": {
@@ -3736,6 +3796,18 @@
         "WR": 18.700000000000003,
         "TE": 5.0,
         "DST": 5.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "NE",
+      "defense": "GB",
+      "points": {
+        "QB": 19.1,
+        "RB": 26.7,
+        "WR": 43.699999999999996,
+        "TE": 14.7,
+        "DST": -2.0
       }
     },
     {
@@ -3784,6 +3856,30 @@
         "WR": 19.9,
         "TE": 10.0,
         "DST": 8.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "SEA",
+      "defense": "ARI",
+      "points": {
+        "QB": 12.6,
+        "RB": 21.4,
+        "WR": 22.5,
+        "TE": 15.0,
+        "DST": 10.0
+      }
+    },
+    {
+      "week": 9,
+      "offense": "SF",
+      "defense": "LV",
+      "points": {
+        "QB": 24.98,
+        "RB": 30.8,
+        "WR": 32.5,
+        "TE": 9.8,
+        "DST": 17.0
       }
     },
     {
