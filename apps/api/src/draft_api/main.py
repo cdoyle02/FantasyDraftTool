@@ -48,7 +48,11 @@ from .workbook.service import (
     WorkbookServiceError,
     build_explain_response,
     build_feeder_response,
+    build_injuries_response,
     build_matchups_response,
+    build_matrix_response,
+    build_pace_response,
+    build_top_response,
 )
 
 
@@ -554,6 +558,51 @@ def strength_of_schedule_tier1(
         return error_response(status, code, str(exc))
 
 
+@app.get("/api/v1/nfl/strength-of-schedule/tier1/opportunity", response_model=None)
+def strength_of_schedule_tier1_opportunity(
+    position: str = "RB",
+    window: str = "l8",
+    week: int | None = None,
+    leagueId: str | None = None,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Player opportunity scores (shrunk softness × nflverse usage share)."""
+    from draft_api.sos.service import (
+        LeagueJoinUnavailableError,
+        build_tier1_opportunity_response,
+    )
+
+    position_key = position.upper()
+    window_key = window.lower()
+    if position_key not in ("QB", "RB", "WR", "TE"):
+        return error_response(
+            400,
+            "invalid_position",
+            f"position must be QB, RB, WR, or TE (got {position!r})",
+        )
+    if window_key not in ("l4", "l8", "season"):
+        return error_response(
+            400,
+            "invalid_window",
+            f"window must be l4, l8, or season (got {window!r})",
+        )
+    try:
+        return build_tier1_opportunity_response(
+            position=position_key,  # type: ignore[arg-type]
+            window=window_key,  # type: ignore[arg-type]
+            week=week,
+            season=season,
+            league_id=leagueId,
+            now=datetime.now(UTC),
+        )
+    except LeagueJoinUnavailableError as exc:
+        return error_response(404, "league_not_found", str(exc))
+    except (NflverseError, ValueError) as exc:
+        status = 400 if isinstance(exc, ValueError) else 503
+        code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
+        return error_response(status, code, str(exc))
+
+
 @app.get("/api/v1/nfl/workbook/matchups", response_model=None)
 def workbook_matchups(
     week: int,
@@ -597,6 +646,105 @@ def workbook_matchups(
         if leagueId:
             return error_response(404, "league_not_found", str(exc))
         return error_response(400, "invalid_params", str(exc))
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+    except WorkbookNflverseError as exc:
+        return error_response(503, "workbook_unavailable", str(exc))
+
+
+@app.get("/api/v1/nfl/workbook/top", response_model=None)
+def workbook_top(
+    week: int,
+    window: str = "l4",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Workbook time-of-possession table for one NFL week context."""
+    try:
+        return build_top_response(
+            week=week,
+            window=window,
+            custom_start_week=startWeek,
+            custom_end_week=endWeek,
+            season=season,
+        )
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+    except WorkbookNflverseError as exc:
+        return error_response(503, "workbook_unavailable", str(exc))
+
+
+@app.get("/api/v1/nfl/workbook/pace", response_model=None)
+def workbook_pace(
+    week: int,
+    window: str = "l4",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Workbook offensive pace (plays per game) for one NFL week context."""
+    try:
+        return build_pace_response(
+            week=week,
+            window=window,
+            custom_start_week=startWeek,
+            custom_end_week=endWeek,
+            season=season,
+        )
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+    except WorkbookNflverseError as exc:
+        return error_response(503, "workbook_unavailable", str(exc))
+
+
+@app.get("/api/v1/nfl/workbook/injuries", response_model=None)
+def workbook_injuries(
+    week: int,
+    season: int = 2026,
+    leagueId: str | None = None,
+) -> dict[str, Any] | JSONResponse:
+    """Workbook ESPN injury list for one fantasy league."""
+    try:
+        if leagueId:
+            get_league(leagueId)
+        return build_injuries_response(
+            week=week,
+            season=season,
+            league_id=leagueId,
+            espn_http_json=_espn_roster_http_json_override,
+        )
+    except LeagueNotFoundError as exc:
+        if leagueId:
+            return error_response(404, "league_not_found", str(exc))
+        return error_response(400, "invalid_params", str(exc))
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+
+
+@app.get("/api/v1/nfl/workbook/matrices/{group}", response_model=None)
+def workbook_matrices(
+    group: str,
+    week: int,
+    metric: str = "fp_per_game",
+    window: str = "l4",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    scoring: str = "ppr",
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Workbook positional matrix with tertile tiers for OFF/DEF/Net."""
+    try:
+        return build_matrix_response(
+            group=group,
+            metric=metric,
+            week=week,
+            window=window,
+            custom_start_week=startWeek,
+            custom_end_week=endWeek,
+            scoring=scoring,
+            season=season,
+        )
     except WorkbookServiceError as exc:
         return error_response(400, "invalid_params", str(exc))
     except WorkbookNflverseError as exc:

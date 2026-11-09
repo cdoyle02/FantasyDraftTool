@@ -31,7 +31,19 @@ shrunk = (n * raw_afpa + k * prior) / (n + k)
 - Default pseudo-count **`k = 4`** (`shrinkK` in API responses).
 - Rating window: **`l4`** (last 4 completed weeks), **`l8`** (default), or **`season`** (week 1 through `ratedThroughWeek`).
 - Softness buckets by defense rank (1 = softest): ranks **1–7** `soft`, **8–25** `neutral`, **26–32** `tough`.
-- Linear scores: soft **1.0**, neutral **0.5**, tough **0.0** (for future opportunity = softness × usage).
+- Linear scores: soft **1.0**, neutral **0.5**, tough **0.0**.
+
+### Opportunity
+
+`opportunity = softness_score × usage_share` for skill positions (QB/RB/WR/TE; **DST excluded**).
+
+| Position | Usage share (window mean of weekly ratios) |
+|----------|---------------------------------------------|
+| RB | `carries / team carries` |
+| WR / TE | `targets / team targets` (same position group) |
+| QB | `1.0` for team passing-yards leader in window; backups → `null` share |
+
+Offline Spearman backtest: `draft_api.sos.backtest.run_tier1_backtest` (see `apps/api/tests/sos/fixtures/tier1_backtest_summary.json`).
 
 Classic FPA/PAE endpoint is unchanged.
 
@@ -40,3 +52,5 @@ Classic FPA/PAE endpoint is unchanged.
 `GET /api/v1/nfl/strength-of-schedule?position=RB&metric=fpa&startWeek=10&endWeek=17&season=2026`
 
 `GET /api/v1/nfl/strength-of-schedule/tier1?position=RB&window=l8&startWeek=10&endWeek=17&season=2026`
+
+`GET /api/v1/nfl/strength-of-schedule/tier1/opportunity?position=RB&window=l8&week=10&season=2026` — nflverse players sorted by `opportunity` desc; optional `leagueId` reserved for ESPN roster join (wave 3).

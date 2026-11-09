@@ -3,7 +3,11 @@
 from draft_api.main import app
 from draft_api.sos.calculate import CompletedGame
 from draft_api.sos.nflverse import SosDataset
-from draft_api.sos.service import clear_sos_cache, set_sos_dataset_override
+from draft_api.sos.service import (
+    clear_sos_cache,
+    set_sos_dataset_override,
+    set_sos_stats_rows_override,
+)
 from fastapi.testclient import TestClient
 
 client = TestClient(app)
@@ -43,8 +47,53 @@ def setup_function() -> None:
     set_sos_dataset_override(FIXTURE)
 
 
+STATS_ROWS = [
+    {
+        "season": "2026",
+        "week": "1",
+        "season_type": "REG",
+        "position": "RB",
+        "team": "AAA",
+        "player_id": "RB1",
+        "player_display_name": "Workhorse",
+        "carries": "20",
+    },
+    {
+        "season": "2026",
+        "week": "1",
+        "season_type": "REG",
+        "position": "RB",
+        "team": "AAA",
+        "player_id": "RB2",
+        "player_display_name": "Change",
+        "carries": "5",
+    },
+    {
+        "season": "2026",
+        "week": "2",
+        "season_type": "REG",
+        "position": "RB",
+        "team": "AAA",
+        "player_id": "RB1",
+        "player_display_name": "Workhorse",
+        "carries": "18",
+    },
+    {
+        "season": "2026",
+        "week": "2",
+        "season_type": "REG",
+        "position": "RB",
+        "team": "AAA",
+        "player_id": "RB2",
+        "player_display_name": "Change",
+        "carries": "6",
+    },
+]
+
+
 def teardown_function() -> None:
     set_sos_dataset_override(None)
+    set_sos_stats_rows_override(None)
     clear_sos_cache()
 
 
@@ -73,6 +122,42 @@ def test_tier1_window_season_toggle():
     assert response.status_code == 200
     assert response.json()["window"] == "season"
     assert response.json()["ratingWeeks"] == [1, 2]
+
+
+def test_tier1_opportunity_returns_players():
+    set_sos_stats_rows_override(STATS_ROWS)
+    response = client.get(
+        "/api/v1/nfl/strength-of-schedule/tier1/opportunity",
+        params={"position": "RB", "window": "season", "week": 3, "season": 2026},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["window"] == "season"
+    assert body["week"] == 3
+    assert body["shrinkK"] == 4
+    assert len(body["players"]) >= 1
+    player = body["players"][0]
+    assert "opportunity" in player
+    assert "usageShare" in player
+    assert "softnessScore" in player
+
+
+def test_tier1_opportunity_rejects_dst():
+    response = client.get(
+        "/api/v1/nfl/strength-of-schedule/tier1/opportunity",
+        params={"position": "DST"},
+    )
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "invalid_position"
+
+
+def test_tier1_opportunity_league_id_404_until_roster_join():
+    response = client.get(
+        "/api/v1/nfl/strength-of-schedule/tier1/opportunity",
+        params={"position": "RB", "leagueId": "12345"},
+    )
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "league_not_found"
 
 
 def test_tier1_rejects_bad_window():
