@@ -15,6 +15,7 @@ from draft_api.workbook.calculate import drive_success_rate, pass_rate_over_expe
 from draft_api.workbook.nflverse import (
     PBP_URL,
     WorkbookNflverseError,
+    extract_drive_possessions,
     load_workbook_dataset,
     parse_alignment_csv,
     parse_play_by_play,
@@ -175,6 +176,21 @@ def test_parse_positional_stats_rejects_invalid_numeric_values() -> None:
     bad = text.replace("16.0", "not-a-number", 1)
     with pytest.raises(WorkbookNflverseError, match="invalid numeric value"):
         parse_positional_stats(bad, season=SEASON)
+
+
+def test_extract_drive_possessions_from_pbp_top_fixture() -> None:
+    text = (FIXTURES / "pbp_top_mini.csv").read_text()
+    drives = extract_drive_possessions(text, season=SEASON)
+    assert len(drives) == 4
+    aaa = sum(d.seconds for d in drives if d.team == "AAA")
+    bbb = sum(d.seconds for d in drives if d.team == "BBB")
+    assert aaa == 300.0
+    assert bbb == 240.0
+
+
+def test_extract_drive_possessions_absent_column_returns_empty() -> None:
+    text = (FIXTURES / "pbp_week5.csv").read_text()
+    assert extract_drive_possessions(text, season=SEASON) == []
 
 
 def test_parse_play_by_play_rejects_missing_required_headers() -> None:

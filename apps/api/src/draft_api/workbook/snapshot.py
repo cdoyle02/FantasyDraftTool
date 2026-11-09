@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from draft_api.workbook.calculate import DriveOutcome, PassPlay, TeamRateSlice
+from draft_api.workbook.top import DrivePossession
 from draft_api.workbook.nflverse import PositionalWeekRate, ScheduledGame, WorkbookDataset
 
 SNAPSHOT_NAME = "workbook_{season}.json"
@@ -22,6 +23,9 @@ _POSITIONAL_FIELDS: tuple[str, ...] = (
     "rush_tds",
     "pass_yards",
     "pass_tds",
+    "pass_attempts",
+    "pass_ints",
+    "sacks_taken",
     "fantasy_points",
 )
 _TEAM_RATE_FIELDS: tuple[str, ...] = (
@@ -154,6 +158,15 @@ def dataset_to_dict(dataset: WorkbookDataset) -> dict[str, Any]:
             {"team": drive.team, "week": drive.week, "success": drive.success}
             for drive in dataset.drives
         ],
+        "drivePossessions": [
+            {
+                "team": drive.team,
+                "week": drive.week,
+                "seconds": drive.seconds,
+                "gameId": drive.game_id,
+            }
+            for drive in dataset.drive_possessions
+        ],
         "passPlays": [
             {
                 "team": play.team,
@@ -170,6 +183,7 @@ def dataset_to_dict(dataset: WorkbookDataset) -> dict[str, Any]:
     }
     if dataset.clay_roles:
         payload["clayRoles"] = _clay_roles_to_dict(dataset.clay_roles)
+    payload["alignmentSource"] = dataset.alignment_source
     return payload
 
 
@@ -199,6 +213,19 @@ def dataset_from_dict(payload: Any) -> WorkbookDataset:
                 )
                 for row in payload.get("drives") or []
             ],
+            drive_possessions=[
+                DrivePossession(
+                    team=str(row["team"]),
+                    week=int(row["week"]),
+                    seconds=float(row["seconds"]),
+                    game_id=(
+                        None
+                        if row.get("gameId") in (None, "")
+                        else str(row.get("gameId"))
+                    ),
+                )
+                for row in payload.get("drivePossessions") or []
+            ],
             pass_plays=[
                 PassPlay(
                     team=str(row["team"]),
@@ -221,6 +248,7 @@ def dataset_from_dict(payload: Any) -> WorkbookDataset:
                 payload.get("positionalDef") or {}
             ),
             clay_roles=_clay_roles_from_dict(payload.get("clayRoles")),
+            alignment_source=str(payload.get("alignmentSource") or "clay_role"),  # type: ignore[arg-type]
         )
     except (KeyError, TypeError, ValueError) as exc:
         raise SnapshotError("packaged snapshot has invalid Workbook shape") from exc

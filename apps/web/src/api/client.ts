@@ -568,6 +568,37 @@ export class DraftApiClient {
     if (params.season != null) query.set('season', String(params.season))
     return this.request<WorkbookOldlResponse>(`/api/v1/nfl/workbook/oldl?${query}`, { method: 'GET' }, 30_000)
   }
+
+  workbookClayShadow(params: { week: number; season?: number }) {
+    const query = new URLSearchParams({ week: String(params.week) })
+    if (params.season != null) query.set('season', String(params.season))
+    return this.request<import('../week/types').WorkbookClayShadowResponse>(
+      `/api/v1/nfl/workbook/clay-shadow?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
+
+  workbookPlayerIntel(params: {
+    name: string
+    week: number
+    team?: string
+    leagueId?: string
+    season?: number
+  }) {
+    const query = new URLSearchParams({
+      name: params.name,
+      week: String(params.week)
+    })
+    if (params.team) query.set('team', params.team)
+    if (params.leagueId) query.set('leagueId', params.leagueId)
+    if (params.season != null) query.set('season', String(params.season))
+    return this.request<import('../week/types').WorkbookPlayerIntelResponse>(
+      `/api/v1/nfl/workbook/player-intel?${query}`,
+      { method: 'GET' },
+      30_000
+    )
+  }
 }
 
 export const draftApi = new DraftApiClient(

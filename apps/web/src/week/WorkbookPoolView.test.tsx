@@ -10,6 +10,27 @@ import type { WorkbookP2Controls } from './WeekWorkbookP2Tabs'
 const fixtureDir = dirname(fileURLToPath(import.meta.url))
 const SAMPLE_CSV = readFileSync(join(fixtureDir, 'fixtures', 'dk_salaries_sample.csv'), 'utf8')
 
+const persistState = {
+  csvText: '',
+  manualTags: {} as Record<string, 'target' | 'fade'>
+}
+
+vi.mock('./workbookPoolPersistence', () => ({
+  WORKBOOK_POOL_CSV_STORAGE_KEY: 'workbook-pool-csv-text',
+  loadWorkbookPool: vi.fn(async () => ({
+    id: 'active' as const,
+    csvText: persistState.csvText,
+    manualTags: persistState.manualTags,
+    updatedAt: Date.now()
+  })),
+  saveWorkbookPoolCsv: vi.fn(async (csvText: string) => {
+    persistState.csvText = csvText
+  }),
+  saveWorkbookPoolTags: vi.fn(async (manualTags: Record<string, 'target' | 'fade'>) => {
+    persistState.manualTags = manualTags
+  })
+}))
+
 const CONTROLS: WorkbookP2Controls = {
   week: 10,
   window: 'l4',
@@ -73,6 +94,8 @@ function buildRankPayload(overrides: Partial<WorkbookPoolRankResponse> = {}): Wo
 
 describe('WorkbookPoolView', () => {
   beforeEach(() => {
+    persistState.csvText = ''
+    persistState.manualTags = {}
     sessionStorage.clear()
     vi.stubGlobal(
       'fetch',
@@ -99,6 +122,7 @@ describe('WorkbookPoolView', () => {
 
   it('parses pasted CSV, ranks on button click, and renders the table', async () => {
     render(<WorkbookPoolView controls={CONTROLS} />)
+    await waitFor(() => expect(screen.getByTestId('workbook-pool-csv-input')).toBeInTheDocument())
     fireEvent.change(screen.getByTestId('workbook-pool-csv-input'), { target: { value: SAMPLE_CSV } })
 
     await waitFor(() => {
@@ -123,11 +147,17 @@ describe('WorkbookPoolView', () => {
     expect(calls.some((path) => path.includes('/workbook/pool/rank'))).toBe(true)
   })
 
-  it('persists CSV text in sessionStorage', async () => {
+  it('persists CSV text via Dexie store helper', async () => {
+    const { saveWorkbookPoolCsv } = await import('./workbookPoolPersistence')
     render(<WorkbookPoolView controls={CONTROLS} />)
+    await waitFor(() => expect(screen.getByTestId('workbook-pool-csv-input')).toBeInTheDocument())
     fireEvent.change(screen.getByTestId('workbook-pool-csv-input'), { target: { value: SAMPLE_CSV } })
     await waitFor(() => {
-      expect(sessionStorage.getItem(WORKBOOK_POOL_CSV_STORAGE_KEY)).toContain('Ja')
+      expect(vi.mocked(saveWorkbookPoolCsv)).toHaveBeenCalled()
+      expect(persistState.csvText).toContain('Ja')
     })
+    expect(screen.getByTestId('workbook-pool-persist-note')).toHaveTextContent('Persists in this browser')
+    // Legacy key kept exported for migrate/tests but no longer written on paste.
+    expect(WORKBOOK_POOL_CSV_STORAGE_KEY).toBe('workbook-pool-csv-text')
   })
 })

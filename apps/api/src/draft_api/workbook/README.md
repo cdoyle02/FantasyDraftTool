@@ -135,7 +135,7 @@ honored:
 
 | Group | Fields | Formula notes |
 |---|---|---|
-| **QB** | `fpGTot`, `fpGPass`, `fpGRun`, `ydsG`, `passTdG` | `fpGPass` = `passing_points(yards, tds)` / games (no INT data in the weekly-stats feed yet — `ints=0`); `fpGRun` = `rushing_points(yards, tds)` / games; `fpGTot` = their sum |
+| **QB** | `fpGTot`, `fpGPass`, `fpGRun`, `ydsG`, `passTdG`, `intG`, `sackPct` | `fpGPass` = `passing_points(yards, tds, ints)` / games (INTs from weekly `interceptions` or PBP); `sackPct` = sacks / (attempts + sacks); `fpGRun` = `rushing_points(yards, tds)` / games; `fpGTot` = their sum |
 | **ALL WR / Out WR / Slot WR / TE** | `fpG`, `tarG`, `tarPct`, `ydG`, `tdG` | `fpG` = `receiving_points(receptions, yards, tds, scoring)` / games |
 | **RB** | `fpGTot`, `fpRec`, `fpRun`, `tarG`, `tarPct`, `recYdG`, `recTdG`, `attG`, `rushYdG`, `rushTdG` | `fpGTot` = `fpRec` + `fpRun` |
 
@@ -245,13 +245,12 @@ via `explain`, not the feeder table, in P0.
 `GET /api/v1/nfl/workbook/top` (`build_top_response`) — rolling window matches
 matchups (`l4` | `season` | `custom`, rated through `week - 1`).
 
-- **Primary (when PBP drive seconds are wired):** `method: "pbp_drive"` —
-  mean per-game share `team_drive_seconds / (team + opponent drive seconds)`.
-- **Fallback (current nflverse loader):** `method: "plays_share_proxy"` —
+- **Primary (when `drive_time_of_possession` is present on PBP):** `method: "pbp_drive"` —
+  mean per-game share `team_drive_seconds / (team + opponent drive seconds)` from
+  unique (team, week, drive) possessions (`extract_drive_possessions`).
+- **Fallback:** `method: "plays_share_proxy"` —
   mean per-game `team_off_plays / (team_off_plays + opponent_off_plays)` using
-  `TeamRateSlice.pass_plays + run_plays` from PBP aggregation. Labeled in API;
-  upgrade path is real `drive_time_of_possession` in PBP (see
-  `workbook/top.py`).
+  `TeamRateSlice.pass_plays + run_plays` from PBP aggregation. Labeled in API and UI.
 
 ### Pace
 
@@ -264,8 +263,11 @@ dropped at parse; optional `play_type` kneel/spike/no_play excluded in
 
 `GET /api/v1/nfl/workbook/injuries?leagueId=` — ESPN `mRoster` injury fields
 (`injuryStatus`, `injuryBodyPart`, practice hints). Sorted by team then severity
-(Out > Doubtful > Questionable > Probable). On ESPN failure: HTTP 200,
-`injuries: []`, `warnings: ["injuries_unavailable"]`, `source: "espn"`.
+(Out > Doubtful > Questionable > Probable). Response includes
+`source: "espn_roster"` and `inactivesAvailable: false` — Sunday game-day
+inactives remain deferred until a reliable free feed is locked (use ESPN
+injury + roster as the game-day checklist). On ESPN failure: HTTP 200,
+`injuries: []`, `warnings: ["injuries_unavailable"]`.
 
 ### Positional matrices
 
@@ -275,6 +277,19 @@ thresholds). Tier cut: rank `n` teams with data; top `ceil(n/3)` → `top`, next
 `ceil(n/3)` → `mid`, remainder → `bottom`. Metrics: `fp_per_game` (positional
 feeder headline), `targets_per_game` / `yards_per_game` / `tds_per_game`
 (volume feeders), `dsr` (group `dsr` only).
+
+### Clay CB shadows
+
+`GET /api/v1/nfl/workbook/clay-shadow?week=` — Mike Clay WR↔CB shadow pairings
+parsed from the season WR/CB PDF (`clay_pdf.parse_clay_shadow_layout_text`).
+`week` is board context; the PDF is the current published sheet.
+
+### Player intel
+
+`GET /api/v1/nfl/workbook/player-intel?name=&week=&team=&leagueId=` — composes
+injury (when league given), Workbook Net for the matchup team (WR bag), Clay
+role, Clay shadow, and explicit nulls for SoS opportunity / Ballers mention
+until those feeds are joined. MCP: `player_intel` / `clay_shadow_week`.
 
 ## Explain
 
@@ -321,14 +336,9 @@ dropback on offense). Response includes `disclaimer`:
 
 ## Known P0 gaps (tracked, not silently guessed)
 
-- **Out/Slot alignment** — see above; always `null` against the current
-  public nflverse release until a real source is wired.
-- **QB Sack%** — not in the metric catalog output yet; the weekly-stats feed
-  this loader reads has no sacks-taken column. Add it once a sacks source is
-  wired (nflverse PBP has sack plays; this would need its own aggregation).
-- **QB interceptions** — `passing_points` defaults `ints=0` for the same
-  reason (no INT column in `stats_player_week`). Fantasy points are
-  therefore a slight overestimate for INT-prone QBs.
+- **Out/Slot play-level alignment** — Clay roles are primary; FTN Participation
+  remains gated (see FTN upgrade design). Public nflverse FTN charting has no
+  `skp_pos`.
 - **Packaged `workbook_{season}.json` snapshot** is intentionally slim
   synthetic data (Task 6), but it must include at least one `games` entry that
   lines up with its team/week rates so the stale-snapshot path can still

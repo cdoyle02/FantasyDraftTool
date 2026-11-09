@@ -32,6 +32,14 @@ export interface QueueEvent {
   status: 'pending' | 'synced'
 }
 
+/** Workbook DFS pool paste + manual tags (browser-local). */
+export interface WorkbookPoolRecord {
+  id: 'active'
+  csvText: string
+  manualTags: Record<string, 'target' | 'fade'>
+  updatedAt: number
+}
+
 class DraftDatabase extends Dexie {
   players!: EntityTable<Player, 'id'>
   picks!: EntityTable<DraftPick, 'id'>
@@ -43,6 +51,7 @@ class DraftDatabase extends Dexie {
   meta!: EntityTable<SeedMeta, 'id'>
   importMeta!: EntityTable<ImportMeta, 'id'>
   savedRankings!: EntityTable<SavedRankingProfile, 'id'>
+  workbookPool!: EntityTable<WorkbookPoolRecord, 'id'>
 
   constructor() {
     super('fantasy-draft-tool')
@@ -108,6 +117,19 @@ class DraftDatabase extends Dexie {
       meta: 'id',
       importMeta: 'id',
       savedRankings: 'id, normalizedName, updatedAt'
+    })
+    this.version(8).stores({
+      players: 'id, name, position, adp',
+      picks: 'id, pickNumber, teamId, playerId',
+      keepers: 'id, teamId, playerId',
+      settings: 'id',
+      adjustments: 'playerId, tag',
+      evaluationRecords: 'id, pickId, pickNumber, status, capturedAt',
+      events: 'id, status, createdAt',
+      meta: 'id',
+      importMeta: 'id',
+      savedRankings: 'id, normalizedName, updatedAt',
+      workbookPool: 'id, updatedAt'
     })
   }
 }

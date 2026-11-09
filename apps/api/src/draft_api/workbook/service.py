@@ -295,6 +295,15 @@ def _sum_group_rates(
         rush_tds=sum(r.rush_tds or 0.0 for r in matched),
         pass_yards=sum(r.pass_yards or 0.0 for r in matched),
         pass_tds=sum(r.pass_tds or 0.0 for r in matched),
+        pass_attempts=sum(r.pass_attempts or 0.0 for r in matched)
+        if any(r.pass_attempts is not None for r in matched)
+        else None,
+        pass_ints=sum(r.pass_ints or 0.0 for r in matched)
+        if any(r.pass_ints is not None for r in matched)
+        else None,
+        sacks_taken=sum(r.sacks_taken or 0.0 for r in matched)
+        if any(r.sacks_taken is not None for r in matched)
+        else None,
         fantasy_points=sum(r.fantasy_points or 0.0 for r in matched),
     )
     return summed, games
@@ -326,14 +335,26 @@ def _rate_metrics(
         return {}
 
     if group == "qb":
-        pass_pts = passing_points(yards=summed.pass_yards or 0.0, tds=summed.pass_tds or 0.0)
+        ints = summed.pass_ints or 0.0
+        pass_pts = passing_points(
+            yards=summed.pass_yards or 0.0, tds=summed.pass_tds or 0.0, ints=ints
+        )
         run_pts = rushing_points(yards=summed.rush_yards or 0.0, tds=summed.rush_tds or 0.0)
+        attempts = summed.pass_attempts
+        sacks = summed.sacks_taken
+        dropbacks = None
+        sack_pct = None
+        if attempts is not None and sacks is not None:
+            dropbacks = attempts + sacks
+            sack_pct = (sacks / dropbacks) if dropbacks else None
         return {
             "fpGTot": (pass_pts + run_pts) / games,
             "fpGPass": pass_pts / games,
             "fpGRun": run_pts / games,
             "ydsG": ((summed.pass_yards or 0.0) + (summed.rush_yards or 0.0)) / games,
             "passTdG": (summed.pass_tds or 0.0) / games,
+            "intG": (ints / games) if summed.pass_ints is not None else None,
+            "sackPct": sack_pct,
         }
 
     if group == "rb":
@@ -636,6 +657,8 @@ def build_matchups_response(
             }
         )
 
+    from draft_api.workbook.ftn_participation import alignment_label
+
     payload = {
         "season": dataset.season,
         "week": week,
@@ -646,6 +669,8 @@ def build_matchups_response(
         "fetchedAt": _fetched_at(dataset, moment),
         "source": source,
         "stale": stale,
+        "alignmentSource": dataset.alignment_source,
+        "alignmentLabel": alignment_label(dataset.alignment_source),
         "attribution": ATTRIBUTION,
         "games": games_payload,
     }
@@ -944,7 +969,11 @@ def build_top_response(
         custom_start_week=custom_start_week,
         custom_end_week=custom_end_week,
     )
-    teams = build_top_table(dataset, weeks=weeks)
+    teams = build_top_table(
+        dataset,
+        weeks=weeks,
+        drive_possessions=dataset.drive_possessions or None,
+    )
     method = teams[0].method if teams else "plays_share_proxy"
     if any(row.method == "pbp_drive" for row in teams):
         method = "pbp_drive"
@@ -1026,11 +1055,14 @@ def build_injuries_response(
         logger.warning("Workbook injuries unavailable: %s", exc)
         warnings.append("injuries_unavailable")
 
+    # Sunday inactives stay deferred until a reliable free feed is locked;
+    # ESPN roster injuryStatus is the honest baseline (see workbook README).
     return {
         "season": season,
         "week": week,
         "fetchedAt": moment.astimezone(UTC).isoformat().replace("+00:00", "Z"),
-        "source": "espn",
+        "source": "espn_roster",
+        "inactivesAvailable": False,
         "stale": False,
         "injuries": injuries,
         "warnings": warnings,
@@ -1133,18 +1165,30 @@ def build_pool_rank_response(
         custom_end_week=custom_end_week,
     )
 
-    inputs = [
-        PoolPlayerInput(
-            name=str(item.get("name") or ""),
-            team=str(item.get("team") or ""),
-            salary=int(item.get("salary") or 0),
-            position=str(item.get("position") or ""),
-            opponent=(
-                str(item["opponent"]) if item.get("opponent") is not None else None
-            ),
+    inputs = []
+    for item in players:
+        espn_raw = item.get("espnPlayerId")
+        espn_player_id: int | None = None
+        if espn_raw is not None and espn_raw != "":
+            try:
+                espn_player_id = int(espn_raw)
+            except (TypeError, ValueError):
+                espn_player_id = None
+        gsis_raw = item.get("gsisId")
+        gsis_id = str(gsis_raw).strip() if gsis_raw not in (None, "") else None
+        inputs.append(
+            PoolPlayerInput(
+                name=str(item.get("name") or ""),
+                team=str(item.get("team") or ""),
+                salary=int(item.get("salary") or 0),
+                position=str(item.get("position") or ""),
+                opponent=(
+                    str(item["opponent"]) if item.get("opponent") is not None else None
+                ),
+                gsis_id=gsis_id,
+                espn_player_id=espn_player_id,
+            )
         )
-        for item in players
-    ]
     try:
         ranked = rank_pool(
             inputs,
@@ -1152,6 +1196,7 @@ def build_pool_rank_response(
             week=week,
             weeks=weeks,
             scoring=scoring_literal,
+            id_index=None,  # optional map supplied by callers/tests with roster ids
         )
     except ValueError as exc:
         raise WorkbookServiceError(str(exc)) from exc
@@ -1213,3 +1258,188 @@ def build_oldl_response(
     payload["teams"] = [oldl_row_to_json(row) for row in team_rows_list]
     payload["games"] = build_oldl_games(dataset, week=week, team_rows=team_rows)
     return payload
+
+
+# --- Clay CB shadow + player intel ------------------------------------------
+
+_clay_shadow_override: list[Any] | None = None
+
+
+def set_clay_shadow_override(rows: list[Any] | None) -> None:
+    global _clay_shadow_override
+    _clay_shadow_override = rows
+
+
+def build_clay_shadow_response(
+    *,
+    week: int,
+    season: int = DEFAULT_SEASON,
+    now: datetime | None = None,
+    http_get: HttpGetter | None = None,
+) -> dict[str, Any]:
+    """Mike Clay WR↔CB shadow cheatsheet for the current PDF (week is board context)."""
+    from draft_api.workbook.clay_pdf import ClayPdfError, ClayShadowRow, load_clay_shadow_rows
+    from draft_api.workbook.roles import normalize_clay_team
+
+    if week < 1 or week > 18:
+        raise WorkbookServiceError(f"invalid week {week}")
+
+    moment = now or datetime.now(UTC)
+    warnings: list[str] = []
+    rows: list[ClayShadowRow] = []
+    if _clay_shadow_override is not None:
+        rows = list(_clay_shadow_override)  # type: ignore[arg-type]
+    else:
+        try:
+            rows = load_clay_shadow_rows(season, http_get=http_get)
+        except ClayPdfError as exc:
+            logger.warning("Clay shadow unavailable: %s", exc)
+            warnings.append("clay_shadow_unavailable")
+
+    return {
+        "season": season,
+        "week": week,
+        "fetchedAt": moment.astimezone(UTC).isoformat().replace("+00:00", "Z"),
+        "source": "clay_pdf",
+        "stale": False,
+        "attribution": "Mike Clay WR/CB cheatsheet (ESPN PDF)",
+        "shadows": [
+            {
+                "offenseTeam": normalize_clay_team(row.offense_team),
+                "receiver": row.receiver,
+                "receiverPos": row.receiver_pos,
+                "defenseTeam": normalize_clay_team(row.defense_team),
+                "defender": row.defender,
+                "defenderPos": row.defender_pos,
+            }
+            for row in rows
+        ],
+        "warnings": warnings,
+    }
+
+
+def build_player_intel_response(
+    *,
+    name: str,
+    week: int,
+    team: str | None = None,
+    league_id: str | None = None,
+    season: int = DEFAULT_SEASON,
+    window: str = "l4",
+    scoring: str = "half_ppr",
+    now: datetime | None = None,
+    espn_http_json: HttpJsonGetter | None = None,
+    espn_profile: str | None = None,
+) -> dict[str, Any]:
+    """Compose existing feeds into one player card (explicit nulls when missing)."""
+    from draft_api.workbook.clay_pdf import ClayPdfError, load_clay_shadow_rows
+    from draft_api.workbook.ftn_participation import alignment_label
+    from draft_api.workbook.identity import normalize_player_name
+    from draft_api.workbook.roles import lookup_role, normalize_clay_team
+
+    if week < 1 or week > 18:
+        raise WorkbookServiceError(f"invalid week {week}")
+    display = (name or "").strip()
+    if not display:
+        raise WorkbookServiceError("name is required")
+
+    moment = now or datetime.now(UTC)
+    dataset, source, stale = resolve_dataset(season, now=moment)
+    team_norm = normalize_team(team) if team else None
+    opponent = None
+    if team_norm:
+        opponent = (dataset.schedule.get(week) or {}).get(team_norm)
+
+    role = lookup_role(dataset.clay_roles, display) if dataset.clay_roles else None
+    matchup_net: dict[str, Any] | None = None
+    if team_norm and opponent:
+        weeks = _resolve_weeks(
+            window=window,
+            rated_through_week=_rated_through_week(week),
+            custom_start_week=None,
+            custom_end_week=None,
+        )
+        scoring_literal = cast(Scoring, scoring if scoring in _SCORINGS else "half_ppr")
+        # Best-effort position guess from Clay role presence → WR; else all_wr/qb skip.
+        group = "all_wr"
+        matchup_net = _positional_block(
+            dataset,
+            group=group,
+            team=team_norm,
+            opponent=opponent,
+            weeks=weeks,
+            scoring=scoring_literal,
+        )
+
+    shadow: dict[str, Any] | None = None
+    try:
+        shadow_rows = (
+            list(_clay_shadow_override)
+            if _clay_shadow_override is not None
+            else load_clay_shadow_rows(season)
+        )
+        needle = normalize_player_name(display)
+        for row in shadow_rows:
+            if normalize_player_name(row.receiver) == needle:
+                if team_norm and normalize_clay_team(row.offense_team) != team_norm:
+                    continue
+                shadow = {
+                    "offenseTeam": normalize_clay_team(row.offense_team),
+                    "receiver": row.receiver,
+                    "receiverPos": row.receiver_pos,
+                    "defenseTeam": normalize_clay_team(row.defense_team),
+                    "defender": row.defender,
+                    "defenderPos": row.defender_pos,
+                }
+                break
+    except ClayPdfError:
+        shadow = None
+
+    injury: dict[str, Any] | None = None
+    if league_id:
+        try:
+            espn_s2, swid, _ = espn_credentials_from_env(
+                league_id=league_id, espn_profile=espn_profile
+            )
+            if espn_http_json is not None:
+                espn_s2 = espn_s2 or "test-espn-s2"
+                swid = swid or "{00000000-0000-0000-0000-000000000000}"
+            if espn_s2 and swid:
+                rows = fetch_week_injuries(
+                    league_id=league_id,
+                    season=season,
+                    week=week,
+                    espn_s2=espn_s2,
+                    swid=swid,
+                    http_json=espn_http_json,
+                )
+                needle = normalize_player_name(display)
+                for row in rows:
+                    if normalize_player_name(row.name) == needle:
+                        injury = injury_row_to_json(row)
+                        break
+        except (InjuriesFetchError, EspnRosterError, EspnAvailableError):
+            injury = None
+
+    # SoS opportunity stays null here unless a separate sos call is wired by the UI/MCP.
+    return {
+        "season": season,
+        "week": week,
+        "fetchedAt": moment.astimezone(UTC).isoformat().replace("+00:00", "Z"),
+        "source": source,
+        "stale": stale,
+        "player": {
+            "name": display,
+            "team": team_norm,
+            "opponent": opponent,
+        },
+        "injury": injury,
+        "matchupNet": matchup_net,
+        "clayRole": role,
+        "clayShadow": shadow,
+        "alignmentSource": dataset.alignment_source,
+        "alignmentLabel": alignment_label(dataset.alignment_source),
+        "sosOpportunity": None,
+        "ballersMention": None,
+        "attribution": ATTRIBUTION,
+    }

@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react'
 import { ApiTokenPrompt } from '../api/ApiTokenPrompt'
 import { draftApi, isApiAuthError } from '../api/client'
 import {
+  WorkbookClayShadowPanel,
   WorkbookFeedersPanel,
   WorkbookInjuriesPanel,
   WorkbookMatricesPanel,
@@ -277,7 +278,9 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
                 ? 'Feeder Tables'
                 : subTab === 'pool'
                   ? 'DFS Salary Pool'
-                  : 'OL/DL Proxy'
+                  : subTab === 'shadow'
+                    ? 'Clay WR Shadows'
+                    : 'OL/DL Proxy'
 
   const allRows = useMemo(() => data?.games.flatMap((game) => game.rows) ?? [], [data])
   const pools = useMemo(() => {
@@ -522,6 +525,7 @@ export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) 
       {subTab === 'feeders' && <WorkbookFeedersPanel controls={p2Controls} />}
       {subTab === 'pool' && <WorkbookPoolView controls={p2Controls} />}
       {subTab === 'oldl' && <WorkbookOldlPanel controls={p2Controls} />}
+      {subTab === 'shadow' && <WorkbookClayShadowPanel controls={p2Controls} />}
 
       {subTab === 'matchups' && (
       <section className="panel overflow-hidden">

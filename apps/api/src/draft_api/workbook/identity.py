@@ -17,6 +17,7 @@ from draft_api.sos.nflverse import NFL_TEAMS, TEAM_ALIASES
 
 __all__ = [
     "NFL_TEAMS",
+    "PlayerIdIndex",
     "PlayerRef",
     "TEAM_ALIASES",
     "normalize_player_name",
@@ -54,3 +55,34 @@ class PlayerRef:
 def player_join_key(display_name: str, team: str) -> str:
     """Stable name+team key for cross-source lookups."""
     return f"{normalize_player_name(display_name)}|{normalize_team(team)}"
+
+
+@dataclass(frozen=True, slots=True)
+class PlayerIdIndex:
+    """Exact-id lookup for pool / intel joins (no fuzzy name matching)."""
+
+    by_gsis: dict[str, PlayerRef]
+    by_espn: dict[int, PlayerRef]
+
+    @classmethod
+    def from_refs(cls, refs: list[PlayerRef]) -> PlayerIdIndex:
+        by_gsis: dict[str, PlayerRef] = {}
+        by_espn: dict[int, PlayerRef] = {}
+        for ref in refs:
+            if ref.gsis_id:
+                by_gsis[ref.gsis_id] = ref
+            if ref.espn_player_id is not None:
+                by_espn[int(ref.espn_player_id)] = ref
+        return cls(by_gsis=by_gsis, by_espn=by_espn)
+
+    def resolve(
+        self,
+        *,
+        gsis_id: str | None = None,
+        espn_player_id: int | None = None,
+    ) -> PlayerRef | None:
+        if gsis_id and gsis_id in self.by_gsis:
+            return self.by_gsis[gsis_id]
+        if espn_player_id is not None and espn_player_id in self.by_espn:
+            return self.by_espn[espn_player_id]
+        return None

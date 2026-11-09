@@ -89,6 +89,18 @@ Attribution string must name the active source. SoS `wrRole` filter continues to
 2. May derived weekly Out/Slot aggregates be committed under private license, or must they stay runtime-only?  
 3. Extend SoS Out/Slot to play-level in the same milestone, or Workbook-first?
 
+## Gate log
+
+| Gate | Status | Date | Notes |
+|------|--------|------|-------|
+| 1. License / cost | **Pending** | 2026-11-08 | Household FTN Participation license not purchased; no live client. |
+| 2. Sample schema | **Partial** | 2026-11-08 | Redacted fixture `apps/api/tests/workbook/fixtures/ftn_participation_redacted.csv` (nflverse ids + `skp_pos`). Not a vendor sample. |
+| 3. Join validation | **Pending** | 2026-11-08 | Fixture assumes supplied `nflverse_game_id`+`play_id`; measured live match rate TBD. |
+| 4. `skp_pos` dictionary | **Draft-locked in code** | 2026-11-08 | `SLT`→slot; `WR`/`LWR`/`RWR`/`OUT`→outside; `Y-TE`/`H-TE`/`HB`/`FB`/`TE`/`RB` excluded. Confirm vs vendor docs before production. |
+| 5. Refresh SLA | **Pending** | 2026-11-08 | Prefer Clay PDF cadence until FTN post-game SLA is documented. |
+
+**Dual-run (fixture-only):** `draft_api.workbook.ftn_participation` implements parse → aggregate → `prefer_out_slot_alignment` (FTN wins when bags non-empty; else Clay; else `none`). Production loader still passes `ftn_off=None` until gates 1–4 are dated **Pass**. No `FTN_*` secrets in git.
+
 ## Implementation next step
 
-Do **not** open an implementation plan until gates 1–4 are checked off in this doc (add a short “Gate log” section with dates). Then write `docs/superpowers/plans/2026-*-ftn-participation-upgrade.md`.
+When gates 1–4 are checked **Pass**, write `docs/superpowers/plans/2026-*-ftn-participation-upgrade.md` for the live wire. Fixture dual-run + `alignmentSource` on matchup payloads may ship earlier without a paid client.

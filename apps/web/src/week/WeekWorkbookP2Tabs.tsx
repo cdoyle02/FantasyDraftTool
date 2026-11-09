@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { draftApi } from '../api/client'
 import type {
+  WorkbookClayShadowResponse,
   WorkbookFeederGroup,
   WorkbookFeederResponse,
   WorkbookInjuriesResponse,
@@ -11,6 +12,7 @@ import type {
   WorkbookMatrixTierColor,
   WorkbookMatrixTertile,
   WorkbookPaceResponse,
+  WorkbookPlayerIntelResponse,
   WorkbookScoring,
   WorkbookSubTab,
   WorkbookTopResponse,
@@ -25,7 +27,8 @@ export const WORKBOOK_SUB_TABS: Array<{ id: WorkbookSubTab; label: string; testI
   { id: 'matrices', label: 'Matrices', testId: 'workbook-subnav-matrices' },
   { id: 'feeders', label: 'Feeders', testId: 'workbook-subnav-feeders' },
   { id: 'pool', label: 'Pool', testId: 'workbook-subnav-pool' },
-  { id: 'oldl', label: 'OL/DL', testId: 'workbook-subnav-oldl' }
+  { id: 'oldl', label: 'OL/DL', testId: 'workbook-subnav-oldl' },
+  { id: 'shadow', label: 'Shadows', testId: 'workbook-subnav-shadow' }
 ]
 
 const FEEDER_GROUPS: Array<{ id: WorkbookFeederGroup; label: string }> = [
@@ -162,6 +165,9 @@ export function WorkbookTopPanel({ controls }: { controls: WorkbookP2Controls })
           <h2>TOP % by team</h2>
           {data?.method === 'plays_share_proxy' && (
             <p className="mt-1 text-[11px] text-amber-100">Plays-share proxy — not drive-clock TOP</p>
+          )}
+          {data?.method === 'pbp_drive' && (
+            <p className="mt-1 text-[11px] text-muted">Drive-clock TOP from PBP possession seconds</p>
           )}
         </div>
         {loading && <p className="text-xs text-muted">Loading…</p>}
@@ -379,6 +385,11 @@ export function WorkbookInjuriesPanel({
         <div>
           <p className="eyebrow">Injuries</p>
           <h2>Week {controls.week} · ESPN statuses</h2>
+          {data && data.inactivesAvailable === false && (
+            <p className="mt-1 text-[11px] text-muted" data-testid="workbook-injuries-inactives-note">
+              Roster injury statuses only — Sunday inactives not available yet
+            </p>
+          )}
         </div>
         <div className="flex items-end gap-2">
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-muted">
@@ -740,6 +751,122 @@ export function WorkbookFeedersPanel({ controls }: { controls: WorkbookP2Control
         <p className="px-4 pb-3 text-[10px] text-muted" data-testid="workbook-feeders-attribution">
           {data.attribution}
         </p>
+      )}
+    </section>
+  )
+}
+
+export function WorkbookClayShadowPanel({ controls }: { controls: WorkbookP2Controls }) {
+  const [data, setData] = useState<WorkbookClayShadowResponse | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [selected, setSelected] = useState<string | null>(null)
+  const [intel, setIntel] = useState<WorkbookPlayerIntelResponse | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError('')
+    void draftApi
+      .workbookClayShadow({ week: controls.week })
+      .then((payload) => {
+        if (!cancelled) setData(payload)
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Could not load shadows.')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [controls.week])
+
+  const openIntel = (receiver: string, team: string) => {
+    setSelected(receiver)
+    void draftApi
+      .workbookPlayerIntel({ name: receiver, week: controls.week, team })
+      .then(setIntel)
+      .catch(() => setIntel(null))
+  }
+
+  return (
+    <section className="panel overflow-hidden" data-testid="workbook-shadow-panel">
+      <div className="panel-heading">
+        <div>
+          <p className="eyebrow">Clay shadows</p>
+          <h2>WR ↔ CB pairings</h2>
+        </div>
+        {loading && <p className="text-xs text-muted">Loading…</p>}
+      </div>
+      {error && (
+        <p role="alert" className="px-4 py-2 text-xs text-rose-200">
+          {error}
+        </p>
+      )}
+      {data?.warnings?.includes('clay_shadow_unavailable') && (
+        <p className="px-4 py-2 text-xs text-amber-100">Clay PDF unavailable — try again later.</p>
+      )}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse text-left text-xs" data-testid="workbook-shadow-table">
+          <thead>
+            <tr className="border-b border-line text-[10px] uppercase tracking-wider text-muted">
+              <th className="px-3 py-2">WR</th>
+              <th className="px-3 py-2">Pos</th>
+              <th className="px-3 py-2">vs</th>
+              <th className="px-3 py-2">Defender</th>
+              <th className="px-3 py-2">Pos</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(data?.shadows ?? []).map((row) => (
+              <tr
+                key={`${row.offenseTeam}-${row.receiver}-${row.defender}`}
+                className="border-b border-line/60 cursor-pointer hover:bg-line/20"
+                data-testid={`workbook-shadow-row-${row.receiver.replace(/\s+/g, '-')}`}
+                onClick={() => openIntel(row.receiver, row.offenseTeam)}
+              >
+                <td className="px-3 py-1.5 font-semibold">
+                  {row.receiver} <span className="text-muted font-normal">{row.offenseTeam}</span>
+                </td>
+                <td className="px-3 py-1.5">{row.receiverPos}</td>
+                <td className="px-3 py-1.5 text-muted">{row.defenseTeam}</td>
+                <td className="px-3 py-1.5">{row.defender}</td>
+                <td className="px-3 py-1.5">{row.defenderPos}</td>
+              </tr>
+            ))}
+            {!loading && !error && (data?.shadows?.length ?? 0) === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-6 text-center text-muted">
+                  No shadow rows for this week.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {intel && selected && (
+        <aside
+          className="border-t border-line px-4 py-3 text-xs"
+          data-testid="workbook-player-intel-drawer"
+        >
+          <p className="font-bold text-slate-100">{intel.player.name}</p>
+          <p className="text-muted">
+            {intel.player.team ?? '—'} vs {intel.player.opponent ?? '—'} · role{' '}
+            {intel.clayRole ?? '—'}
+          </p>
+          <p className="mt-1">
+            Shadow: {intel.clayShadow?.defender ?? '—'} ({intel.clayShadow?.defenderPos ?? '—'})
+          </p>
+          <p className="mt-1 text-muted">
+            Injury: {intel.injury?.status ?? 'none / not in league feed'}
+          </p>
+          <p className="mt-1 text-[10px] text-muted">{intel.alignmentLabel ?? intel.attribution}</p>
+        </aside>
+      )}
+      {data?.attribution && (
+        <p className="px-4 pb-3 text-[10px] text-muted">{data.attribution}</p>
       )}
     </section>
   )

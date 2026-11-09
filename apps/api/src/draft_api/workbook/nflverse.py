@@ -20,7 +20,7 @@ from collections import defaultdict
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 from zoneinfo import ZoneInfo
 
 from draft_api.sos.calculate import WEEKS
@@ -30,6 +30,9 @@ from draft_api.workbook.fantasy import receiving_points
 from draft_api.workbook.identity import NFL_TEAMS, normalize_team
 from draft_api.workbook.clay_pdf import ClayPdfError, load_clay_wr_rows
 from draft_api.workbook.roles import Role, build_role_index, lookup_role, merge_last_known
+
+if TYPE_CHECKING:
+    from draft_api.workbook.top import DrivePossession
 
 HttpGetter = Callable[[str], bytes]
 
@@ -98,8 +101,26 @@ _RATE_FIELDS: tuple[str, ...] = (
     "rush_tds",
     "pass_yards",
     "pass_tds",
+    "pass_attempts",
+    "pass_ints",
+    "sacks_taken",
     "fantasy_points",
 )
+# Counters always present on weekly-stats rows (optional QB fields stay off this list
+# so missing CSV columns do not coerce to 0.0 and block PBP enrichment).
+_RATE_SUM_FIELDS: tuple[str, ...] = (
+    "targets",
+    "receptions",
+    "rec_yards",
+    "rec_tds",
+    "rush_att",
+    "rush_yards",
+    "rush_tds",
+    "pass_yards",
+    "pass_tds",
+    "fantasy_points",
+)
+_OPTIONAL_QB_RATE_FIELDS: tuple[str, ...] = ("pass_attempts", "pass_ints", "sacks_taken")
 
 # Required CSV headers (verified against live nflverse assets 2026-11-08).
 _STATS_REQUIRED_HEADERS: tuple[str, ...] = (
@@ -175,6 +196,9 @@ class PositionalWeekRate:
     rush_tds: float | None = None
     pass_yards: float | None = None
     pass_tds: float | None = None
+    pass_attempts: float | None = None
+    pass_ints: float | None = None
+    sacks_taken: float | None = None
     fantasy_points: float | None = None
 
 
@@ -210,6 +234,9 @@ class WorkbookDataset:
     positional_def: dict[str, dict[tuple[str, int], PositionalWeekRate]]
     games: list[ScheduledGame] = field(default_factory=list)
     clay_roles: dict[str, Role] = field(default_factory=dict)
+    drive_possessions: list[DrivePossession] = field(default_factory=list)
+    # Out/Slot fill source after dual-run (Clay primary until FTN gates pass).
+    alignment_source: Literal["ftn_participation", "clay_role", "none"] = "clay_role"
 
 
 def default_http_get(url: str) -> bytes:
@@ -287,7 +314,7 @@ def _parse_bool(value: str | None) -> bool:
 
 
 def _empty_rate_sums() -> dict[str, float]:
-    return dict.fromkeys(_RATE_FIELDS, 0.0)
+    return dict.fromkeys(_RATE_SUM_FIELDS, 0.0)
 
 
 def parse_positional_stats(
@@ -306,6 +333,10 @@ def parse_positional_stats(
     _ensure_csv_headers(
         reader.fieldnames, _STATS_REQUIRED_HEADERS, source="stats_player_week"
     )
+    header_set = {name for name in (reader.fieldnames or [])}
+    has_attempts = "attempts" in header_set
+    has_ints = "interceptions" in header_set
+    has_sacks = "sacks" in header_set
     player_position: dict[str, str] = {}
     off_sums: dict[tuple[str, str, int], dict[str, float]] = defaultdict(_empty_rate_sums)
     def_sums: dict[tuple[str, str, int], dict[str, float]] = defaultdict(_empty_rate_sums)
@@ -347,11 +378,17 @@ def parse_positional_stats(
                 row.get("fantasy_points_ppr"), field="fantasy_points_ppr"
             ),
         }
+        if has_attempts:
+            bag["pass_attempts"] = _parse_float(row.get("attempts"), field="attempts")
+        if has_ints:
+            bag["pass_ints"] = _parse_float(row.get("interceptions"), field="interceptions")
+        if has_sacks:
+            bag["sacks_taken"] = _parse_float(row.get("sacks"), field="sacks")
         off_bucket = off_sums[(group, team, week)]
         def_bucket = def_sums[(group, opponent, week)]
         for field_name, value in bag.items():
-            off_bucket[field_name] += value
-            def_bucket[field_name] += value
+            off_bucket[field_name] = off_bucket.get(field_name, 0.0) + value
+            def_bucket[field_name] = def_bucket.get(field_name, 0.0) + value
 
     return _bucket_by_group(off_sums), _bucket_by_group(def_sums), player_position
 
@@ -361,7 +398,11 @@ def _bucket_by_group(
 ) -> dict[str, dict[tuple[str, int], PositionalWeekRate]]:
     out: dict[str, dict[tuple[str, int], PositionalWeekRate]] = defaultdict(dict)
     for (group, team, week), bag in sums.items():
-        out[group][(team, week)] = PositionalWeekRate(**bag)
+        kwargs = {field: bag[field] for field in _RATE_SUM_FIELDS}
+        for field in _OPTIONAL_QB_RATE_FIELDS:
+            if field in bag:
+                kwargs[field] = bag[field]
+        out[group][(team, week)] = PositionalWeekRate(**kwargs)
     return dict(out)
 
 
@@ -376,10 +417,105 @@ def _stats_row_bag(row: dict[str, str | None]) -> dict[str, float]:
         "rush_tds": _parse_float(row.get("rushing_tds"), field="rushing_tds"),
         "pass_yards": _parse_float(row.get("passing_yards"), field="passing_yards"),
         "pass_tds": _parse_float(row.get("passing_tds"), field="passing_tds"),
+        "pass_attempts": _parse_float(row.get("attempts"), field="attempts"),
+        "pass_ints": _parse_float(row.get("interceptions"), field="interceptions"),
+        "sacks_taken": _parse_float(row.get("sacks"), field="sacks"),
         "fantasy_points": _parse_float(
             row.get("fantasy_points_ppr"), field="fantasy_points_ppr"
         ),
     }
+
+
+def enrich_qb_rates_from_pbp(
+    text: str,
+    *,
+    season: int,
+    positional_off: dict[str, dict[tuple[str, int], PositionalWeekRate]],
+    positional_def: dict[str, dict[tuple[str, int], PositionalWeekRate]],
+) -> tuple[
+    dict[str, dict[tuple[str, int], PositionalWeekRate]],
+    dict[str, dict[tuple[str, int], PositionalWeekRate]],
+]:
+    """Fill QB pass_attempts / sacks_taken / pass_ints from PBP when stats omit them.
+
+    Uses optional `sack` and `interception` columns (not required for P0 PBP parse).
+    When a weekly-stats bag already has non-null values for a field, those win.
+    """
+    reader = csv.DictReader(io.StringIO(text))
+    fieldnames = {name.lower() for name in (reader.fieldnames or [])}
+    if "sack" not in fieldnames and "interception" not in fieldnames:
+        return positional_off, positional_def
+
+    off_counts: dict[tuple[str, int], dict[str, float]] = defaultdict(
+        lambda: {"pass_attempts": 0.0, "sacks_taken": 0.0, "pass_ints": 0.0}
+    )
+    def_counts: dict[tuple[str, int], dict[str, float]] = defaultdict(
+        lambda: {"pass_attempts": 0.0, "sacks_taken": 0.0, "pass_ints": 0.0}
+    )
+
+    for row in reader:
+        row_season = _parse_int(row.get("season"))
+        if row_season is not None and row_season != season:
+            continue
+        if (row.get("season_type") or "").upper() not in ("REG", "REGULAR"):
+            continue
+        week = _parse_int(row.get("week"))
+        if week is None or week < 1 or week > 18:
+            continue
+        posteam = normalize_team(row.get("posteam") or "")
+        defteam = normalize_team(row.get("defteam") or "")
+        if not posteam or not defteam:
+            continue
+        if _parse_bool(row.get("qb_kneel")):
+            continue
+        is_pass = _parse_bool(row.get("pass_attempt"))
+        is_sack = _parse_bool(row.get("sack"))
+        is_int = _parse_bool(row.get("interception"))
+        if not (is_pass or is_sack or is_int):
+            continue
+        off_bag = off_counts[(posteam, week)]
+        def_bag = def_counts[(defteam, week)]
+        if is_pass or is_sack:
+            off_bag["pass_attempts"] += 1.0
+            def_bag["pass_attempts"] += 1.0
+        if is_sack:
+            off_bag["sacks_taken"] += 1.0
+            def_bag["sacks_taken"] += 1.0
+        if is_int:
+            off_bag["pass_ints"] += 1.0
+            def_bag["pass_ints"] += 1.0
+
+    def _merge(
+        existing: dict[str, dict[tuple[str, int], PositionalWeekRate]],
+        counts: dict[tuple[str, int], dict[str, float]],
+    ) -> dict[str, dict[tuple[str, int], PositionalWeekRate]]:
+        qb = dict(existing.get("qb") or {})
+        for key, bag in counts.items():
+            prior = qb.get(key) or PositionalWeekRate()
+            qb[key] = PositionalWeekRate(
+                targets=prior.targets,
+                receptions=prior.receptions,
+                rec_yards=prior.rec_yards,
+                rec_tds=prior.rec_tds,
+                rush_att=prior.rush_att,
+                rush_yards=prior.rush_yards,
+                rush_tds=prior.rush_tds,
+                pass_yards=prior.pass_yards,
+                pass_tds=prior.pass_tds,
+                pass_attempts=prior.pass_attempts
+                if prior.pass_attempts is not None
+                else bag["pass_attempts"],
+                pass_ints=prior.pass_ints if prior.pass_ints is not None else bag["pass_ints"],
+                sacks_taken=prior.sacks_taken
+                if prior.sacks_taken is not None
+                else bag["sacks_taken"],
+                fantasy_points=prior.fantasy_points,
+            )
+        out = dict(existing)
+        out["qb"] = qb
+        return out
+
+    return _merge(positional_off, off_counts), _merge(positional_def, def_counts)
 
 
 def aggregate_out_slot_from_stats(
@@ -510,6 +646,77 @@ class _RateAccumulator:
 
 def _empty_out_slot_sums() -> dict[str, float]:
     return dict.fromkeys(_RATE_FIELDS, 0.0)
+
+
+def _parse_drive_seconds(value: str | None) -> float | None:
+    """Parse nflverse ``drive_time_of_possession`` (MM:SS, HH:MM:SS, or seconds)."""
+    if value is None:
+        return None
+    raw = str(value).strip()
+    if not raw:
+        return None
+    if ":" in raw:
+        parts = raw.split(":")
+        try:
+            nums = [float(part) for part in parts]
+        except ValueError:
+            return None
+        if len(nums) == 2:
+            minutes, seconds = nums
+            return minutes * 60.0 + seconds
+        if len(nums) == 3:
+            hours, minutes, seconds = nums
+            return hours * 3600.0 + minutes * 60.0 + seconds
+        return None
+    try:
+        return float(raw)
+    except ValueError:
+        return None
+
+
+def extract_drive_possessions(text: str, *, season: int) -> list[DrivePossession]:
+    """One possession row per (team, week, drive) when ``drive_time_of_possession`` exists.
+
+    Falls back to an empty list when the column is absent so older fixtures and
+    snapshots keep the plays-share TOP proxy.
+    """
+    # Late import avoids a circular dependency with workbook.top → WorkbookDataset.
+    from draft_api.workbook.top import DrivePossession as DrivePossessionRow
+
+    reader = csv.DictReader(io.StringIO(text))
+    if not reader.fieldnames or "drive_time_of_possession" not in reader.fieldnames:
+        return []
+
+    # (team, week, drive_id) -> (seconds, game_id)
+    seen: dict[tuple[str, int, str], tuple[float, str | None]] = {}
+    for row in reader:
+        row_season = _parse_int(row.get("season"))
+        if row_season is not None and row_season != season:
+            continue
+        if (row.get("season_type") or "").upper() not in ("REG", "REGULAR"):
+            continue
+        week = _parse_int(row.get("week"))
+        if week is None or week < 1 or week > 18:
+            continue
+        posteam = normalize_team(row.get("posteam") or "")
+        drive_id = (row.get("drive") or "").strip()
+        if not posteam or not drive_id:
+            continue
+        if _parse_bool(row.get("qb_kneel")):
+            continue
+        seconds = _parse_drive_seconds(row.get("drive_time_of_possession"))
+        if seconds is None or seconds <= 0:
+            continue
+        key = (posteam, week, drive_id)
+        if key in seen:
+            continue
+        game_id = row.get("game_id") or None
+        seen[key] = (seconds, str(game_id) if game_id else None)
+
+    return [
+        DrivePossessionRow(team=team, week=week, seconds=seconds, game_id=game_id)
+        for (team, week, _drive_id), (seconds, game_id) in sorted(seen.items())
+    ]
 
 
 def parse_play_by_play(
@@ -769,6 +976,16 @@ def load_workbook_dataset(
             resolved_roles,
             season=season,
         )
+        # Live FTN client is gated off — dual-run prefers Clay until fixture/API
+        # events are injected by tests or a future gated loader.
+        from draft_api.workbook.ftn_participation import prefer_out_slot_alignment
+
+        out_slot_off, out_slot_def, alignment_source = prefer_out_slot_alignment(
+            clay_off=clay_off,
+            clay_def=clay_def,
+            ftn_off=None,
+            ftn_def=None,
+        )
         (
             drives,
             pass_plays,
@@ -782,8 +999,15 @@ def load_workbook_dataset(
             player_position=player_position,
             alignment_by_key={},
         )
-        positional_off = {**positional_off, **clay_off}
-        positional_def = {**positional_def, **clay_def}
+        drive_possessions = extract_drive_possessions(pbp_text, season=season)
+        positional_off = {**positional_off, **out_slot_off}
+        positional_def = {**positional_def, **out_slot_def}
+        positional_off, positional_def = enrich_qb_rates_from_pbp(
+            pbp_text,
+            season=season,
+            positional_off=positional_off,
+            positional_def=positional_def,
+        )
 
         _validate_schedule_headers(schedule_text)
         team_week_schedule = parse_schedule_csv(schedule_text, season=season)
@@ -808,4 +1032,6 @@ def load_workbook_dataset(
         positional_def=positional_def,
         games=scheduled_games,
         clay_roles=resolved_roles,
+        drive_possessions=drive_possessions,
+        alignment_source=alignment_source,
     )

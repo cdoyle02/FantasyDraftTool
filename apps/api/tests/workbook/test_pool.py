@@ -47,6 +47,42 @@ def _dataset() -> WorkbookDataset:
   )
 
 
+def test_rank_pool_gsis_id_index_recovers_wrong_csv_team() -> None:
+  from draft_api.workbook.identity import PlayerIdIndex, PlayerRef
+
+  dataset = _dataset()
+  index = PlayerIdIndex.from_refs(
+    [
+      PlayerRef(
+        gsis_id="00-0034829",
+        espn_player_id=None,
+        display_name="Stud",
+        team="AAA",
+      )
+    ]
+  )
+  players = [
+    PoolPlayerInput(
+      name="Stud",
+      team="ZZZ",  # wrong team in paste — gsis map recovers AAA
+      salary=8000,
+      position="WR",
+      gsis_id="00-0034829",
+    ),
+  ]
+  rows = rank_pool(
+    players,
+    dataset=dataset,
+    week=WEEK,
+    weeks=WINDOW_WEEKS,
+    scoring="half_ppr",
+    id_index=index,
+  )
+  assert rows[0].join_status == "matched"
+  assert rows[0].team == "AAA"
+  assert rows[0].matchup_team == "AAA"
+
+
 def test_rank_pool_orders_by_value_then_net() -> None:
   dataset = _dataset()
   players = [

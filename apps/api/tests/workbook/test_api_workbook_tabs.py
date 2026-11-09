@@ -123,7 +123,8 @@ def test_workbook_injuries_route_with_fixture_http() -> None:
     )
     assert response.status_code == 200
     body = response.json()
-    assert body["source"] == "espn"
+    assert body["source"] == "espn_roster"
+    assert body["inactivesAvailable"] is False
     assert len(body["injuries"]) == 3
     assert body["warnings"] == []
 

@@ -6,7 +6,11 @@ from dataclasses import dataclass
 from typing import Literal
 
 from draft_api.workbook.fantasy import Scoring
-from draft_api.workbook.identity import normalize_player_name, normalize_team
+from draft_api.workbook.identity import (
+  PlayerIdIndex,
+  normalize_player_name,
+  normalize_team,
+)
 from draft_api.workbook.matrices import Tertile, assign_tertile
 from draft_api.workbook.nflverse import WorkbookDataset
 
@@ -29,6 +33,8 @@ class PoolPlayerInput:
   salary: int
   position: str
   opponent: str | None = None
+  gsis_id: str | None = None
+  espn_player_id: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -78,14 +84,24 @@ def rank_pool(
   week: int,
   weeks: set[int],
   scoring: Scoring,
+  id_index: PlayerIdIndex | None = None,
 ) -> list[PoolRankRow]:
-  """Rank pasted pool players by salary-adjusted Net FP/G for their matchup."""
+  """Rank pasted pool players by salary-adjusted Net FP/G for their matchup.
+
+  Join order (still no fuzzy names): optional ``gsis_id`` / ``espn_player_id``
+  via ``id_index``, then exact team membership + schedule for the board week.
+  """
   if len(players) > MAX_POOL_PLAYERS:
     raise ValueError(f"pool exceeds {MAX_POOL_PLAYERS} players")
 
   draft_rows: list[PoolRankRow] = []
   for player in players:
-    team = normalize_team(player.team)
+    resolved = (
+      id_index.resolve(gsis_id=player.gsis_id, espn_player_id=player.espn_player_id)
+      if id_index is not None
+      else None
+    )
+    team = normalize_team(resolved.team if resolved is not None else player.team)
     position = player.position.strip().upper()
     group = _POSITION_TO_GROUP.get(position)
     opponent = (dataset.schedule.get(week) or {}).get(team)

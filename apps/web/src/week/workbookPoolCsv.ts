@@ -12,6 +12,9 @@ export interface PoolPlayerInput {
   salary: number
   position: string
   opponent?: string
+  /** Optional exact ids for non-fuzzy pool joins (API `gsisId` / `espnPlayerId`). */
+  gsisId?: string
+  espnPlayerId?: number
 }
 
 export interface ParseDfsCsvResult {
@@ -24,6 +27,8 @@ const POSITION_HEADERS = ['position', 'pos']
 const TEAM_HEADERS = ['team', 'teamabbrev', 'team abbreviation']
 const SALARY_HEADERS = ['salary', 'sal']
 const OPPONENT_HEADERS = ['opponent', 'opp']
+const GSIS_HEADERS = ['gsisid', 'gsis_id', 'gsis id']
+const ESPN_ID_HEADERS = ['espnplayerid', 'espn_player_id', 'espn id', 'playerid']
 
 function splitCsvLine(line: string): string[] {
   const cells: string[] = []
@@ -94,6 +99,8 @@ export function parseDfsCsv(text: string): ParseDfsCsvResult {
   const teamIdx = findColumnIndex(headers, TEAM_HEADERS)
   const salaryIdx = findColumnIndex(headers, SALARY_HEADERS)
   const opponentIdx = findColumnIndex(headers, OPPONENT_HEADERS)
+  const gsisIdx = findColumnIndex(headers, GSIS_HEADERS)
+  const espnIdIdx = findColumnIndex(headers, ESPN_ID_HEADERS)
 
   if (nameIdx < 0) errors.push('Missing player name column (Name or Nickname).')
   if (positionIdx < 0) errors.push('Missing Position column.')
@@ -111,6 +118,8 @@ export function parseDfsCsv(text: string): ParseDfsCsvResult {
     const team = normalizeTeam(cells[teamIdx] ?? '')
     const salary = parseSalary(cells[salaryIdx] ?? '')
     const opponentRaw = opponentIdx >= 0 ? (cells[opponentIdx] ?? '').trim() : ''
+    const gsisRaw = gsisIdx >= 0 ? (cells[gsisIdx] ?? '').trim() : ''
+    const espnRaw = espnIdIdx >= 0 ? (cells[espnIdIdx] ?? '').trim() : ''
 
     if (!name && !position && !team) continue
     if (!name || !position || !team) {
@@ -122,6 +131,15 @@ export function parseDfsCsv(text: string): ParseDfsCsvResult {
     const player: PoolPlayerInput = { name, team, salary, position }
     if (opponentRaw) {
       player.opponent = opponentRaw.toUpperCase()
+    }
+    if (gsisRaw) {
+      player.gsisId = gsisRaw
+    }
+    if (espnRaw) {
+      const espnId = Number(espnRaw)
+      if (Number.isFinite(espnId)) {
+        player.espnPlayerId = Math.round(espnId)
+      }
     }
     players.push(player)
   }

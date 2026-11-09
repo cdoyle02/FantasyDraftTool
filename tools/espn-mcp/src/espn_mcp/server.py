@@ -68,6 +68,8 @@ Roster and show tools:
 - kyle_dst_available / jared_k_available — weekly DST and kicker rankings crossed
   with free agents in one league.
 - workbook_week — Net Matchups board for one week with optional ESPN highlights.
+- clay_shadow_week — Mike Clay WR↔CB shadow pairings for the active cheatsheet PDF.
+- player_intel — one-player card composing injury / Net / Clay role+shadow (nulls explicit).
 - sos_grid — Tier 1/2 strength-of-schedule team grid with league FA/Mine/Taken badges.
 - sos_opportunity — Tier 1/2 opportunity scores joined to one league's rosters.
 - week_odds — current-week NFL spreads and implied totals.
@@ -997,6 +999,38 @@ def workbook_week(
         slate=slate,
         include_highlights=include_highlights,
     )
+
+
+@server.tool(
+    description=(
+        "Mike Clay WR↔CB shadow cheatsheet for one board week (season PDF). "
+        "Returns receiver↔defender pairings with L/S/R roles."
+    )
+)
+def clay_shadow_week(week: int | None = None) -> str:
+    """Args: week — defaults to current fantasy week."""
+    from .draft_bridge import clay_shadow_week as _clay_shadow_week
+
+    return _clay_shadow_week(week=week)
+
+
+@server.tool(
+    description=(
+        "Player intelligence card: ESPN injury (when league given), Workbook Net for the "
+        "matchup team, Clay Out/Slot role, and Clay CB shadow when present. Missing feeds "
+        "are explicit nulls — not invented."
+    )
+)
+def player_intel(
+    name: str,
+    league: str | None = None,
+    week: int | None = None,
+    team: str | None = None,
+) -> str:
+    """Args: name — player display name; league — optional for injuries; team — NFL abbrev."""
+    from .draft_bridge import player_intel as _player_intel
+
+    return _player_intel(name, league=league, week=week, team=team)
 
 
 @server.tool(

@@ -1,0 +1,6 @@
+season,nflverse_game_id,play_id,week,posteam,defteam,receiver_player_id,receiver_position,skp_pos,targets,receptions,rec_yards,rec_tds
+2026,2026_05_AAA_BBB,101,5,AAA,BBB,WR_OUT_1,WR,WR,1,1,12,0
+2026,2026_05_AAA_BBB,102,5,AAA,BBB,WR_SLOT_1,WR,SLT,1,1,8,1
+2026,2026_05_AAA_BBB,103,5,AAA,BBB,TE_SLOT_1,TE,SLT,1,1,6,0
+2026,2026_05_AAA_BBB,104,5,AAA,BBB,RB_SLOT_1,RB,SLT,1,0,0,0
+2026,2026_05_AAA_BBB,105,5,BBB,AAA,WR_OUT_2,WR,LWR,1,1,15,0

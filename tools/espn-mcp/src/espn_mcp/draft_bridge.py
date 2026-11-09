@@ -422,3 +422,38 @@ def sos_opportunity(
     if payload["wrRole"] is None:
         del payload["wrRole"]
     return _dump(payload)
+
+
+def clay_shadow_week(*, week: int | None = None) -> str:
+    """Mike Clay WR↔CB shadow cheatsheet for the board week."""
+    from draft_api.workbook.service import build_clay_shadow_response
+
+    config = active_config()
+    resolved_week = week if week is not None else _default_workbook_week()
+    payload = build_clay_shadow_response(week=resolved_week, season=config.season)
+    return _dump(payload)
+
+
+def player_intel(
+    name: str,
+    *,
+    league: str | None = None,
+    week: int | None = None,
+    team: str | None = None,
+) -> str:
+    """Compose injury / Net / Clay role+shadow feeds for one player."""
+    from draft_api.workbook.service import build_player_intel_response
+
+    config = active_config()
+    resolved_week = week if week is not None else _default_workbook_week()
+    league_id: str | None = None
+    if league:
+        league_id = _league(league)["id"]
+    payload = build_player_intel_response(
+        name=name,
+        week=resolved_week,
+        team=team,
+        league_id=league_id,
+        season=config.season,
+    )
+    return _dump(payload)

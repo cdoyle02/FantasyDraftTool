@@ -574,6 +574,8 @@ export interface WorkbookInjuriesResponse {
   week: number
   fetchedAt: string
   source: string
+  /** True only when a reliable Sunday-inactives feed is wired (currently deferred). */
+  inactivesAvailable?: boolean
   stale: boolean
   injuries: WorkbookInjuryRow[]
   warnings: string[]
@@ -638,6 +640,7 @@ export type WorkbookSubTab =
   | 'feeders'
   | 'pool'
   | 'oldl'
+  | 'shadow'
 
 export type WorkbookPoolJoinStatus = 'matched' | 'unmatched'
 
@@ -647,6 +650,8 @@ export interface WorkbookPoolPlayerPayload {
   salary: number
   position: string
   opponent?: string
+  gsisId?: string
+  espnPlayerId?: number
 }
 
 export interface WorkbookPoolRankRow {
@@ -683,6 +688,44 @@ export interface WorkbookPoolRankQuery {
   startWeek?: number
   endWeek?: number
   season?: number
+}
+
+export interface WorkbookClayShadowRow {
+  offenseTeam: string
+  receiver: string
+  receiverPos: 'L' | 'S' | 'R'
+  defenseTeam: string
+  defender: string
+  defenderPos: 'L' | 'S' | 'R'
+}
+
+export interface WorkbookClayShadowResponse {
+  season: number
+  week: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  attribution: string
+  shadows: WorkbookClayShadowRow[]
+  warnings: string[]
+}
+
+export interface WorkbookPlayerIntelResponse {
+  season: number
+  week: number
+  fetchedAt: string
+  source: string
+  stale: boolean
+  player: { name: string; team: string | null; opponent: string | null }
+  injury: WorkbookInjuryRow | null
+  matchupNet: Record<string, number | null> | null
+  clayRole: 'slot' | 'outside' | null
+  clayShadow: WorkbookClayShadowRow | null
+  alignmentSource?: string
+  alignmentLabel?: string
+  sosOpportunity: unknown | null
+  ballersMention: unknown | null
+  attribution: string
 }
 
 export type WorkbookOldlRole = 'offense_ol' | 'defense_dl'

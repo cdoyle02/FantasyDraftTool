@@ -1,5 +1,18 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('./workbookPoolPersistence', () => ({
+  WORKBOOK_POOL_CSV_STORAGE_KEY: 'workbook-pool-csv-text',
+  loadWorkbookPool: vi.fn(async () => ({
+    id: 'active' as const,
+    csvText: '',
+    manualTags: {},
+    updatedAt: Date.now()
+  })),
+  saveWorkbookPoolCsv: vi.fn(async () => undefined),
+  saveWorkbookPoolTags: vi.fn(async () => undefined)
+}))
+
 import { WeekWorkbookView } from './WeekWorkbookView'
 import type {
   WorkbookExplainResponse,

@@ -39,6 +39,34 @@ class ClayWrRow:
     rwr_pct: int
 
 
+@dataclass(frozen=True, slots=True)
+class ClayShadowRow:
+    """One WR ↔ primary CB/S shadow pairing from the Clay WR/CB sheet."""
+
+    offense_team: str
+    receiver: str
+    receiver_pos: ClayPos
+    defense_team: str
+    defender: str
+    defender_pos: ClayPos
+
+
+# Full matchup line: WR side … DEF team … defender … L/S/R.
+# Optional zone-% sits between DEF team and defender on some rows.
+_SHADOW_ROW = re.compile(
+    r"^\s*([A-Z]{2,3})\s+"
+    r"(.+?)\s+"
+    r"([LSR])\s+"
+    r"\d+%"
+    r".+?"
+    r"\s([A-Z]{2,3})\s+"
+    r"(?:\d+%\s+)?"
+    r"([A-Za-z][A-Za-z.'\-\s]+?)\s+"
+    r"([LSR])\s+"
+    r"\d",
+)
+
+
 class ClayPdfError(RuntimeError):
     """Raised when Clay PDF download or text extraction fails."""
 
@@ -106,3 +134,33 @@ def parse_clay_layout_text(text: str) -> list[ClayWrRow]:
             )
         )
     return rows
+
+
+def parse_clay_shadow_layout_text(text: str) -> list[ClayShadowRow]:
+    """Extract WR↔defender shadow pairings from Clay WR/CB layout text."""
+    rows: list[ClayShadowRow] = []
+    for line in text.splitlines():
+        match = _SHADOW_ROW.match(line)
+        if not match:
+            continue
+        off, wr, wr_pos, deff, defender, def_pos = match.groups()
+        rows.append(
+            ClayShadowRow(
+                offense_team=off.strip(),
+                receiver=" ".join(wr.split()),
+                receiver_pos=wr_pos,  # type: ignore[arg-type]
+                defense_team=deff.strip(),
+                defender=" ".join(defender.split()),
+                defender_pos=def_pos,  # type: ignore[arg-type]
+            )
+        )
+    return rows
+
+
+def load_clay_shadow_rows(
+    season: int, *, http_get: Callable[[str], bytes] | None = None
+) -> list[ClayShadowRow]:
+    """Fetch Clay WR/CB PDF and parse shadow pairings."""
+    data = fetch_clay_pdf_bytes(season, http_get=http_get)
+    text = extract_layout_text_from_pdf(data)
+    return parse_clay_shadow_layout_text(text)

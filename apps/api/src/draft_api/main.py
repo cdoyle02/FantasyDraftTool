@@ -47,6 +47,7 @@ from .week_odds import build_week_odds_payload
 from .workbook.nflverse import WorkbookNflverseError
 from .workbook.service import (
     WorkbookServiceError,
+    build_clay_shadow_response,
     build_explain_response,
     build_feeder_response,
     build_injuries_response,
@@ -54,6 +55,7 @@ from .workbook.service import (
     build_matrix_response,
     build_oldl_response,
     build_pace_response,
+    build_player_intel_response,
     build_pool_rank_response,
     build_top_response,
 )
@@ -1148,6 +1150,52 @@ def workbook_oldl(
             custom_end_week=endWeek,
             season=season,
         )
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+    except WorkbookNflverseError as exc:
+        return error_response(503, "workbook_unavailable", str(exc))
+
+
+@app.get("/api/v1/nfl/workbook/clay-shadow", response_model=None)
+def workbook_clay_shadow(
+    week: int,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Mike Clay WR↔CB shadow cheatsheet for the active season PDF."""
+    try:
+        return build_clay_shadow_response(week=week, season=season)
+    except WorkbookServiceError as exc:
+        return error_response(400, "invalid_params", str(exc))
+
+
+@app.get("/api/v1/nfl/workbook/player-intel", response_model=None)
+def workbook_player_intel(
+    name: str,
+    week: int,
+    team: str | None = None,
+    leagueId: str | None = None,
+    window: str = "l4",
+    scoring: str = "half_ppr",
+    season: int = 2026,
+    espnProfile: str | None = None,
+) -> dict[str, Any] | JSONResponse:
+    """Compose injury / Net / Clay role+shadow feeds for one player card."""
+    try:
+        if leagueId:
+            get_league(leagueId)
+        return build_player_intel_response(
+            name=name,
+            week=week,
+            team=team,
+            league_id=leagueId,
+            season=season,
+            window=window,
+            scoring=scoring,
+            espn_http_json=_espn_roster_http_json_override,
+            espn_profile=espnProfile,
+        )
+    except LeagueNotFoundError as exc:
+        return error_response(404, "league_not_found", str(exc))
     except WorkbookServiceError as exc:
         return error_response(400, "invalid_params", str(exc))
     except WorkbookNflverseError as exc:

@@ -57,3 +57,33 @@ def test_top_from_drive_seconds_when_pbp_present() -> None:
     share, games = top_from_drive_seconds(drives, team="AAA", weeks={WEEK}, schedule=schedule)
     assert games == 1
     assert share == pytest.approx(0.6)
+
+
+def test_build_top_table_prefers_pbp_drive_when_possessions_present() -> None:
+    dataset = WorkbookDataset(
+        season=2026,
+        fetched_at="2026-11-08T12:00:00Z",
+        teams=["AAA", "BBB"],
+        schedule={WEEK: {"AAA": "BBB", "BBB": "AAA"}},
+        games=[ScheduledGame(week=WEEK, home="AAA", away="BBB", kickoff=None)],
+        drives=[],
+        pass_plays=[],
+        team_env_off=[
+            TeamRateSlice(team="AAA", week=WEEK, side="off", pass_plays=20, run_plays=15),
+            TeamRateSlice(team="BBB", week=WEEK, side="off", pass_plays=10, run_plays=15),
+        ],
+        team_env_def=[],
+        positional_off={},
+        positional_def={},
+        drive_possessions=[
+            DrivePossession(team="AAA", week=WEEK, seconds=300),
+            DrivePossession(team="BBB", week=WEEK, seconds=200),
+        ],
+    )
+    rows = build_top_table(
+        dataset, weeks={WEEK}, drive_possessions=dataset.drive_possessions
+    )
+    aaa = next(row for row in rows if row.team == "AAA")
+    assert aaa.method == "pbp_drive"
+    assert aaa.top_pct == pytest.approx(60.0)
+    assert aaa.sample_games == 1
