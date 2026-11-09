@@ -28,6 +28,7 @@ USAGE_STATS_FIELDS: tuple[str, ...] = (
     "passing_yards",
     "passing_epa",
     "rushing_epa",
+    "receiving_epa",
 )
 
 

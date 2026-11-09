@@ -1,6 +1,11 @@
 """Tier 1 usage shares from nflverse stats_player_week rows."""
 
-from draft_api.sos.usage import PlayerUsage, build_usage_index, parse_usage_stats_csv
+from draft_api.sos.usage import (
+    PlayerUsage,
+    build_usage_index,
+    parse_usage_stats_csv,
+    trim_usage_stats_row,
+)
 
 
 def _rb_row(
@@ -123,6 +128,24 @@ def test_player_usage_dataclass_fields():
     row: PlayerUsage = usage[0]
     assert row.gsis_id == "X"
     assert row.position == "RB"
+
+
+def test_trim_usage_stats_row_keeps_receiving_epa():
+    row = {
+        "season": "2026",
+        "week": "1",
+        "season_type": "REG",
+        "position": "WR",
+        "team": "KC",
+        "player_id": "W1",
+        "player_display_name": "Receiver",
+        "targets": "8",
+        "receiving_epa": "1.25",
+        "fantasy_points_ppr": "14.2",
+    }
+    trimmed = trim_usage_stats_row(row)
+    assert trimmed["receiving_epa"] == "1.25"
+    assert "fantasy_points_ppr" not in trimmed
 
 
 def test_parse_usage_stats_csv_trims_columns_and_filters_season_type():
