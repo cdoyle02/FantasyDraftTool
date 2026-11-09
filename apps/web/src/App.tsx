@@ -712,9 +712,9 @@ export default function App() {
       ) : shellView === 'week-k' ? (
         <WeekKView />
       ) : shellView === 'week-sos' ? (
-        <WeekSosView />
+        <WeekSosView onNavigateTab={setShellView} />
       ) : shellView === 'week-workbook' ? (
-        <WeekWorkbookView />
+        <WeekWorkbookView onNavigateTab={setShellView} />
       ) : (
         <>
           <section className="mb-5 grid gap-3 rounded-2xl border border-line bg-gradient-to-r from-panel to-ink p-4 shadow-glow lg:grid-cols-[1fr_auto] lg:items-center">

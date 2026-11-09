@@ -9,7 +9,18 @@ import type {
   StrengthOfScheduleTier1Response
 } from './types'
 
+/** sessionStorage — Workbook tab reads once on mount (`crossLink.week`). */
+const CROSS_LINK_WEEK_KEY = 'crossLink.week'
+/** sessionStorage — SoS tab reads once on mount (`crossLink.position`). */
+const CROSS_LINK_POSITION_KEY = 'crossLink.position'
+
 const POSITIONS: SosPosition[] = ['QB', 'RB', 'WR', 'TE', 'DST']
+
+export type WeekShellTab = 'week-sos' | 'week-workbook'
+
+export type WeekSosViewProps = {
+  onNavigateTab?: (tab: WeekShellTab) => void
+}
 const WEEK_OPTIONS = Array.from({ length: 18 }, (_, i) => i + 1)
 const RATING_WINDOWS: { key: SosTier1Window; label: string }[] = [
   { key: 'l4', label: 'L4' },
@@ -56,8 +67,19 @@ function presetWindow(
   return { startWeek: start, endWeek: 17 }
 }
 
-export function WeekSosView() {
-  const [position, setPosition] = useState<SosPosition>('RB')
+export function WeekSosView({ onNavigateTab }: WeekSosViewProps = {}) {
+  const [position, setPosition] = useState<SosPosition>(() => {
+    try {
+      const linked = sessionStorage.getItem(CROSS_LINK_POSITION_KEY)
+      if (linked && POSITIONS.includes(linked as SosPosition)) {
+        sessionStorage.removeItem(CROSS_LINK_POSITION_KEY)
+        return linked as SosPosition
+      }
+    } catch {
+      // private mode
+    }
+    return 'RB'
+  })
   const [viewMode, setViewMode] = useState<SosViewMode>('tier1')
   const [metric, setMetric] = useState<SosMetric>('fpa')
   const [ratingWindow, setRatingWindow] = useState<SosTier1Window>('l8')
@@ -176,7 +198,25 @@ export function WeekSosView() {
       <section className="mb-1 grid gap-3 rounded-2xl border border-line bg-gradient-to-r from-panel to-ink p-4 shadow-glow lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
           <p className="eyebrow">Matchups</p>
-          <h2 className="text-lg font-semibold">Strength of schedule</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-semibold">Strength of schedule</h2>
+            <button
+              type="button"
+              data-testid="sos-workbook-cross-link"
+              className="text-xs font-semibold text-mint hover:underline"
+              onClick={() => {
+                const nextWeek = Math.min(18, Math.max(1, activeRatedThrough + 1 || 10))
+                try {
+                  sessionStorage.setItem(CROSS_LINK_WEEK_KEY, String(nextWeek))
+                } catch {
+                  // private mode
+                }
+                onNavigateTab?.('week-workbook')
+              }}
+            >
+              See this week&apos;s Net board
+            </button>
+          </div>
           <p className="mt-1 text-xs text-muted">
             Household grid ·{' '}
             {viewMode === 'tier1'

@@ -198,4 +198,26 @@ describe('WeekSosView', () => {
       ).toBe(true)
     })
   })
+
+  it('cross-links to Workbook with week in sessionStorage', async () => {
+    const navigate = vi.fn()
+    sessionStorage.clear()
+    render(<WeekSosView onNavigateTab={navigate} />)
+    await waitFor(() => expect(screen.getByTestId('sos-table')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByTestId('sos-workbook-cross-link'))
+
+    expect(sessionStorage.getItem('crossLink.week')).toBe('10')
+    expect(navigate).toHaveBeenCalledWith('week-workbook')
+  })
+
+  it('applies position from sessionStorage on mount', async () => {
+    sessionStorage.setItem('crossLink.position', 'WR')
+    render(<WeekSosView />)
+    await waitFor(() => {
+      const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+      expect(calls.some((url) => url.includes('position=WR'))).toBe(true)
+    })
+    expect(sessionStorage.getItem('crossLink.position')).toBeNull()
+  })
 })
