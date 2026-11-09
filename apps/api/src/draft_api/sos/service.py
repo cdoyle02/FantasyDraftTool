@@ -9,6 +9,12 @@ from typing import Any
 from draft_api.nfl_week import fantasy_week_number, season_week1_tuesday_from_env
 from draft_api.odds.cache import TtlCache
 from draft_api.sos.calculate import SHRINK_K, Metric, Position, SosWindow, build_sos_payload, sos_payload_to_dict
+from draft_api.sos.clay_roles import (
+    WrRole,
+    filter_stats_by_clay_role,
+    filter_usage_index_by_clay_role,
+    resolve_clay_role_index,
+)
 from draft_api.implied_totals import GameLine
 from draft_api.sos.tier1 import (
     build_defense_softness_index,
@@ -88,6 +94,27 @@ def set_sos_cache_ttl(seconds: float) -> None:
 
 def clear_sos_cache() -> None:
     _dataset_cache.clear()
+
+
+def _clay_roles_for_request(season: int, dataset: SosDataset) -> dict[str, str]:
+    previous = dataset.clay_roles or None
+    return resolve_clay_role_index(
+        season,
+        http_get=_http_get_override,
+        previous_clay_roles=previous,
+    )
+
+
+def _stats_for_wr_role(
+    stats_rows: list[dict[str, str | None]],
+    *,
+    position: str,
+    wr_role: WrRole,
+    role_index: dict[str, str],
+) -> list[dict[str, str | None]]:
+    if wr_role == "all" or position != "WR":
+        return stats_rows
+    return filter_stats_by_clay_role(stats_rows, role_index, wr_role)
 
 
 def _resolve_stats_rows(
@@ -212,6 +239,7 @@ def build_tier1_strength_of_schedule_response(
     end_week: int | None = None,
     season: int = DEFAULT_SEASON,
     now: datetime | None = None,
+    wr_role: WrRole = "all",
 ) -> dict[str, Any]:
     moment = now or datetime.now(timezone.utc)
     default_start, default_end = _default_window(moment)
@@ -219,6 +247,11 @@ def build_tier1_strength_of_schedule_response(
     window_end = default_end if end_week is None else end_week
 
     dataset, source, stale = resolve_dataset(season, now=moment)
+    stats_rows, _ = _resolve_stats_rows(season, dataset)
+    role_index = _clay_roles_for_request(season, dataset)
+    scoped_stats = _stats_for_wr_role(
+        stats_rows, position=position, wr_role=wr_role, role_index=role_index
+    )
     payload = build_tier1_grid(
         season=dataset.season,
         position=position,
@@ -228,11 +261,16 @@ def build_tier1_strength_of_schedule_response(
         games=dataset.games,
         season_schedule=dataset.schedule,
         teams=dataset.teams,
+        stats_rows=scoped_stats,
+        wr_role=wr_role,
     )
     fetched_at = dataset.fetched_at or moment.astimezone(timezone.utc).isoformat().replace(
         "+00:00", "Z"
     )
-    return tier1_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
+    body = tier1_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
+    if wr_role != "all":
+        body["wrRole"] = wr_role
+    return body
 
 
 def build_tier1_opportunity_response(
@@ -244,6 +282,7 @@ def build_tier1_opportunity_response(
     league_id: str | None = None,
     now: datetime | None = None,
     espn_http_json: HttpGetter | None = None,
+    wr_role: WrRole = "all",
 ) -> dict[str, Any]:
     """Nflverse player opportunity rows (softness × usage); optional ESPN roster overlay."""
     if position == "DST":
@@ -265,12 +304,18 @@ def build_tier1_opportunity_response(
 
     stats_rows, _usage_from_snapshot = _resolve_stats_rows(season, dataset)
     usage_unavailable = len(stats_rows) == 0
+    role_index = _clay_roles_for_request(season, dataset)
+    scoped_stats = _stats_for_wr_role(
+        stats_rows, position=position, wr_role=wr_role, role_index=role_index
+    )
 
     rated_through, rating_weeks, softness = build_defense_softness_index(
         position=position,
         window=window,
         games=dataset.games,
         teams=dataset.teams,
+        stats_rows=scoped_stats,
+        wr_role=wr_role,
     )
     usage = build_usage_index(
         stats_rows,
@@ -278,6 +323,7 @@ def build_tier1_opportunity_response(
         weeks=set(rating_weeks),
         season=season,
     )
+    usage = filter_usage_index_by_clay_role(usage, role_index, wr_role)
     players = build_player_opportunity(
         usage_index=usage,
         defense_softness=softness,
@@ -331,6 +377,8 @@ def build_tier1_opportunity_response(
         body["overlayError"] = overlay_error
     if usage_unavailable:
         body["usageUnavailable"] = True
+    if wr_role != "all":
+        body["wrRole"] = wr_role
     return body
 
 
@@ -342,6 +390,7 @@ def build_tier2_strength_of_schedule_response(
     end_week: int | None = None,
     season: int = DEFAULT_SEASON,
     now: datetime | None = None,
+    wr_role: WrRole = "all",
 ) -> dict[str, Any]:
     moment = now or datetime.now(timezone.utc)
     default_start, default_end = _default_window(moment)
@@ -350,6 +399,10 @@ def build_tier2_strength_of_schedule_response(
 
     dataset, source, stale = resolve_dataset(season, now=moment)
     stats_rows, _ = _resolve_stats_rows(season, dataset)
+    role_index = _clay_roles_for_request(season, dataset)
+    scoped_stats = _stats_for_wr_role(
+        stats_rows, position=position, wr_role=wr_role, role_index=role_index
+    )
     payload = build_tier2_grid(
         season=dataset.season,
         position=position,
@@ -357,14 +410,17 @@ def build_tier2_strength_of_schedule_response(
         start_week=window_start,
         end_week=window_end,
         games=dataset.games,
-        stats_rows=stats_rows,
+        stats_rows=scoped_stats,
         season_schedule=dataset.schedule,
         teams=dataset.teams,
     )
     fetched_at = dataset.fetched_at or moment.astimezone(timezone.utc).isoformat().replace(
         "+00:00", "Z"
     )
-    return tier2_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
+    body = tier2_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
+    if wr_role != "all":
+        body["wrRole"] = wr_role
+    return body
 
 
 def build_tier2_opportunity_response(
@@ -377,6 +433,7 @@ def build_tier2_opportunity_response(
     now: datetime | None = None,
     espn_http_json: HttpGetter | None = None,
     game_lines: list[GameLine] | None = None,
+    wr_role: WrRole = "all",
 ) -> dict[str, Any]:
     if position not in ("QB", "RB", "WR", "TE"):
         raise ValueError(
@@ -403,12 +460,16 @@ def build_tier2_opportunity_response(
     snap_rows, _ = _resolve_snap_rows(season, dataset)
     snap_filtered = len(snap_rows) > 0
     snap_index = build_snap_pct_index(snap_rows, season=season) if snap_filtered else None
+    role_index = _clay_roles_for_request(season, dataset)
+    scoped_stats = _stats_for_wr_role(
+        stats_rows, position=position, wr_role=wr_role, role_index=role_index
+    )
 
     rated_through, rating_weeks, softness = build_defense_epa_softness_index(
         position=position,
         window=window,
         games=dataset.games,
-        stats_rows=stats_rows,
+        stats_rows=scoped_stats,
         teams=dataset.teams,
         season=season,
     )
@@ -420,6 +481,7 @@ def build_tier2_opportunity_response(
         snap_pct_index=snap_index,
         min_offense_snap_pct=DEFAULT_MIN_OFFENSE_SNAP_PCT,
     )
+    usage = filter_usage_index_by_clay_role(usage, role_index, wr_role)
     lines = game_lines or []
     players = build_tier2_player_opportunity(
         position=position,
@@ -483,4 +545,6 @@ def build_tier2_opportunity_response(
         body["overlayError"] = overlay_error
     if usage_unavailable:
         body["usageUnavailable"] = True
+    if wr_role != "all":
+        body["wrRole"] = wr_role
     return body

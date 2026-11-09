@@ -520,6 +520,14 @@ def strength_of_schedule(
         return error_response(status, code, str(exc))
 
 
+def _parse_sos_wr_role(wrRole: str | None, position: str):
+    from draft_api.sos.clay_roles import ensure_wr_role_for_position, parse_wr_role
+
+    role = parse_wr_role(wrRole)
+    ensure_wr_role_for_position(position, role)
+    return role
+
+
 @app.get("/api/v1/nfl/strength-of-schedule/tier1", response_model=None)
 def strength_of_schedule_tier1(
     position: str = "RB",
@@ -527,6 +535,7 @@ def strength_of_schedule_tier1(
     startWeek: int | None = None,
     endWeek: int | None = None,
     season: int = 2026,
+    wrRole: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Team × week shrunk aFPA strength of schedule (Tier 1 rolling window)."""
     from draft_api.sos.service import build_tier1_strength_of_schedule_response
@@ -546,6 +555,7 @@ def strength_of_schedule_tier1(
             f"window must be l4, l8, or season (got {window!r})",
         )
     try:
+        wr_role = _parse_sos_wr_role(wrRole, position_key)
         return build_tier1_strength_of_schedule_response(
             position=position_key,  # type: ignore[arg-type]
             window=window_key,  # type: ignore[arg-type]
@@ -553,6 +563,7 @@ def strength_of_schedule_tier1(
             end_week=endWeek,
             season=season,
             now=datetime.now(UTC),
+            wr_role=wr_role,
         )
     except (NflverseError, ValueError) as exc:
         status = 400 if isinstance(exc, ValueError) else 503
@@ -567,6 +578,7 @@ def strength_of_schedule_tier1_opportunity(
     week: int | None = None,
     leagueId: str | None = None,
     season: int = 2026,
+    wrRole: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Player opportunity scores (shrunk softness × nflverse usage share)."""
     from draft_api.espn_leagues import LeagueNotFoundError
@@ -587,6 +599,7 @@ def strength_of_schedule_tier1_opportunity(
             f"window must be l4, l8, or season (got {window!r})",
         )
     try:
+        wr_role = _parse_sos_wr_role(wrRole, position_key)
         return build_tier1_opportunity_response(
             position=position_key,  # type: ignore[arg-type]
             window=window_key,  # type: ignore[arg-type]
@@ -595,6 +608,7 @@ def strength_of_schedule_tier1_opportunity(
             league_id=leagueId,
             now=datetime.now(UTC),
             espn_http_json=_espn_roster_http_json_override,
+            wr_role=wr_role,
         )
     except LeagueNotFoundError as exc:
         return error_response(404, "league_not_found", str(exc))
@@ -611,6 +625,7 @@ def strength_of_schedule_tier2(
     startWeek: int | None = None,
     endWeek: int | None = None,
     season: int = 2026,
+    wrRole: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Team × week shrunk EPA-allowed strength of schedule (Tier 2 skill positions)."""
     from draft_api.sos.service import build_tier2_strength_of_schedule_response
@@ -630,6 +645,7 @@ def strength_of_schedule_tier2(
             f"window must be l4, l8, or season (got {window!r})",
         )
     try:
+        wr_role = _parse_sos_wr_role(wrRole, position_key)
         return build_tier2_strength_of_schedule_response(
             position=position_key,  # type: ignore[arg-type]
             window=window_key,  # type: ignore[arg-type]
@@ -637,6 +653,7 @@ def strength_of_schedule_tier2(
             end_week=endWeek,
             season=season,
             now=datetime.now(UTC),
+            wr_role=wr_role,
         )
     except (NflverseError, ValueError) as exc:
         status = 400 if isinstance(exc, ValueError) else 503
@@ -651,6 +668,7 @@ def strength_of_schedule_tier2_opportunity(
     week: int | None = None,
     leagueId: str | None = None,
     season: int = 2026,
+    wrRole: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Tier 2 opportunity: EPA softness × snap-filtered usage × game script."""
     from draft_api.espn_leagues import LeagueNotFoundError
@@ -677,6 +695,7 @@ def strength_of_schedule_tier2_opportunity(
     except OddsApiError as exc:
         logger.warning("tier2 opportunity odds unavailable: %s", exc)
     try:
+        wr_role = _parse_sos_wr_role(wrRole, position_key)
         return build_tier2_opportunity_response(
             position=position_key,  # type: ignore[arg-type]
             window=window_key,  # type: ignore[arg-type]
@@ -686,6 +705,7 @@ def strength_of_schedule_tier2_opportunity(
             now=datetime.now(UTC),
             espn_http_json=_espn_roster_http_json_override,
             game_lines=odds_games,
+            wr_role=wr_role,
         )
     except LeagueNotFoundError as exc:
         return error_response(404, "league_not_found", str(exc))
@@ -696,12 +716,13 @@ def strength_of_schedule_tier2_opportunity(
 
 
 @app.get("/api/v1/nfl/strength-of-schedule/tier2", response_model=None)
-def strength_of_schedule_tier2(
+def strength_of_schedule_tier2_dup(
     position: str = "RB",
     window: str = "l8",
     startWeek: int | None = None,
     endWeek: int | None = None,
     season: int = 2026,
+    wrRole: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Team × week shrunk EPA-allowed strength of schedule (Tier 2 skill positions)."""
     from draft_api.sos.service import build_tier2_strength_of_schedule_response
@@ -721,6 +742,7 @@ def strength_of_schedule_tier2(
             f"window must be l4, l8, or season (got {window!r})",
         )
     try:
+        wr_role = _parse_sos_wr_role(wrRole, position_key)
         return build_tier2_strength_of_schedule_response(
             position=position_key,  # type: ignore[arg-type]
             window=window_key,  # type: ignore[arg-type]
@@ -728,6 +750,7 @@ def strength_of_schedule_tier2(
             end_week=endWeek,
             season=season,
             now=datetime.now(UTC),
+            wr_role=wr_role,
         )
     except (NflverseError, ValueError) as exc:
         status = 400 if isinstance(exc, ValueError) else 503
@@ -736,12 +759,13 @@ def strength_of_schedule_tier2(
 
 
 @app.get("/api/v1/nfl/strength-of-schedule/tier2/opportunity", response_model=None)
-def strength_of_schedule_tier2_opportunity(
+def strength_of_schedule_tier2_opportunity_dup(
     position: str = "RB",
     window: str = "l8",
     week: int | None = None,
     leagueId: str | None = None,
     season: int = 2026,
+    wrRole: str | None = None,
 ) -> dict[str, Any] | JSONResponse:
     """Tier 2 player opportunity (EPA softness × snap-filtered usage, optional Vegas script)."""
     from draft_api.espn_leagues import LeagueNotFoundError
@@ -768,6 +792,7 @@ def strength_of_schedule_tier2_opportunity(
         logger.warning("tier2 opportunity odds unavailable: %s", exc)
 
     try:
+        wr_role = _parse_sos_wr_role(wrRole, position_key)
         return build_tier2_opportunity_response(
             position=position_key,  # type: ignore[arg-type]
             window=window_key,  # type: ignore[arg-type]
@@ -777,6 +802,7 @@ def strength_of_schedule_tier2_opportunity(
             now=datetime.now(UTC),
             espn_http_json=_espn_roster_http_json_override,
             game_lines=odds_games,
+            wr_role=wr_role,
         )
     except LeagueNotFoundError as exc:
         return error_response(404, "league_not_found", str(exc))

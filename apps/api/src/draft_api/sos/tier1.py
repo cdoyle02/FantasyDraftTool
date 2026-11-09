@@ -20,6 +20,8 @@ from draft_api.sos.calculate import (
     shrunk_defensive_afpa,
     softness_bucket,
 )
+from draft_api.sos.clay_roles import WrRole
+from draft_api.sos.nflverse import normalize_team
 from draft_api.sos.usage import PlayerUsage
 
 
@@ -60,6 +62,63 @@ def _games_in_weeks(games: list[CompletedGame], weeks: set[int]) -> list[Complet
     return [game for game in games if game.week in weeks]
 
 
+def _parse_float_stat(value: str | None) -> float:
+    if value is None or value == "":
+        return 0.0
+    try:
+        return float(value)
+    except ValueError:
+        return 0.0
+
+
+def defensive_wr_ppr_allowed_per_game(
+    stats_rows: list[dict[str, str | None]],
+):
+    """Sum Clay-filtered WR PPR fantasy points allowed per defensive matchup."""
+    from collections import defaultdict
+
+    from draft_api.sos.tier2_epa import EpaGameTotal
+
+    totals: dict[tuple[int, str, str], float] = defaultdict(float)
+    for row in stats_rows:
+        if (row.get("season_type") or "").upper() not in ("REG", "REGULAR"):
+            continue
+        if (row.get("position") or "").upper() != "WR":
+            continue
+        week = int(float(row.get("week") or "0"))
+        if week < 1:
+            continue
+        offense = normalize_team(row.get("team") or "")
+        defense = normalize_team(row.get("opponent_team") or "")
+        if not offense or not defense:
+            continue
+        totals[(week, offense, defense)] += _parse_float_stat(row.get("fantasy_points_ppr"))
+
+    return [
+        EpaGameTotal(week=week, offense=offense, defense=defense, total_epa=total)
+        for (week, offense, defense), total in sorted(totals.items())
+    ]
+
+
+def _shrunk_values_for_tier1(
+    *,
+    position: Position,
+    window_games: list[CompletedGame],
+    rating_weeks_set: set[int],
+    stats_rows: list[dict[str, str | None]] | None,
+    wr_role: WrRole,
+    teams: list[str],
+) -> dict[str, float | None]:
+    if position == "WR" and wr_role != "all":
+        from draft_api.sos.tier2_epa import shrunk_defensive_epa
+
+        ppr_games = defensive_wr_ppr_allowed_per_game(stats_rows or [])
+        filtered = [game for game in ppr_games if game.week in rating_weeks_set]
+        return shrunk_defensive_epa(filtered, position="WR", teams=teams)
+    shrunk = shrunk_defensive_afpa(window_games, position, teams=teams)
+    return {team: shrunk.get(team) for team in teams}
+
+
 def build_tier1_grid(
     *,
     season: int,
@@ -71,6 +130,8 @@ def build_tier1_grid(
     season_schedule: dict[str, dict[int, str | None]] | None = None,
     teams: list[str] | None = None,
     shrink_k: int | None = None,
+    stats_rows: list[dict[str, str | None]] | None = None,
+    wr_role: WrRole = "all",
 ) -> Tier1Payload:
     """Team × week grid using shrunk defensive aFPA over the rating window."""
     from draft_api.sos.calculate import SHRINK_K
@@ -90,7 +151,14 @@ def build_tier1_grid(
 
     schedule = build_schedule(games, season_schedule=season_schedule, teams=teams)
     team_list = teams or sorted(schedule)
-    shrunk = shrunk_defensive_afpa(window_games, position, teams=team_list)
+    shrunk = _shrunk_values_for_tier1(
+        position=position,
+        window_games=window_games,
+        rating_weeks_set=rating_weeks_set,
+        stats_rows=stats_rows,
+        wr_role=wr_role,
+        teams=team_list,
+    )
     defense_ranks = rank_defenses_shrunk(shrunk, team_list)
 
     rows: list[Tier1TeamRow] = []
@@ -175,6 +243,8 @@ def build_defense_softness_index(
     games: list[CompletedGame],
     teams: list[str],
     shrink_k: int | None = None,
+    stats_rows: list[dict[str, str | None]] | None = None,
+    wr_role: WrRole = "all",
 ) -> tuple[int, tuple[int, ...], dict[str, DefenseSoftness]]:
     """Shrunk defensive ranks and softness scores for the rating window."""
     _ = shrink_k  # reserved for future per-request shrink override
@@ -182,7 +252,14 @@ def build_defense_softness_index(
     rating_weeks_set = resolve_sos_window(window, through)
     rating_weeks = tuple(sorted(rating_weeks_set))
     window_games = _games_in_weeks(games, rating_weeks_set)
-    shrunk = shrunk_defensive_afpa(window_games, position, teams=teams)
+    shrunk = _shrunk_values_for_tier1(
+        position=position,
+        window_games=window_games,
+        rating_weeks_set=rating_weeks_set,
+        stats_rows=stats_rows,
+        wr_role=wr_role,
+        teams=teams,
+    )
     defense_ranks = rank_defenses_shrunk(shrunk, teams)
     index: dict[str, DefenseSoftness] = {}
     for defense, rank in defense_ranks.items():

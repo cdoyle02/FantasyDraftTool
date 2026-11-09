@@ -145,7 +145,7 @@ def test_trim_usage_stats_row_keeps_receiving_epa():
     }
     trimmed = trim_usage_stats_row(row)
     assert trimmed["receiving_epa"] == "1.25"
-    assert "fantasy_points_ppr" not in trimmed
+    assert trimmed["fantasy_points_ppr"] == "14.2"
 
 
 def test_parse_usage_stats_csv_trims_columns_and_filters_season_type():
@@ -158,4 +158,4 @@ def test_parse_usage_stats_csv_trims_columns_and_filters_season_type():
     rows = parse_usage_stats_csv(text, season=2026)
     assert len(rows) == 1
     assert rows[0]["player_display_name"] == "One"
-    assert "fantasy_points_ppr" not in rows[0]
+    assert rows[0]["fantasy_points_ppr"] == "12.0"

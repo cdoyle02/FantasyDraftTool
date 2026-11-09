@@ -29,6 +29,8 @@ USAGE_STATS_FIELDS: tuple[str, ...] = (
     "passing_epa",
     "rushing_epa",
     "receiving_epa",
+    "opponent_team",
+    "fantasy_points_ppr",
 )
 
 
