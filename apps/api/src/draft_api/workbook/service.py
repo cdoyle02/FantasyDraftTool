@@ -35,6 +35,14 @@ from draft_api.workbook.calculate import (
     mean_net,
     resolve_stat_weeks,
 )
+from draft_api.espn_available_dst import (
+    EspnAvailableError,
+    HttpJsonGetter,
+    espn_credentials_from_env,
+)
+from draft_api.espn_leagues import get_league
+from draft_api.espn_roster import EspnRosterError, load_espn_overlay_players
+from draft_api.workbook.espn_overlay import build_highlights, highlights_to_json
 from draft_api.workbook.fantasy import Scoring, passing_points, receiving_points, rushing_points
 from draft_api.workbook.identity import normalize_team
 from draft_api.workbook.nflverse import (
@@ -476,6 +484,54 @@ def _build_team_row(
     }
 
 
+def _merge_espn_overlay(
+    payload: dict[str, Any],
+    *,
+    league_id: str,
+    season: int,
+    owner: str | None,
+    owner_team_id: int | None,
+    include_fa: bool,
+    espn_http_json: HttpJsonGetter | None,
+) -> dict[str, Any]:
+    get_league(league_id)
+    try:
+        espn_s2, swid, _ = espn_credentials_from_env()
+        if espn_http_json is not None:
+            espn_s2 = espn_s2 or "test-espn-s2"
+            swid = swid or "{00000000-0000-0000-0000-000000000000}"
+        elif not espn_s2 or not swid:
+            raise EspnRosterError("ESPN credentials are not configured")
+        roster, free_agents, resolved_owner = load_espn_overlay_players(
+            league_id=league_id,
+            season=season,
+            espn_s2=espn_s2,
+            swid=swid,
+            owner=owner,
+            owner_team_id=owner_team_id,
+            include_fa=include_fa,
+            http_json=espn_http_json,
+        )
+        highlights, join_stats = build_highlights(
+            games=list(payload.get("games") or []),
+            roster=roster,
+            free_agents=free_agents,
+            owner_team_id=resolved_owner,
+            include_fa=include_fa,
+        )
+        payload.update(highlights_to_json(highlights, join_stats))
+    except (EspnRosterError, EspnAvailableError) as exc:
+        logger.warning("Workbook ESPN overlay unavailable: %s", exc)
+        payload["highlights"] = []
+        payload["joinStats"] = {
+            "matched": 0,
+            "unmatched_team": 0,
+            "unmatched_name_only": 0,
+        }
+        payload["overlayError"] = "espn_unavailable"
+    return payload
+
+
 def build_matchups_response(
     *,
     week: int,
@@ -487,6 +543,11 @@ def build_matchups_response(
     custom_start_week: int | None = None,
     custom_end_week: int | None = None,
     odds_games: Sequence[GameLine] | None = None,
+    league_id: str | None = None,
+    owner: str | None = None,
+    owner_team_id: int | None = None,
+    include_fa: bool = True,
+    espn_http_json: HttpJsonGetter | None = None,
 ) -> dict[str, Any]:
     """Build the Workbook Net Matchups board for one week.
 
@@ -555,7 +616,7 @@ def build_matchups_response(
             }
         )
 
-    return {
+    payload = {
         "season": dataset.season,
         "week": week,
         "window": window,
@@ -568,6 +629,17 @@ def build_matchups_response(
         "attribution": ATTRIBUTION,
         "games": games_payload,
     }
+    if league_id:
+        return _merge_espn_overlay(
+            payload,
+            league_id=league_id,
+            season=season,
+            owner=owner,
+            owner_team_id=owner_team_id,
+            include_fa=include_fa,
+            espn_http_json=espn_http_json,
+        )
+    return payload
 
 
 # --- Feeders -----------------------------------------------------------------

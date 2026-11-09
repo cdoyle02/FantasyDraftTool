@@ -249,6 +249,44 @@ def _parse_free_agent_entry(entry: dict[str, Any]) -> EspnRosterPlayer | None:
     )
 
 
+def load_espn_overlay_players(
+    *,
+    league_id: str,
+    season: int,
+    espn_s2: str,
+    swid: str,
+    owner: str | None = None,
+    owner_team_id: int | None = None,
+    include_fa: bool = True,
+    http_json: HttpJsonGetter | None = None,
+) -> tuple[list[EspnRosterPlayer], list[EspnRosterPlayer], int | None]:
+    """One roster fetch (owner resolve) plus optional FA pool for overlay."""
+    url = _league_url(league_id=league_id, season=season, views=["mTeam", "mRoster"])
+    getter = http_json or default_http_json
+    try:
+        payload = getter(url, _auth_headers(espn_s2=espn_s2, swid=swid))
+    except EspnRosterError:
+        raise
+    except Exception as exc:
+        raise EspnRosterError(f"ESPN request failed: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise EspnRosterError("ESPN returned an unexpected payload")
+    roster = parse_league_roster(payload)
+    resolved_owner = owner_team_id
+    if resolved_owner is None and owner:
+        resolved_owner = resolve_owner_team_id(payload, owner=owner)
+    free_agents: list[EspnRosterPlayer] = []
+    if include_fa:
+        free_agents = fetch_league_free_agents(
+            league_id=league_id,
+            season=season,
+            espn_s2=espn_s2,
+            swid=swid,
+            http_json=http_json,
+        )
+    return roster, free_agents, resolved_owner
+
+
 def fetch_league_free_agents(
     *,
     league_id: str,
@@ -277,7 +315,12 @@ def fetch_league_free_agents(
         extra={"X-Fantasy-Filter": json.dumps(fantasy_filter)},
     )
     getter = http_json or default_http_json
-    payload = getter(url, headers)
+    try:
+        payload = getter(url, headers)
+    except EspnRosterError:
+        raise
+    except Exception as exc:
+        raise EspnRosterError(f"ESPN request failed: {exc}") from exc
     if not isinstance(payload, dict):
         raise EspnRosterError("ESPN returned an unexpected payload")
     players: list[EspnRosterPlayer] = []

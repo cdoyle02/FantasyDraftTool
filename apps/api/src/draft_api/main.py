@@ -172,6 +172,7 @@ _kyle_dst_cache: TtlCache[dict[str, Any]] = TtlCache(
 )
 _kyle_dst_http_get_override: Any | None = None
 _espn_available_http_json_override: Any | None = None
+_espn_roster_http_json_override: Any | None = None
 
 # Jared Smola weekly K scrape cache.
 _jared_k_cache: TtlCache[dict[str, Any]] = TtlCache(
@@ -198,6 +199,12 @@ def set_espn_available_http_json(http_json: Any | None) -> None:
     """Test hook: override ESPN JSON fetcher (None restores default)."""
     global _espn_available_http_json_override
     _espn_available_http_json_override = http_json
+
+
+def set_espn_roster_http_json(http_json: Any | None) -> None:
+    """Test hook: override ESPN roster/FA JSON fetcher (None restores default)."""
+    global _espn_roster_http_json_override
+    _espn_roster_http_json_override = http_json
 
 
 def get_kyle_dst_rankings_cached(*, week: int | None = None) -> dict[str, Any]:
@@ -556,6 +563,10 @@ def workbook_matchups(
     scoring: str = "ppr",
     slate: str = "main",
     season: int = 2026,
+    leagueId: str | None = None,
+    ownerTeamId: int | None = None,
+    owner: str | None = None,
+    includeFa: bool = True,
 ) -> dict[str, Any] | JSONResponse:
     """Workbook Net Matchups board for one NFL week."""
     odds_games: list[GameLine] | None = None
@@ -565,6 +576,8 @@ def workbook_matchups(
         logger.warning("workbook_matchups odds unavailable: %s", exc)
 
     try:
+        if leagueId:
+            get_league(leagueId)
         return build_matchups_response(
             week=week,
             window=window,
@@ -574,7 +587,16 @@ def workbook_matchups(
             slate=slate,
             season=season,
             odds_games=odds_games,
+            league_id=leagueId,
+            owner=owner,
+            owner_team_id=ownerTeamId,
+            include_fa=includeFa,
+            espn_http_json=_espn_roster_http_json_override,
         )
+    except LeagueNotFoundError as exc:
+        if leagueId:
+            return error_response(404, "league_not_found", str(exc))
+        return error_response(400, "invalid_params", str(exc))
     except WorkbookServiceError as exc:
         return error_response(400, "invalid_params", str(exc))
     except WorkbookNflverseError as exc:
