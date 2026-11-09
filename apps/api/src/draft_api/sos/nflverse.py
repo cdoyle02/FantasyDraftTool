@@ -97,6 +97,7 @@ class SosDataset:
     teams: list[str]
     usage_stats: tuple[dict[str, str | None], ...] = field(default_factory=tuple)
     snap_counts: tuple[dict[str, str | None], ...] = field(default_factory=tuple)
+    clay_roles: dict[str, str] = field(default_factory=dict)
 
     @property
     def rated_through_week(self) -> int:

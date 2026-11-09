@@ -9,12 +9,29 @@ from typing import Any
 
 from draft_api.sos.calculate import CompletedGame, Position
 from draft_api.sos.nflverse import NFL_TEAMS, SosDataset
+from draft_api.workbook.roles import Role
 
 SNAPSHOT_NAME = "sos_{season}.json"
 
 
 class SnapshotError(RuntimeError):
     """Raised when a packaged snapshot is missing or invalid."""
+
+
+def _clay_roles_to_dict(roles: dict[str, Role]) -> dict[str, str]:
+    return {str(name): str(role) for name, role in sorted(roles.items())}
+
+
+def _clay_roles_from_dict(payload: Any) -> dict[str, Role]:
+    raw = payload or {}
+    if not isinstance(raw, dict):
+        raise SnapshotError("clayRoles must be a JSON object")
+    out: dict[str, Role] = {}
+    for name, role in raw.items():
+        if role not in ("slot", "outside"):
+            raise SnapshotError(f"invalid Clay role {role!r} for {name!r}")
+        out[str(name)] = role  # type: ignore[assignment]
+    return out
 
 
 def snapshot_resource_name(season: int) -> str:
@@ -52,6 +69,8 @@ def dataset_to_dict(dataset: SosDataset) -> dict[str, Any]:
         payload["usageStats"] = list(dataset.usage_stats)
     if dataset.snap_counts:
         payload["snapCounts"] = list(dataset.snap_counts)
+    if dataset.clay_roles:
+        payload["clayRoles"] = _clay_roles_to_dict(dataset.clay_roles)
     return payload
 
 
@@ -113,6 +132,7 @@ def dataset_from_dict(payload: dict[str, Any]) -> SosDataset:
         teams=teams,
         usage_stats=usage_stats,
         snap_counts=snap_counts,
+        clay_roles=_clay_roles_from_dict(payload.get("clayRoles")),
     )
 
 

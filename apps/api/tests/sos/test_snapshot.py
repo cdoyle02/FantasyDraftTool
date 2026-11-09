@@ -74,6 +74,24 @@ def test_write_snapshot_round_trips_usage_stats(tmp_path) -> None:
     assert dataset_from_dict(payload) == dataset
 
 
+def test_write_snapshot_round_trips_clay_roles(tmp_path) -> None:
+    roles = {"khalil shakir": "slot", "other guy": "outside"}
+    dataset = _mini_dataset()
+    dataset = SosDataset(
+        season=dataset.season,
+        fetched_at=dataset.fetched_at,
+        games=dataset.games,
+        schedule=dataset.schedule,
+        teams=dataset.teams,
+        clay_roles=roles,
+    )
+    target = tmp_path / "sos_2026.json"
+    write_snapshot(dataset, target)
+    payload = json.loads(target.read_text(encoding="utf-8"))
+    assert payload["clayRoles"]["khalil shakir"] == "slot"
+    assert dataset_from_dict(payload).clay_roles == dataset.clay_roles
+
+
 def test_dataset_from_dict_rejects_non_array_usage_stats() -> None:
     base = _mini_dataset()
     payload = {
