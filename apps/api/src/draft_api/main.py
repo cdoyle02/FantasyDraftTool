@@ -507,6 +507,46 @@ def strength_of_schedule(
         return error_response(status, code, str(exc))
 
 
+@app.get("/api/v1/nfl/strength-of-schedule/tier1", response_model=None)
+def strength_of_schedule_tier1(
+    position: str = "RB",
+    window: str = "l8",
+    startWeek: int | None = None,
+    endWeek: int | None = None,
+    season: int = 2026,
+) -> dict[str, Any] | JSONResponse:
+    """Team × week shrunk aFPA strength of schedule (Tier 1 rolling window)."""
+    from draft_api.sos.service import build_tier1_strength_of_schedule_response
+
+    position_key = position.upper()
+    window_key = window.lower()
+    if position_key not in ("QB", "RB", "WR", "TE", "DST"):
+        return error_response(
+            400,
+            "invalid_position",
+            f"position must be QB, RB, WR, TE, or DST (got {position!r})",
+        )
+    if window_key not in ("l4", "l8", "season"):
+        return error_response(
+            400,
+            "invalid_window",
+            f"window must be l4, l8, or season (got {window!r})",
+        )
+    try:
+        return build_tier1_strength_of_schedule_response(
+            position=position_key,  # type: ignore[arg-type]
+            window=window_key,  # type: ignore[arg-type]
+            start_week=startWeek,
+            end_week=endWeek,
+            season=season,
+            now=datetime.now(UTC),
+        )
+    except (NflverseError, ValueError) as exc:
+        status = 400 if isinstance(exc, ValueError) else 503
+        code = "domain_validation_error" if isinstance(exc, ValueError) else "sos_unavailable"
+        return error_response(status, code, str(exc))
+
+
 @app.get("/api/v1/nfl/workbook/matchups", response_model=None)
 def workbook_matchups(
     week: int,

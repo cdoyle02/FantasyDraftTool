@@ -8,7 +8,8 @@ from typing import Any
 
 from draft_api.nfl_week import fantasy_week_number, season_week1_tuesday_from_env
 from draft_api.odds.cache import TtlCache
-from draft_api.sos.calculate import Metric, Position, build_sos_payload, sos_payload_to_dict
+from draft_api.sos.calculate import Metric, Position, SosWindow, build_sos_payload, sos_payload_to_dict
+from draft_api.sos.tier1 import build_tier1_grid, tier1_payload_to_dict
 from draft_api.sos.nflverse import HttpGetter, NflverseError, SosDataset, load_sos_dataset
 from draft_api.sos.snapshot import SnapshotError, read_packaged_snapshot
 
@@ -107,3 +108,34 @@ def build_strength_of_schedule_response(
         "+00:00", "Z"
     )
     return sos_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
+
+
+def build_tier1_strength_of_schedule_response(
+    *,
+    position: Position,
+    window: SosWindow = "l8",
+    start_week: int | None = None,
+    end_week: int | None = None,
+    season: int = DEFAULT_SEASON,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    moment = now or datetime.now(timezone.utc)
+    default_start, default_end = _default_window(moment)
+    window_start = default_start if start_week is None else start_week
+    window_end = default_end if end_week is None else end_week
+
+    dataset, source, stale = resolve_dataset(season, now=moment)
+    payload = build_tier1_grid(
+        season=dataset.season,
+        position=position,
+        window=window,
+        start_week=window_start,
+        end_week=window_end,
+        games=dataset.games,
+        season_schedule=dataset.schedule,
+        teams=dataset.teams,
+    )
+    fetched_at = dataset.fetched_at or moment.astimezone(timezone.utc).isoformat().replace(
+        "+00:00", "Z"
+    )
+    return tier1_payload_to_dict(payload, fetched_at=fetched_at, source=source, stale=stale)
