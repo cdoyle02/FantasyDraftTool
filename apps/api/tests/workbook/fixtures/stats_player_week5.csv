@@ -1,6 +1,6 @@
-season,week,season_type,player_id,position,team,opponent_team,targets,receptions,receiving_yards,receiving_tds,carries,rushing_yards,rushing_tds,passing_yards,passing_tds,fantasy_points_ppr
-2026,5,REG,WR1,WR,KC,BUF,5,4,60,1,0,0,0,0,0,16.0
-2026,5,REG,WR2,WR,KC,BUF,3,2,15,0,0,0,0,0,0,5.5
-2026,5,REG,TE1,TE,KC,BUF,4,3,30,0,0,0,0,0,0,6.0
-2026,5,REG,RB1,RB,KC,BUF,2,1,8,0,15,80,1,0,0,17.3
-2026,5,REG,QB1,QB,KC,BUF,0,0,0,0,3,10,0,250,2,19.0
+season,week,season_type,player_id,player_display_name,position,team,opponent_team,targets,receptions,receiving_yards,receiving_tds,carries,rushing_yards,rushing_tds,passing_yards,passing_tds,fantasy_points_ppr
+2026,5,REG,WR1,Outside Receiver,WR,KC,BUF,5,4,60,1,0,0,0,0,0,16.0
+2026,5,REG,WR2,Slot Receiver,WR,KC,BUF,3,2,15,0,0,0,0,0,0,5.5
+2026,5,REG,TE1,Tight End,TE,KC,BUF,4,3,30,0,0,0,0,0,0,6.0
+2026,5,REG,RB1,Running Back,RB,KC,BUF,2,1,8,0,15,80,1,0,0,17.3
+2026,5,REG,QB1,Quarterback,QB,KC,BUF,0,0,0,0,3,10,0,250,2,19.0

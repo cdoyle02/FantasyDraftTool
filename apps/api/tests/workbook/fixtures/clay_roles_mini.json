@@ -1,0 +1,18 @@
+[
+  {
+    "team": "KC",
+    "name": "Outside Receiver",
+    "pos": "L",
+    "lwr_pct": 75,
+    "slot_pct": 12,
+    "rwr_pct": 13
+  },
+  {
+    "team": "KC",
+    "name": "Slot Receiver",
+    "pos": "S",
+    "lwr_pct": 10,
+    "slot_pct": 72,
+    "rwr_pct": 18
+  }
+]

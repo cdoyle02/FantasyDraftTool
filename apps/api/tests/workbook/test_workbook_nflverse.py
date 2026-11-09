@@ -1,23 +1,18 @@
-"""Parser tests for the Workbook nflverse loader (no network; fixture CSVs only).
-
-Fixture note: `fixtures/ftn_charting_week5.csv` includes a `receiver_alignment`
-column that the *real* public nflverse `ftn_charting` release does not ship
-(verified 2026-11-08 — see `nflverse.ALIGNMENT_COLUMN` docstring). It exists
-here purely to exercise the alignment join contract so Out/Slot WR wiring is
-ready the moment a real source provides that column.
-"""
+"""Parser tests for the Workbook nflverse loader (no network; fixture CSVs only)."""
 
 from __future__ import annotations
 
 import gzip
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 from draft_api.sos.nflverse import SCHEDULES_URL, STATS_URL
+from draft_api.workbook.clay_pdf import ClayWrRow
+from draft_api.workbook.roles import build_role_index
 from draft_api.workbook.calculate import drive_success_rate, pass_rate_over_expectation
 from draft_api.workbook.nflverse import (
-    FTN_CHARTING_URL,
     PBP_URL,
     WorkbookNflverseError,
     load_workbook_dataset,
@@ -35,6 +30,22 @@ def _fixture_bytes(name: str, *, gzipped: bool) -> bytes:
     return gzip.compress(raw) if gzipped else raw
 
 
+def _fixture_role_index() -> dict[str, str]:
+    raw = json.loads((FIXTURES / "clay_roles_mini.json").read_text())
+    rows = [
+        ClayWrRow(
+            team=item["team"],
+            name=item["name"],
+            pos=item["pos"],  # type: ignore[arg-type]
+            lwr_pct=item["lwr_pct"],
+            slot_pct=item["slot_pct"],
+            rwr_pct=item["rwr_pct"],
+        )
+        for item in raw
+    ]
+    return build_role_index(rows)
+
+
 def _fake_http_get(url: str) -> bytes:
     if url == PBP_URL.format(season=SEASON):
         return _fixture_bytes("pbp_week5.csv", gzipped=True)
@@ -42,14 +53,17 @@ def _fake_http_get(url: str) -> bytes:
         return _fixture_bytes("stats_player_week5.csv", gzipped=True)
     if url == SCHEDULES_URL:
         return _fixture_bytes("schedule.csv", gzipped=False)
-    if url == FTN_CHARTING_URL.format(season=SEASON):
-        return _fixture_bytes("ftn_charting_week5.csv", gzipped=False)
     raise AssertionError(f"Unexpected URL requested: {url}")
 
 
 def test_load_workbook_dataset_builds_env_drives_and_positional_rates() -> None:
     fixed_now = datetime(2026, 11, 8, 12, 0, tzinfo=UTC)
-    dataset = load_workbook_dataset(SEASON, http_get=_fake_http_get, now=fixed_now)
+    dataset = load_workbook_dataset(
+        SEASON,
+        http_get=_fake_http_get,
+        now=fixed_now,
+        role_index=_fixture_role_index(),
+    )
 
     assert dataset.season == SEASON
     assert dataset.fetched_at == "2026-11-08T12:00:00Z"
@@ -106,23 +120,23 @@ def test_load_workbook_dataset_builds_env_drives_and_positional_rates() -> None:
     te_off = dataset.positional_off["te"][("KC", 5)]
     assert te_off.rec_yards == pytest.approx(30.0)
 
-    # Out/Slot WR come from PBP + alignment join, not the weekly stats CSV.
+    # Out/Slot WR come from Clay roles + weekly stats (not PBP alignment).
     out_wr_off = dataset.positional_off["out_wr"][("KC", 5)]
-    assert out_wr_off.targets == pytest.approx(1.0)
-    assert out_wr_off.receptions == pytest.approx(1.0)
-    assert out_wr_off.rec_yards == pytest.approx(20.0)
-    assert out_wr_off.rec_tds == pytest.approx(0.0)
-    assert out_wr_off.fantasy_points == pytest.approx(3.0)  # 1 rec + 0.1*20yd PPR
+    assert out_wr_off.targets == pytest.approx(5.0)
+    assert out_wr_off.receptions == pytest.approx(4.0)
+    assert out_wr_off.rec_yards == pytest.approx(60.0)
+    assert out_wr_off.rec_tds == pytest.approx(1.0)
+    assert out_wr_off.fantasy_points == pytest.approx(16.0)
 
     slot_wr_off = dataset.positional_off["slot_wr"][("KC", 5)]
-    assert slot_wr_off.targets == pytest.approx(1.0)
-    assert slot_wr_off.rec_yards == pytest.approx(3.0)
-    assert slot_wr_off.fantasy_points == pytest.approx(1.3)
+    assert slot_wr_off.targets == pytest.approx(3.0)
+    assert slot_wr_off.rec_yards == pytest.approx(15.0)
+    assert slot_wr_off.fantasy_points == pytest.approx(3.5)
 
     out_wr_def = dataset.positional_def["out_wr"][("BUF", 5)]
-    assert out_wr_def.rec_yards == pytest.approx(20.0)
+    assert out_wr_def.rec_yards == pytest.approx(60.0)
     slot_wr_def = dataset.positional_def["slot_wr"][("BUF", 5)]
-    assert slot_wr_def.rec_yards == pytest.approx(3.0)
+    assert slot_wr_def.rec_yards == pytest.approx(15.0)
 
 
 def test_parse_alignment_csv_joins_on_nflverse_ids() -> None:

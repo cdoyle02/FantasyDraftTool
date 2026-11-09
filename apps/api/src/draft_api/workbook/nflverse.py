@@ -16,7 +16,7 @@ import io
 import urllib.error
 import urllib.request
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Literal
@@ -24,10 +24,10 @@ from zoneinfo import ZoneInfo
 
 from draft_api.sos.calculate import WEEKS
 from draft_api.sos.nflverse import SCHEDULES_URL, STATS_URL, parse_schedule_csv
-from draft_api.workbook.alignment import classify_wr_alignment
 from draft_api.workbook.calculate import DriveOutcome, PassPlay, TeamRateSlice
 from draft_api.workbook.fantasy import receiving_points
 from draft_api.workbook.identity import NFL_TEAMS, normalize_team
+from draft_api.workbook.roles import Role, lookup_role
 
 HttpGetter = Callable[[str], bytes]
 
@@ -76,7 +76,7 @@ USER_AGENT = (
 PositionalGroup = Literal["qb", "all_wr", "out_wr", "slot_wr", "te", "rb"]
 
 # nflverse `stats_player_week` `position` -> Workbook positional group.
-# Out/Slot WR are derived separately from PBP + alignment, not from this map.
+# Out/Slot WR buckets use Clay roles + WR weekly stats, not this map.
 _STAT_POSITION_GROUPS: dict[str, PositionalGroup] = {
     "QB": "qb",
     "WR": "all_wr",
@@ -294,9 +294,8 @@ def parse_positional_stats(
 ]:
     """Aggregate QB/ALL WR/TE/RB OFF-produced and DEF-allowed rates by team-week.
 
-    Also returns a `player_id -> position` map built from the same rows, used
-    by `parse_play_by_play` to resolve a PBP target's position for Out/Slot
-    WR classification without needing a separate roster join.
+    Also returns a `player_id -> position` map built from the same rows for
+    optional PBP joins.
     """
     reader = csv.DictReader(io.StringIO(text))
     _ensure_csv_headers(
@@ -359,6 +358,82 @@ def _bucket_by_group(
     for (group, team, week), bag in sums.items():
         out[group][(team, week)] = PositionalWeekRate(**bag)
     return dict(out)
+
+
+def _stats_row_bag(row: dict[str, str | None]) -> dict[str, float]:
+    return {
+        "targets": _parse_float(row.get("targets"), field="targets"),
+        "receptions": _parse_float(row.get("receptions"), field="receptions"),
+        "rec_yards": _parse_float(row.get("receiving_yards"), field="receiving_yards"),
+        "rec_tds": _parse_float(row.get("receiving_tds"), field="receiving_tds"),
+        "rush_att": _parse_float(row.get("carries"), field="carries"),
+        "rush_yards": _parse_float(row.get("rushing_yards"), field="rushing_yards"),
+        "rush_tds": _parse_float(row.get("rushing_tds"), field="rushing_tds"),
+        "pass_yards": _parse_float(row.get("passing_yards"), field="passing_yards"),
+        "pass_tds": _parse_float(row.get("passing_tds"), field="passing_tds"),
+        "fantasy_points": _parse_float(
+            row.get("fantasy_points_ppr"), field="fantasy_points_ppr"
+        ),
+    }
+
+
+def aggregate_out_slot_from_stats(
+    stats_rows: Iterable[dict[str, str | None]],
+    role_index: dict[str, Role],
+    *,
+    season: int,
+) -> tuple[
+    dict[str, dict[tuple[str, int], PositionalWeekRate]],
+    dict[str, dict[tuple[str, int], PositionalWeekRate]],
+]:
+    """Sum WR weekly stats into out_wr / slot_wr OFF and DEF buckets via Clay roles."""
+    out_wr_off: dict[tuple[str, int], dict[str, float]] = defaultdict(_empty_out_slot_sums)
+    out_wr_def: dict[tuple[str, int], dict[str, float]] = defaultdict(_empty_out_slot_sums)
+    slot_wr_off: dict[tuple[str, int], dict[str, float]] = defaultdict(_empty_out_slot_sums)
+    slot_wr_def: dict[tuple[str, int], dict[str, float]] = defaultdict(_empty_out_slot_sums)
+
+    for row in stats_rows:
+        row_season = _parse_int(row.get("season", ""))
+        if row_season is not None and row_season != season:
+            continue
+        if (row.get("season_type") or "").upper() not in ("REG", "REGULAR"):
+            continue
+        week = _parse_int(row.get("week", ""))
+        if week is None or week < 1 or week > 18:
+            continue
+        if (row.get("position") or "").upper() != "WR":
+            continue
+
+        display_name = (row.get("player_display_name") or row.get("player_name") or "").strip()
+        role = lookup_role(role_index, display_name)
+        if role is None:
+            continue
+
+        team = normalize_team(row.get("team") or "")
+        opponent = normalize_team(row.get("opponent_team") or "")
+        if not team or not opponent:
+            continue
+
+        bag = _stats_row_bag(row)
+        if role == "outside":
+            off_sums, def_sums = out_wr_off, out_wr_def
+        else:
+            off_sums, def_sums = slot_wr_off, slot_wr_def
+        off_bucket = off_sums[(team, week)]
+        def_bucket = def_sums[(opponent, week)]
+        for field_name, value in bag.items():
+            off_bucket[field_name] += value
+            def_bucket[field_name] += value
+
+    positional_off = {
+        "out_wr": _finalize_out_slot(out_wr_off),
+        "slot_wr": _finalize_out_slot(slot_wr_off),
+    }
+    positional_def = {
+        "out_wr": _finalize_out_slot(out_wr_def),
+        "slot_wr": _finalize_out_slot(slot_wr_def),
+    }
+    return positional_off, positional_def
 
 
 def parse_alignment_csv(text: str) -> dict[tuple[str, int], str]:
@@ -467,10 +542,6 @@ def parse_play_by_play(
     pass_plays: list[PassPlay] = []
     off_rates: dict[tuple[str, int], _RateAccumulator] = defaultdict(_RateAccumulator)
     def_rates: dict[tuple[str, int], _RateAccumulator] = defaultdict(_RateAccumulator)
-    out_wr_off: dict[tuple[str, int], dict[str, float]] = defaultdict(_empty_out_slot_sums)
-    out_wr_def: dict[tuple[str, int], dict[str, float]] = defaultdict(_empty_out_slot_sums)
-    slot_wr_off: dict[tuple[str, int], dict[str, float]] = defaultdict(_empty_out_slot_sums)
-    slot_wr_def: dict[tuple[str, int], dict[str, float]] = defaultdict(_empty_out_slot_sums)
 
     for row in reader:
         row_season = _parse_int(row.get("season"))
@@ -537,48 +608,6 @@ def parse_play_by_play(
                     off_acc.xplsv_run_n += 1
                     def_acc.xplsv_run_n += 1
 
-        # Out/Slot WR: only pass attempts with a known receiver are eligible.
-        receiver_id = row.get("receiver_player_id") or ""
-        if is_pass and receiver_id:
-            receiver_position = player_position.get(receiver_id)
-            game_id = row.get("game_id") or ""
-            play_id = _parse_int(row.get("play_id"))
-            alignment_raw = (
-                alignment_by_key.get((game_id, play_id)) if play_id is not None else None
-            )
-            alignment = classify_wr_alignment(
-                position=receiver_position or "", alignment_raw=alignment_raw
-            )
-            if alignment in ("outside", "slot"):
-                is_complete = _parse_bool(row.get("complete_pass"))
-                yards = (
-                    _parse_float(row.get("yards_gained"), field="yards_gained")
-                    if is_complete
-                    else 0.0
-                )
-                is_td = is_complete and _parse_bool(row.get("touchdown"))
-                bag = {
-                    "targets": 1.0,
-                    "receptions": 1.0 if is_complete else 0.0,
-                    "rec_yards": yards,
-                    "rec_tds": 1.0 if is_td else 0.0,
-                    "rush_att": 0.0,
-                    "rush_yards": 0.0,
-                    "rush_tds": 0.0,
-                    "pass_yards": 0.0,
-                    "pass_tds": 0.0,
-                    "fantasy_points": 0.0,
-                }
-                if alignment == "outside":
-                    off_sums, def_sums = out_wr_off, out_wr_def
-                else:
-                    off_sums, def_sums = slot_wr_off, slot_wr_def
-                off_bucket = off_sums[(posteam, week)]
-                def_bucket = def_sums[(defteam, week)]
-                for field_name, value in bag.items():
-                    off_bucket[field_name] += value
-                    def_bucket[field_name] += value
-
     drives = [
         DriveOutcome(team=team, week=week, success=state["success"])
         for (team, week, _drive_id), state in drive_state.items()
@@ -591,15 +620,11 @@ def parse_play_by_play(
         acc.to_slice(team=team, week=week, side="def") for (team, week), acc in def_rates.items()
     ]
 
-    positional_off = {
-        "out_wr": _finalize_out_slot(out_wr_off),
-        "slot_wr": _finalize_out_slot(slot_wr_off),
+    empty_out_slot: dict[str, dict[tuple[str, int], PositionalWeekRate]] = {
+        "out_wr": {},
+        "slot_wr": {},
     }
-    positional_def = {
-        "out_wr": _finalize_out_slot(out_wr_def),
-        "slot_wr": _finalize_out_slot(slot_wr_def),
-    }
-    return drives, pass_plays, team_env_off, team_env_def, positional_off, positional_def
+    return drives, pass_plays, team_env_off, team_env_def, empty_out_slot, empty_out_slot
 
 
 def _finalize_out_slot(
@@ -685,6 +710,7 @@ def load_workbook_dataset(
     *,
     http_get: HttpGetter | None = None,
     now: datetime | None = None,
+    role_index: dict[str, Role] | None = None,
 ) -> WorkbookDataset:
     """Download nflverse PBP + weekly stats + schedule and normalize them."""
     getter = http_get or default_http_get
@@ -694,7 +720,6 @@ def load_workbook_dataset(
         pbp_bytes = getter(PBP_URL.format(season=season))
         stats_bytes = getter(STATS_URL.format(season=season))
         schedule_bytes = getter(SCHEDULES_URL)
-        alignment_bytes = getter(FTN_CHARTING_URL.format(season=season))
     except WorkbookNflverseError:
         raise
     except Exception as exc:  # noqa: BLE001 - surface as WorkbookNflverseError
@@ -704,27 +729,30 @@ def load_workbook_dataset(
         pbp_text = _decode_csv_bytes(pbp_bytes)
         stats_text = _decode_csv_bytes(stats_bytes)
         schedule_text = schedule_bytes.decode("utf-8")
-        alignment_text = _decode_csv_bytes(alignment_bytes)
-
         positional_off, positional_def, player_position = parse_positional_stats(
             stats_text, season=season
         )
-        alignment_by_key = parse_alignment_csv(alignment_text)
+        stats_reader = csv.DictReader(io.StringIO(stats_text))
+        clay_off, clay_def = aggregate_out_slot_from_stats(
+            stats_reader,
+            role_index or {},
+            season=season,
+        )
         (
             drives,
             pass_plays,
             team_env_off,
             team_env_def,
-            out_slot_off,
-            out_slot_def,
+            _pbp_out_slot_off,
+            _pbp_out_slot_def,
         ) = parse_play_by_play(
             pbp_text,
             season=season,
             player_position=player_position,
-            alignment_by_key=alignment_by_key,
+            alignment_by_key={},
         )
-        positional_off = {**positional_off, **out_slot_off}
-        positional_def = {**positional_def, **out_slot_def}
+        positional_off = {**positional_off, **clay_off}
+        positional_def = {**positional_def, **clay_def}
 
         _validate_schedule_headers(schedule_text)
         team_week_schedule = parse_schedule_csv(schedule_text, season=season)
