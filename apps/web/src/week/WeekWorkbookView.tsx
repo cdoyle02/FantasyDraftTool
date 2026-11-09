@@ -1,8 +1,11 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { draftApi } from '../api/client'
 import type {
+  EspnLeague,
+  SosPosition,
   WorkbookExplainMetric,
   WorkbookExplainResponse,
+  WorkbookHighlight,
   WorkbookMatchupsResponse,
   WorkbookScoring,
   WorkbookSlate,
@@ -11,6 +14,39 @@ import type {
 } from './types'
 
 const WEEK_OPTIONS = Array.from({ length: 18 }, (_, i) => i + 1)
+/** Persisted ESPN league for highlight overlay (Week D/ST pattern). */
+export const WORKBOOK_LEAGUE_STORAGE_KEY = 'workbook-league-id'
+/** sessionStorage — SoS tab reads once on mount (`crossLink.position`). */
+const CROSS_LINK_POSITION_KEY = 'crossLink.position'
+/** sessionStorage — Workbook tab reads once on mount (`crossLink.week`). */
+const CROSS_LINK_WEEK_KEY = 'crossLink.week'
+
+export type WeekShellTab = 'week-sos' | 'week-workbook'
+
+export type WeekWorkbookViewProps = {
+  onNavigateTab?: (tab: WeekShellTab) => void
+}
+
+function sosPositionForMetric(metric: WorkbookExplainMetric): SosPosition {
+  switch (metric) {
+    case 'qb_fp':
+      return 'QB'
+    case 'rb_fp':
+      return 'RB'
+    case 'wr_fp':
+    case 'out_wr_fp':
+    case 'slot_wr_fp':
+      return 'WR'
+    case 'te_fp':
+      return 'TE'
+    default:
+      return 'RB'
+  }
+}
+
+function highlightTooltip(players: WorkbookHighlight[]): string {
+  return players.map((p) => `${p.displayName} (${p.role.replace('_', ' ')})`).join(', ')
+}
 
 /** Headline board columns. `explainMetric` is set when the `/workbook/explain`
  * endpoint can reconcile this cell (game-environment Comb/Diff have no single
@@ -104,8 +140,30 @@ function formatValue(value: number | null, decimals: number): string {
   return value.toFixed(decimals)
 }
 
-export function WeekWorkbookView() {
-  const [week, setWeek] = useState(10)
+export function WeekWorkbookView({ onNavigateTab }: WeekWorkbookViewProps = {}) {
+  const [week, setWeek] = useState(() => {
+    try {
+      const linked = sessionStorage.getItem(CROSS_LINK_WEEK_KEY)
+      if (linked) {
+        sessionStorage.removeItem(CROSS_LINK_WEEK_KEY)
+        const parsed = Number(linked)
+        if (parsed >= 1 && parsed <= 18) return parsed
+      }
+    } catch {
+      // private mode
+    }
+    return 10
+  })
+  const [leagues, setLeagues] = useState<EspnLeague[]>([])
+  const [leagueId, setLeagueId] = useState(() => {
+    try {
+      return localStorage.getItem(WORKBOOK_LEAGUE_STORAGE_KEY) ?? ''
+    } catch {
+      return ''
+    }
+  })
+  const [includeFa, setIncludeFa] = useState(true)
+  const [sosCrossPosition, setSosCrossPosition] = useState<SosPosition>('RB')
   const [window, setWindow] = useState<WorkbookWindow>('l4')
   const [customStart, setCustomStart] = useState(1)
   const [customEnd, setCustomEnd] = useState(17)
@@ -122,6 +180,35 @@ export function WeekWorkbookView() {
 
   useEffect(() => {
     let cancelled = false
+    const loadLeagues = async () => {
+      try {
+        const payload = await draftApi.espnLeagues()
+        if (cancelled) return
+        const list = payload.leagues ?? []
+        setLeagues(list)
+        if (!leagueId && list[0]) {
+          setLeagueId(list[0].id)
+        }
+      } catch {
+        // board works without league list
+      }
+    }
+    void loadLeagues()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      if (leagueId) localStorage.setItem(WORKBOOK_LEAGUE_STORAGE_KEY, leagueId)
+    } catch {
+      // ignore quota / private mode
+    }
+  }, [leagueId])
+
+  useEffect(() => {
+    let cancelled = false
     const load = async () => {
       setLoading(true)
       setError('')
@@ -132,7 +219,9 @@ export function WeekWorkbookView() {
           scoring,
           slate,
           startWeek: window === 'custom' ? customStart : undefined,
-          endWeek: window === 'custom' ? customEnd : undefined
+          endWeek: window === 'custom' ? customEnd : undefined,
+          leagueId: leagueId || undefined,
+          includeFa
         })
         if (cancelled) return
         setData(payload)
@@ -148,7 +237,7 @@ export function WeekWorkbookView() {
     return () => {
       cancelled = true
     }
-  }, [week, window, scoring, slate, customStart, customEnd])
+  }, [week, window, scoring, slate, customStart, customEnd, leagueId, includeFa])
 
   const allRows = useMemo(() => data?.games.flatMap((game) => game.rows) ?? [], [data])
   const pools = useMemo(() => {
@@ -159,7 +248,27 @@ export function WeekWorkbookView() {
     return result
   }, [allRows])
 
+  const highlightsByTeam = useMemo(() => {
+    const map = new Map<string, WorkbookHighlight[]>()
+    for (const entry of data?.highlights ?? []) {
+      const list = map.get(entry.matchupTeam) ?? []
+      list.push(entry)
+      map.set(entry.matchupTeam, list)
+    }
+    return map
+  }, [data?.highlights])
+
+  const goToSos = () => {
+    try {
+      sessionStorage.setItem(CROSS_LINK_POSITION_KEY, sosCrossPosition)
+    } catch {
+      // private mode
+    }
+    onNavigateTab?.('week-sos')
+  }
+
   const openExplain = (team: string, metric: WorkbookExplainMetric, label: string) => {
+    setSosCrossPosition(sosPositionForMetric(metric))
     setExplainTarget({ team, metric, label })
     setExplainData(null)
     setExplainError('')
@@ -308,6 +417,34 @@ export function WeekWorkbookView() {
               <option value="all">All games</option>
             </select>
           </label>
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-muted">
+            League
+            <select
+              data-testid="workbook-league-select"
+              className="rounded-lg border border-line bg-ink px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-100"
+              value={leagueId}
+              onChange={(event) => setLeagueId(event.target.value)}
+            >
+              <option value="">No ESPN overlay</option>
+              {(leagues ?? []).map((league) => (
+                <option key={league.id} value={league.id}>
+                  {league.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {leagueId && (
+            <label className="flex items-center gap-2 pb-2 text-xs text-muted">
+              <input
+                type="checkbox"
+                data-testid="workbook-include-fa"
+                className="rounded border-line"
+                checked={includeFa}
+                onChange={(event) => setIncludeFa(event.target.checked)}
+              />
+              Include FA
+            </label>
+          )}
         </div>
       </section>
 
@@ -324,6 +461,12 @@ export function WeekWorkbookView() {
         >
           Showing a packaged snapshot — live nflverse data was unreachable. Numbers may be out of date.
         </div>
+      )}
+
+      {data?.overlayError && leagueId && (
+        <p className="rounded-lg border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-xs text-amber-100">
+          ESPN highlights unavailable — showing the Net board only.
+        </p>
       )}
 
       <section className="panel overflow-hidden">
@@ -365,6 +508,15 @@ export function WeekWorkbookView() {
                         <span className="ml-1 text-[9px] font-semibold text-muted">
                           {row.homeAway === 'home' ? 'HOME' : 'AWAY'}
                         </span>
+                        {(highlightsByTeam.get(row.team)?.length ?? 0) > 0 && (
+                          <span
+                            data-testid={`workbook-highlight-badge-${row.team}`}
+                            className="ml-1.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-mint/20 px-1 text-[9px] font-black text-mint"
+                            title={highlightTooltip(highlightsByTeam.get(row.team) ?? [])}
+                          >
+                            {highlightsByTeam.get(row.team)?.length}
+                          </span>
+                        )}
                       </td>
                       <td className="px-2 py-1.5 text-muted">{row.opponent}</td>
                       {COLUMNS.map((column) => {
@@ -458,6 +610,22 @@ export function WeekWorkbookView() {
           {data.attribution}
         </p>
       )}
+
+      <div className="flex flex-wrap items-center gap-3 px-1">
+        <button
+          type="button"
+          data-testid="workbook-sos-cross-link"
+          className="text-xs font-semibold text-mint hover:underline"
+          onClick={goToSos}
+        >
+          See season SoS for {sosCrossPosition}
+        </button>
+        {leagueId && (data?.joinStats?.matched ?? 0) > 0 && (
+          <span className="text-[10px] text-muted">
+            {data?.joinStats?.matched} ESPN player{data?.joinStats?.matched === 1 ? '' : 's'} matched this week
+          </span>
+        )}
+      </div>
     </div>
   )
 }

@@ -140,14 +140,52 @@ describe('WeekWorkbookView', () => {
         const parsed = new URL(url, 'http://localhost')
         const params = parsed.searchParams
 
+        if (parsed.pathname === '/api/v1/espn/leagues') {
+          return new Response(
+            JSON.stringify({
+              leagues: [
+                { id: '1216398267', name: 'Girls Who Ball' },
+                { id: '999', name: 'Other' }
+              ]
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+
         if (parsed.pathname === '/api/v1/nfl/workbook/matchups') {
+          const leagueId = params.get('leagueId')
           return new Response(
             JSON.stringify(
               buildPayload({
                 week: Number(params.get('week') ?? 10),
                 window: (params.get('window') as WorkbookMatchupsResponse['window']) ?? 'l4',
                 scoring: (params.get('scoring') as WorkbookMatchupsResponse['scoring']) ?? 'ppr',
-                slate: (params.get('slate') as WorkbookMatchupsResponse['slate']) ?? 'main'
+                slate: (params.get('slate') as WorkbookMatchupsResponse['slate']) ?? 'main',
+                ...(leagueId
+                  ? {
+                      highlights: [
+                        {
+                          playerId: 1,
+                          displayName: 'Player A',
+                          nflTeam: 'AAA',
+                          matchupTeam: 'AAA',
+                          opponent: 'BBB',
+                          role: 'roster' as const,
+                          rosterSlot: 'WR'
+                        },
+                        {
+                          playerId: 2,
+                          displayName: 'Player B',
+                          nflTeam: 'AAA',
+                          matchupTeam: 'AAA',
+                          opponent: 'BBB',
+                          role: 'free_agent' as const,
+                          rosterSlot: null
+                        }
+                      ],
+                      joinStats: { matched: 2, unmatched_team: 0, unmatched_name_only: 0 }
+                    }
+                  : {})
               })
             ),
             { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -191,12 +229,22 @@ describe('WeekWorkbookView', () => {
   })
 
   it('shows a stale banner when the API falls back to a snapshot', async () => {
-    vi.mocked(fetch).mockImplementationOnce(async () =>
-      new Response(JSON.stringify(buildPayload({ stale: true, source: 'snapshot' })), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      })
-    )
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.includes('/espn/leagues')) {
+        return new Response(JSON.stringify({ leagues: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+      if (url.includes('/workbook/matchups')) {
+        return new Response(JSON.stringify(buildPayload({ stale: true, source: 'snapshot' })), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+      throw new Error(`Unexpected fetch: ${url}`)
+    })
     render(<WeekWorkbookView />)
     await waitFor(() => {
       expect(screen.getByTestId('workbook-stale-banner')).toBeInTheDocument()
@@ -260,5 +308,50 @@ describe('WeekWorkbookView', () => {
     expect(screen.getByTestId('workbook-explain-panel')).toHaveTextContent('20.1')
     expect(screen.getByTestId('workbook-explain-panel')).toHaveTextContent('16.3')
     expect(screen.getByTestId('workbook-explain-panel')).toHaveTextContent('18.2')
+  })
+
+  it('loads ESPN leagues, refetches with leagueId, and shows highlight badges', async () => {
+    render(<WeekWorkbookView />)
+    await waitFor(() => expect(screen.getByTestId('workbook-league-select')).toBeInTheDocument())
+
+    fireEvent.change(screen.getByTestId('workbook-league-select'), {
+      target: { value: '1216398267' }
+    })
+    await waitFor(() => {
+      const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+      expect(calls.some((url) => url.includes('leagueId=1216398267'))).toBe(true)
+    })
+    await waitFor(() => {
+      expect(screen.getByTestId('workbook-highlight-badge-AAA')).toHaveTextContent('2')
+    })
+    expect(screen.getByTestId('workbook-highlight-badge-AAA')).toHaveAttribute(
+      'title',
+      expect.stringContaining('Player A')
+    )
+  })
+
+  it('cross-links to SoS with position in sessionStorage', async () => {
+    const navigate = vi.fn()
+    sessionStorage.clear()
+    render(<WeekWorkbookView onNavigateTab={navigate} />)
+    await waitFor(() => expect(screen.getByTestId('workbook-table')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByTestId('workbook-cell-AAA-qb'))
+    fireEvent.click(screen.getByTestId('workbook-sos-cross-link'))
+
+    expect(sessionStorage.getItem('crossLink.position')).toBe('QB')
+    expect(navigate).toHaveBeenCalledWith('week-sos')
+  })
+
+  it('applies week from sessionStorage on mount', async () => {
+    sessionStorage.setItem('crossLink.week', '12')
+    render(<WeekWorkbookView />)
+    await waitFor(() => {
+      const calls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]))
+      expect(calls.some((url) => url.includes('/workbook/matchups') && url.includes('week=12'))).toBe(
+        true
+      )
+    })
+    expect(sessionStorage.getItem('crossLink.week')).toBeNull()
   })
 })

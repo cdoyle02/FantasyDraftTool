@@ -361,6 +361,9 @@ export class DraftApiClient {
     const query = DraftApiClient.workbookWindowQuery(params)
     query.set('week', String(params.week))
     query.set('slate', params.slate)
+    if (params.leagueId) query.set('leagueId', params.leagueId)
+    if (params.ownerTeamId != null) query.set('ownerTeamId', String(params.ownerTeamId))
+    if (params.includeFa === false) query.set('includeFa', 'false')
     return this.request<WorkbookMatchupsResponse>(
       `/api/v1/nfl/workbook/matchups?${query}`,
       { method: 'GET' },

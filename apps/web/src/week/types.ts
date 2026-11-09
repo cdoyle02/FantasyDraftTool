@@ -236,6 +236,24 @@ export interface WorkbookGame {
   rows: WorkbookTeamRow[]
 }
 
+export type WorkbookHighlightRole = 'roster' | 'free_agent' | 'waiver'
+
+export interface WorkbookHighlight {
+  playerId: number
+  displayName: string
+  nflTeam: string
+  matchupTeam: string
+  opponent: string
+  role: WorkbookHighlightRole
+  rosterSlot: string | null
+}
+
+export interface WorkbookJoinStats {
+  matched: number
+  unmatched_team: number
+  unmatched_name_only: number
+}
+
 export interface WorkbookMatchupsResponse {
   season: number
   week: number
@@ -248,6 +266,9 @@ export interface WorkbookMatchupsResponse {
   stale: boolean
   attribution: string
   games: WorkbookGame[]
+  highlights?: WorkbookHighlight[]
+  joinStats?: WorkbookJoinStats
+  overlayError?: string
 }
 
 export interface WorkbookMatchupsQuery {
@@ -258,6 +279,9 @@ export interface WorkbookMatchupsQuery {
   startWeek?: number
   endWeek?: number
   season?: number
+  leagueId?: string
+  ownerTeamId?: number
+  includeFa?: boolean
 }
 
 export interface WorkbookFeederRow {
