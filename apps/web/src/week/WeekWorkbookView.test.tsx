@@ -27,8 +27,8 @@ function buildRow(overrides: Partial<WorkbookTeamRow> = {}): WorkbookTeamRow {
     },
     qb: { fpGTot: 18.2, fpGPass: 14.1, fpGRun: 4.1, ydsG: 265, passTdG: 1.8 },
     allWr: { fpG: 12.0, tarG: 7.1, tarPct: 0.22, ydG: 65, tdG: 0.4 },
-    outWr: { fpG: null, reason: 'insufficient_alignment_sample' },
-    slotWr: { fpG: null, reason: 'insufficient_alignment_sample' },
+    outWr: { fpG: null, reason: 'clay_unavailable' },
+    slotWr: { fpG: null, reason: 'clay_unavailable' },
     te: { fpG: 8.5, tarG: 4.2, tarPct: 0.15, ydG: 40, tdG: 0.3 },
     rb: {
       fpGTot: 15.0,

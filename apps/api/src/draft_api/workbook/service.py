@@ -55,17 +55,16 @@ DEFAULT_SEASON = 2026
 _CHICAGO_TZ = ZoneInfo("America/Chicago")
 
 ATTRIBUTION = (
-    "Computed by FantasyDraftTool from nflverse + odds. Methodology inspired by "
-    "Majesstik/OWS Workbook; not their sheet."
+    "Computed by FantasyDraftTool from nflverse + odds. Out/Slot roles from ESPN "
+    "Mike Clay WR/CB cheat sheet (role-based); stats from nflverse. Methodology "
+    "inspired by Majesstik/OWS Workbook; not their sheet."
 )
 
-# Out/Slot alignment is a deferred data source (Task 5.5): the public nflverse
-# `ftn_charting` release has no per-target alignment column, so these buckets
-# are typically empty today. Rather than show a Net built on zero samples,
-# require at least this many team-weeks of OFF *and* DEF alignment data in
-# the window before trusting Out/Slot — otherwise return null + the reason.
-_MIN_ALIGNMENT_SAMPLE_GAMES = 1
-_ALIGNMENT_INSUFFICIENT_REASON = "insufficient_alignment_sample"
+# Out/Slot WR uses Clay role aggregation + nflverse weekly stats. Rather than
+# show a Net built on zero samples, require at least this many team-weeks of OFF
+# *and* DEF data in the window — otherwise return null + reason.
+_MIN_CLAY_SAMPLE_GAMES = 1
+_CLAY_INSUFFICIENT_REASON = "clay_unavailable"
 
 _SCORINGS: tuple[str, ...] = ("ppr", "half_ppr")
 _WINDOWS: tuple[str, ...] = ("l4", "season", "custom")
@@ -145,8 +144,19 @@ def resolve_dataset(
     if cached is not None and cached.season == season:
         return cached, "nflverse", False
 
+    previous_clay_roles: dict[str, str] | None = None
     try:
-        dataset = load_workbook_dataset(season, http_get=_http_get_override, now=now)
+        previous_clay_roles = read_packaged_snapshot(season).clay_roles or None
+    except SnapshotError:
+        previous_clay_roles = None
+
+    try:
+        dataset = load_workbook_dataset(
+            season,
+            http_get=_http_get_override,
+            now=now,
+            previous_clay_roles=previous_clay_roles,
+        )
         _dataset_cache.set(dataset)
         return dataset, "nflverse", False
     except WorkbookNflverseError as exc:
@@ -349,7 +359,7 @@ def _positional_block(
     opponent: str,
     weeks: set[int],
     scoring: Scoring,
-    alignment_gated: bool = False,
+    clay_role_gated: bool = False,
 ) -> dict[str, Any]:
     off_summed, off_games = _sum_group_rates(
         dataset, side="off", group=group, team=team, weeks=weeks
@@ -358,10 +368,10 @@ def _positional_block(
         dataset, side="def", group=group, team=opponent, weeks=weeks
     )
 
-    if alignment_gated and (
-        off_games < _MIN_ALIGNMENT_SAMPLE_GAMES or def_games < _MIN_ALIGNMENT_SAMPLE_GAMES
+    if clay_role_gated and (
+        off_games < _MIN_CLAY_SAMPLE_GAMES or def_games < _MIN_CLAY_SAMPLE_GAMES
     ):
-        return {"fpG": None, "reason": _ALIGNMENT_INSUFFICIENT_REASON}
+        return {"fpG": None, "reason": _CLAY_INSUFFICIENT_REASON}
 
     off_total_targets = _team_total_targets(dataset, side="off", team=team, weeks=weeks)
     def_total_targets = _team_total_targets(dataset, side="def", team=opponent, weeks=weeks)
@@ -446,7 +456,7 @@ def _build_team_row(
             opponent=opponent,
             weeks=weeks,
             scoring=scoring,
-            alignment_gated=True,
+            clay_role_gated=True,
         ),
         "slotWr": _positional_block(
             dataset,
@@ -455,7 +465,7 @@ def _build_team_row(
             opponent=opponent,
             weeks=weeks,
             scoring=scoring,
-            alignment_gated=True,
+            clay_role_gated=True,
         ),
         "te": _positional_block(
             dataset, group="te", team=team, opponent=opponent, weeks=weeks, scoring=scoring
@@ -707,8 +717,8 @@ def _explain_metric(
     )
     off_value = off_metrics.get(headline)
 
-    alignment_gated = group in ("out_wr", "slot_wr")
-    if alignment_gated and off_games < _MIN_ALIGNMENT_SAMPLE_GAMES:
+    clay_role_gated = group in ("out_wr", "slot_wr")
+    if clay_role_gated and off_games < _MIN_CLAY_SAMPLE_GAMES:
         return None, None, None
 
     if opponent is None:
@@ -717,7 +727,7 @@ def _explain_metric(
     def_summed, def_games = _sum_group_rates(
         dataset, side="def", group=group, team=opponent, weeks=weeks
     )
-    if alignment_gated and def_games < _MIN_ALIGNMENT_SAMPLE_GAMES:
+    if clay_role_gated and def_games < _MIN_CLAY_SAMPLE_GAMES:
         return None, None, None
 
     def_total_targets = _team_total_targets(dataset, side="def", team=opponent, weeks=weeks)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 
 import pytest
 
@@ -71,6 +72,16 @@ def test_write_snapshot_round_trips_workbook_dataset(tmp_path) -> None:
 
     payload = json.loads(target.read_text(encoding="utf-8"))
     assert dataset_from_dict(payload) == dataset
+
+
+def test_snapshot_round_trips_clay_roles(tmp_path) -> None:
+    roles = {"khalil shakir": "slot", "jamarr chase": "outside"}
+    dataset = replace(_synthetic_dataset(), clay_roles=roles)
+    target = tmp_path / "workbook_2026.json"
+    write_snapshot(target, dataset)
+    payload = json.loads(target.read_text(encoding="utf-8"))
+    assert payload["clayRoles"]["khalil shakir"] == "slot"
+    assert dataset_from_dict(payload).clay_roles == dataset.clay_roles
 
 
 def test_read_packaged_snapshot_loads_slim_2026_dataset() -> None:

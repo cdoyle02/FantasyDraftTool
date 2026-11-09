@@ -6,6 +6,7 @@ fixture dataset (no network, no FastAPI route — those land in Task 8).
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime
 
 import pytest
@@ -57,10 +58,11 @@ def _fixture_dataset() -> WorkbookDataset:
         {("BBB", w): _wr(targets=6, receptions=4, rec_yards=40, rec_tds=0) for w in (6, 7, 8, 9)}
     )
 
-    # One week of Out WR OFF (AAA) + DEF (BBB) data — enough to clear the
-    # alignment sample threshold and prove the "has data" path still works.
+    # One week of Out/Slot WR OFF (AAA) + DEF (BBB) — clears Clay sample threshold.
     out_wr_off = {("AAA", 6): _wr(targets=2, receptions=1, rec_yards=20, rec_tds=0)}
     out_wr_def = {("BBB", 6): _wr(targets=2, receptions=1, rec_yards=15, rec_tds=0)}
+    slot_wr_off = {("AAA", 6): _wr(targets=3, receptions=2, rec_yards=15, rec_tds=0)}
+    slot_wr_def = {("BBB", 6): _wr(targets=3, receptions=2, rec_yards=10, rec_tds=0)}
 
     return WorkbookDataset(
         season=SEASON,
@@ -72,8 +74,16 @@ def _fixture_dataset() -> WorkbookDataset:
         pass_plays=[],
         team_env_off=[],
         team_env_def=[],
-        positional_off={"all_wr": all_wr_off, "out_wr": out_wr_off},
-        positional_def={"all_wr": all_wr_def, "out_wr": out_wr_def},
+        positional_off={
+            "all_wr": all_wr_off,
+            "out_wr": out_wr_off,
+            "slot_wr": slot_wr_off,
+        },
+        positional_def={
+            "all_wr": all_wr_def,
+            "out_wr": out_wr_def,
+            "slot_wr": slot_wr_def,
+        },
     )
 
 
@@ -109,6 +119,7 @@ def test_matchups_response_shape_and_rated_through_week() -> None:
     assert body["source"] == "fixture"
     assert body["stale"] is False
     assert "Majesstik/OWS Workbook" in body["attribution"]
+    assert "Mike Clay" in body["attribution"]
     assert len(body["games"]) == 2  # AAA/BBB (Sunday) + CCC/DDD (Monday)
 
     row = _aaa_row(body)
@@ -180,13 +191,22 @@ def test_slate_main_drops_monday_night_game() -> None:
     assert monday_game["mainSlate"] is False
 
 
-def test_out_wr_null_with_reason_when_sample_thin() -> None:
+def _fixture_without_slot_wr() -> WorkbookDataset:
+    base = _fixture_dataset()
+    return replace(
+        base,
+        positional_off={k: v for k, v in base.positional_off.items() if k != "slot_wr"},
+        positional_def={k: v for k, v in base.positional_def.items() if k != "slot_wr"},
+    )
+
+
+def test_slot_wr_null_with_reason_when_sample_thin() -> None:
+    set_workbook_dataset_override(_fixture_without_slot_wr())
     body = build_matchups_response(
         week=WEEK, window="l4", scoring="ppr", slate="all", season=SEASON
     )
     row = _aaa_row(body)
-    # Slot WR has zero alignment samples anywhere in the fixture.
-    assert row["slotWr"] == {"fpG": None, "reason": "insufficient_alignment_sample"}
+    assert row["slotWr"] == {"fpG": None, "reason": "clay_unavailable"}
 
 
 def test_out_wr_computes_net_when_sample_sufficient() -> None:
@@ -194,9 +214,17 @@ def test_out_wr_computes_net_when_sample_sufficient() -> None:
         week=WEEK, window="l4", scoring="ppr", slate="all", season=SEASON
     )
     row = _aaa_row(body)
-    # One week of OFF + DEF Out WR data clears the P0 "has a sample" bar.
     assert "reason" not in row["outWr"]
     assert row["outWr"]["fpG"] == pytest.approx(2.75)
+
+
+def test_slot_wr_computes_net_when_sample_sufficient() -> None:
+    body = build_matchups_response(
+        week=WEEK, window="l4", scoring="ppr", slate="all", season=SEASON
+    )
+    row = _aaa_row(body)
+    assert "reason" not in row["slotWr"]
+    assert row["slotWr"]["fpG"] == pytest.approx(3.25)
 
 
 def test_vegas_implied_points_null_without_odds_and_set_with_odds() -> None:
@@ -298,7 +326,8 @@ def test_feeder_response_rejects_unknown_group() -> None:
         build_feeder_response(group="bogus", window="l4", scoring="ppr", week=WEEK, season=SEASON)
 
 
-def test_explain_slot_wr_all_none_when_alignment_sample_thin() -> None:
+def test_explain_slot_wr_all_none_when_clay_sample_thin() -> None:
+    set_workbook_dataset_override(_fixture_without_slot_wr())
     explain = build_explain_response(
         team="AAA", week=WEEK, metric="slot_wr_fp", window="l4", scoring="ppr", season=SEASON
     )
@@ -309,7 +338,7 @@ def test_explain_slot_wr_all_none_when_alignment_sample_thin() -> None:
     matchups = build_matchups_response(
         week=WEEK, window="l4", scoring="ppr", slate="all", season=SEASON
     )
-    assert _aaa_row(matchups)["slotWr"] == {"fpG": None, "reason": "insufficient_alignment_sample"}
+    assert _aaa_row(matchups)["slotWr"] == {"fpG": None, "reason": "clay_unavailable"}
 
 
 def test_explain_response_net_matches_matchups_net() -> None:

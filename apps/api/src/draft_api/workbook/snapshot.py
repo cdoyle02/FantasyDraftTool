@@ -124,8 +124,24 @@ def _scheduled_game_from_dict(payload: dict[str, Any]) -> ScheduledGame:
     )
 
 
+def _clay_roles_to_dict(roles: dict[str, str]) -> dict[str, str]:
+    return {str(name): str(role) for name, role in sorted(roles.items())}
+
+
+def _clay_roles_from_dict(payload: Any) -> dict[str, str]:
+    raw = payload or {}
+    if not isinstance(raw, dict):
+        raise SnapshotError("clayRoles must be a JSON object")
+    out: dict[str, str] = {}
+    for name, role in raw.items():
+        if role not in ("slot", "outside"):
+            raise SnapshotError(f"invalid Clay role {role!r} for {name!r}")
+        out[str(name)] = str(role)
+    return out
+
+
 def dataset_to_dict(dataset: WorkbookDataset) -> dict[str, Any]:
-    return {
+    payload: dict[str, Any] = {
         "season": dataset.season,
         "fetchedAt": dataset.fetched_at,
         "teams": list(dataset.teams),
@@ -152,6 +168,9 @@ def dataset_to_dict(dataset: WorkbookDataset) -> dict[str, Any]:
         "positionalOff": _positional_buckets_to_dict(dataset.positional_off),
         "positionalDef": _positional_buckets_to_dict(dataset.positional_def),
     }
+    if dataset.clay_roles:
+        payload["clayRoles"] = _clay_roles_to_dict(dataset.clay_roles)
+    return payload
 
 
 def dataset_from_dict(payload: Any) -> WorkbookDataset:
@@ -201,6 +220,7 @@ def dataset_from_dict(payload: Any) -> WorkbookDataset:
             positional_def=_positional_buckets_from_dict(
                 payload.get("positionalDef") or {}
             ),
+            clay_roles=_clay_roles_from_dict(payload.get("clayRoles")),
         )
     except (KeyError, TypeError, ValueError) as exc:
         raise SnapshotError("packaged snapshot has invalid Workbook shape") from exc

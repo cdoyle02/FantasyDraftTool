@@ -13,6 +13,7 @@ from __future__ import annotations
 import csv
 import gzip
 import io
+import logging
 import urllib.error
 import urllib.request
 from collections import defaultdict
@@ -27,9 +28,12 @@ from draft_api.sos.nflverse import SCHEDULES_URL, STATS_URL, parse_schedule_csv
 from draft_api.workbook.calculate import DriveOutcome, PassPlay, TeamRateSlice
 from draft_api.workbook.fantasy import receiving_points
 from draft_api.workbook.identity import NFL_TEAMS, normalize_team
-from draft_api.workbook.roles import Role, lookup_role
+from draft_api.workbook.clay_pdf import ClayPdfError, load_clay_wr_rows
+from draft_api.workbook.roles import Role, build_role_index, lookup_role, merge_last_known
 
 HttpGetter = Callable[[str], bytes]
+
+logger = logging.getLogger("fantasy_draft_api.workbook.nflverse")
 
 # Confirmed via `GET /repos/nflverse/nflverse-data/releases/tags/pbp` asset
 # listing (2026-11-08): `play_by_play_{season}.csv.gz` exists for every
@@ -205,6 +209,7 @@ class WorkbookDataset:
     positional_off: dict[str, dict[tuple[str, int], PositionalWeekRate]]
     positional_def: dict[str, dict[tuple[str, int], PositionalWeekRate]]
     games: list[ScheduledGame] = field(default_factory=list)
+    clay_roles: dict[str, Role] = field(default_factory=dict)
 
 
 def default_http_get(url: str) -> bytes:
@@ -705,12 +710,32 @@ def _invert_schedule(
     return by_week
 
 
+def _resolve_clay_role_index(
+    season: int,
+    *,
+    http_get: HttpGetter,
+    role_index: dict[str, Role] | None,
+    previous_clay_roles: dict[str, Role] | None,
+) -> dict[str, Role]:
+    """Load Clay roles for the week, merging with last-known snapshot cache."""
+    if role_index is not None:
+        return role_index
+    try:
+        clay_rows = load_clay_wr_rows(season, http_get=http_get)
+        current = build_role_index(clay_rows)
+        return merge_last_known(current, previous_clay_roles)
+    except ClayPdfError as exc:
+        logger.warning("Clay WR role sheet unavailable; using cached roles if any: %s", exc)
+        return merge_last_known({}, previous_clay_roles)
+
+
 def load_workbook_dataset(
     season: int,
     *,
     http_get: HttpGetter | None = None,
     now: datetime | None = None,
     role_index: dict[str, Role] | None = None,
+    previous_clay_roles: dict[str, Role] | None = None,
 ) -> WorkbookDataset:
     """Download nflverse PBP + weekly stats + schedule and normalize them."""
     getter = http_get or default_http_get
@@ -732,10 +757,16 @@ def load_workbook_dataset(
         positional_off, positional_def, player_position = parse_positional_stats(
             stats_text, season=season
         )
+        resolved_roles = _resolve_clay_role_index(
+            season,
+            http_get=getter,
+            role_index=role_index,
+            previous_clay_roles=previous_clay_roles,
+        )
         stats_reader = csv.DictReader(io.StringIO(stats_text))
         clay_off, clay_def = aggregate_out_slot_from_stats(
             stats_reader,
-            role_index or {},
+            resolved_roles,
             season=season,
         )
         (
@@ -776,4 +807,5 @@ def load_workbook_dataset(
         positional_off=positional_off,
         positional_def=positional_def,
         games=scheduled_games,
+        clay_roles=resolved_roles,
     )

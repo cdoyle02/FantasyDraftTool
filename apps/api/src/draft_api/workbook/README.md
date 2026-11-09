@@ -76,7 +76,7 @@ Each `games[].rows[]` entry (`build_matchups_response`) is one team in a schedul
 | DSR Diff | `gameEnvironment.netDsrDiff` | — | Team `netDsr` − opponent `netDsr` |
 | QB | `qb.fpGTot` | `qb_fp` | Full positional block available via API; board shows headline only |
 | ALL WR | `allWr.fpG` | `wr_fp` | |
-| Out WR | `outWr.fpG` | `out_wr_fp` | `reason: insufficient_alignment_sample` when alignment sample is thin |
+| Out WR | `outWr.fpG` | `out_wr_fp` | `reason: clay_unavailable` when Clay role sample is thin |
 | Slot WR | `slotWr.fpG` | `slot_wr_fp` | Same gating as Out WR |
 | TE | `te.fpG` | `te_fp` | |
 | RB | `rb.fpGTot` | `rb_fp` | |
@@ -143,28 +143,38 @@ honored:
 (`_team_total_targets`) — QB has no `tarPct`. Out WR / Slot WR targets are a
 subset of ALL WR and are **not** double-counted in that denominator.
 
-### Out / Slot WR — deferred alignment source (P0)
+### Out / Slot WR — Mike Clay role method (P0.5)
 
-The public nflverse `ftn_charting` release has no per-target alignment
-column (verified against the live 2025 CSV — see `workbook/nflverse.py`'s
-module docstring and `docs/superpowers/specs/2026-11-08-workbook-alignment-source-research.md`).
-Classification (`classify_wr_alignment`) and the join path
-(`ALIGNMENT_COLUMN = "receiver_alignment"`, keyed on
-`nflverse_game_id`/`nflverse_play_id`) are ready; they simply have no data to
-classify today.
+**Source:** ESPN CDN Mike Clay WR/CB cheat sheet PDF
+(`https://g.espncdn.com/s/ffldraftkit/{yy}/NFL{yy}_CS_WRCB.pdf`), parsed in
+`workbook/clay_pdf.py`. **Role:** slot-primary when `Slot% ≥ 45`, else when Clay
+`Pos=S`, else outside-primary (`workbook/roles.py`). Team codes `ARZ→ARI`,
+`BLT→BAL`, `CLV→CLE`, `HST→HOU` before `normalize_team`.
 
-Rather than show a Net built on a near-zero sample, the service layer
-requires **at least `_MIN_ALIGNMENT_SAMPLE_GAMES` (currently 1) team-weeks of
-both the OFF and DEF leg** in the window before computing Out/Slot WR. Below
-that, the block is:
+**Join:** `normalize_player_name` on Clay names ↔ nflverse
+`player_display_name`. Unlisted WRs stay in ALL WR only — never forced into
+Out/Slot.
+
+**Aggregate:** `aggregate_out_slot_from_stats` sums receiving targets/yards/TDs
+and PPR fantasy points from `stats_player_week` into `out_wr` / `slot_wr`
+OFF (producing team-week) and DEF (allowed on opponent-week) buckets.
+
+**Bye / PDF miss:** `load_workbook_dataset` merges the fresh Clay index with
+`merge_last_known` against `WorkbookDataset.clay_roles` from the prior refresh
+(packaged snapshot `clayRoles` field). If the PDF fails, logged warning + last
+known roles; if a player was never seen, omit from Out/Slot.
+
+Rather than show a Net built on a near-zero sample, the service layer requires
+**at least `_MIN_CLAY_SAMPLE_GAMES` (currently 1) team-weeks of both OFF and
+DEF** in the window. Below that:
 
 ```json
-{ "fpG": null, "reason": "insufficient_alignment_sample" }
+{ "fpG": null, "reason": "clay_unavailable" }
 ```
 
-This threshold is a P0 placeholder, not a statistically tuned minimum —
-tighten it once a real alignment feed (FTN Participation `skp_pos`, or a
-licensed household CSV) is wired per the deferred-source decision record.
+Public nflverse `ftn_charting` still has no per-target alignment column; the
+legacy `parse_alignment_csv` path remains for a future supplemental feed but is
+not the primary Out/Slot source.
 
 ## Game list, kickoff, and slate filter
 
