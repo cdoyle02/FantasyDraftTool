@@ -3,11 +3,14 @@
 #
 # Produces a static Vite PWA (engine wheel + Pyodide) served by Caddy with SPA fallback.
 
-FROM ghcr.io/astral-sh/uv:0.9.7 AS uv
+# Pure-Python wheel without uv downloading a standalone CPython (flaky on Railway).
+FROM python:3.13-slim AS engine
+WORKDIR /build
+COPY packages/dvs-engine /build/dvs-engine
+RUN pip install --no-cache-dir build \
+	&& python -m build --wheel --outdir /out /build/dvs-engine
 
 FROM node:20-bookworm-slim AS build
-
-COPY --from=uv /uv /usr/local/bin/uv
 
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
@@ -19,8 +22,8 @@ COPY apps/web/package.json apps/web/
 RUN pnpm install --frozen-lockfile
 
 # Offline DVS wheel (gitignored; required before vite build)
-COPY packages/dvs-engine packages/dvs-engine
-RUN pnpm build:engine
+RUN mkdir -p apps/web/public/engine
+COPY --from=engine /out/*.whl apps/web/public/engine/
 
 COPY apps/web apps/web
 
